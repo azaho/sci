@@ -2,7 +2,7 @@
 #
 # pull_request to main: run tests only, with no secrets.
 # push to main: run tests, then release the website if they pass.
-# workflow_dispatch: choose one operation (see README.md, "Hosted deployment").
+# workflow_dispatch: choose one operation (see SETUP.md, "Hosted deployment").
 #
 # Automatic website releases use deployment lookup credentials only after tests
 # pass on the default branch. Other credential-bearing operations stay manual.

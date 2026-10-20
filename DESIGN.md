@@ -809,7 +809,7 @@ Keep deployment configuration in a top-level `deploy/` directory because it cove
 | `deploy/compose.yaml` | Docker Compose configuration in YAML for the complete local installation. Define containers, connections, ports, health checks, initialization, and persistent volumes. |
 | `deploy/infra.tf` | Terraform configuration in HCL for hosted R2, Supabase, and DigitalOcean resources and their settings. |
 
-Keep the hosted deployment workflow in `.github/workflows/deploy.yml`, where GitHub Actions expects it. Put setup instructions in `README.md`. No Makefile, separate deployment repository, or additional deployment subdirectories are required for the pilot. Commit Terraform's generated provider lockfile alongside `infra.tf`.
+Keep the hosted deployment workflow in `.github/workflows/deploy.yml`, where GitHub Actions expects it. Put setup instructions in `SETUP.md` and link to them from `README.md`. No Makefile, separate deployment repository, or additional deployment subdirectories are required for the pilot. Commit Terraform's generated provider lockfile alongside `infra.tf`.
 
 ### Local installation
 
