@@ -69,7 +69,9 @@ jobs:
           retention-days: 7
       - name: Service diagnostics
         if: failure()
-        run: docker compose -f deploy/compose.yaml logs --no-color --tail 100
+        run: |
+          docker compose -f deploy/compose.yaml logs --no-color --tail 100
+          docker compose -f deploy/compose.yaml ps -aq | xargs -r docker inspect --format '{{.Name}} {{json .State.Health}}'
       - if: always()
         run: docker compose -f deploy/compose.yaml down
 

@@ -60,7 +60,7 @@ services:
     ports:
       - "127.0.0.1:${SCI_STORAGE_PORT:-9000}:9000"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9333/cluster/status"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:9333/cluster/status"]
       interval: 3s
       timeout: 3s
       retries: 30
@@ -96,7 +96,7 @@ services:
       initialize:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
       interval: 15s
       timeout: 8s
       retries: 10
@@ -132,7 +132,7 @@ services:
       catalog:
         condition: service_started
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/sci-server.json"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/sci-server.json"]
       interval: 15s
       timeout: 5s
       retries: 10
