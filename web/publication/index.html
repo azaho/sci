@@ -1,107 +1,45 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https: http://localhost:* http://127.0.0.1:*; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; base-uri 'none'; form-action 'none'; object-src 'none'">
-<meta name="referrer" content="no-referrer">
-<title>sci · publication</title>
-<link rel="stylesheet" href="../style.css">
-<script src="../vendor/markdown-it.min.js" defer></script>
-<script src="../vendor/purify.min.js" defer></script>
-<script src="../app.js" defer></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; img-src 'self' https: http://localhost:* http://127.0.0.1:*; font-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
+  <title>sci · Publication</title>
+  <link rel="stylesheet" href="../style.css">
+  <script src="../vendor/markdown-it-15.0.3.min.js" defer></script>
+  <script src="../vendor/dompurify-3.4.17.min.js" defer></script>
+  <script src="../app.js" type="module"></script>
 </head>
-<body class="publication-page">
-<a class="skip" href="#main">Skip to content</a>
-<header class="site-header">
-  <a class="brand" href="../">sci</a>
-  <nav class="site-nav" aria-label="Site">
-    <a href="../">Publications</a>
-    <a href="../#using-sci">Find and publish</a>
-    <a href="../#publishing-terms">Publishing terms</a>
-  </nav>
-  <span id="instance" class="pill" role="status">Connecting…</span>
-</header>
-
-<main id="main">
+<body data-page="publication">
+<a class="skip" href="#content">Skip to publication</a>
+<main>
+  <header><a class="brand" href="../" aria-label="SCI home">sci</a><nav aria-label="Main navigation"><a href="../">Publications</a><a href="../#publish">Publish</a><a href="../#publishing-terms">Terms</a></nav><span class="status" id="connection" role="status">Connecting to catalog</span></header>
   <a class="back" href="../">← All publications</a>
-  <p id="pub-status" class="status" role="status" aria-live="polite">Loading publication…</p>
-
-  <article id="publication" hidden>
-    <header class="pub-head">
-      <ul id="pub-categories" class="chips" aria-label="Categories, primary first"></ul>
-      <h1 id="pub-title"></h1>
-      <p id="pub-abstract" class="abstract"></p>
-      <ul id="pub-keywords" class="keywords" aria-label="Keywords"></ul>
-      <dl class="meta">
-        <dt>Publisher</dt><dd id="pub-publisher"></dd>
-        <dt>Created (author's claim)</dt><dd id="pub-created"></dd>
-        <dt>Accepted by this instance</dt><dd id="pub-accepted"></dd>
-        <dt>UUID</dt><dd><code id="pub-uuid"></code></dd>
-      </dl>
-    </header>
-
-    <div id="figure-slot"></div>
-
-    <div class="pub-grid">
-      <div class="pub-main">
-        <section aria-labelledby="readme-h">
-          <h2 id="readme-h" class="visually-hidden">Main text</h2>
-          <p id="readme-status" class="status" role="status" aria-live="polite">Loading main text…</p>
-          <div id="readme" class="readme"></div>
-        </section>
-
-        <section class="block" aria-labelledby="refs-h">
-          <h2 id="refs-h">References</h2>
-          <p id="refs-status" class="status" role="status" aria-live="polite">Loading references…</p>
-          <ol id="refs" class="cites"></ol>
-        </section>
-
-        <section class="block" aria-labelledby="citedby-h">
-          <h2 id="citedby-h">Cited by <span id="citedby-count" class="count"></span></h2>
-          <p id="citedby-status" class="status" role="status" aria-live="polite">Loading incoming citations…</p>
-          <ol id="citedby" class="cites"></ol>
-        </section>
-      </div>
-
-      <aside class="pub-side">
-        <section aria-labelledby="downloads-h">
-          <h2 id="downloads-h">Downloads</h2>
-          <div id="downloads"></div>
-          <p class="license-line">Text, figures, and data: CC BY 4.0 · Code: MIT<br><span id="license-slot"></span><a href="../#publishing-terms">Publishing terms</a></p>
-        </section>
-
-        <section id="listing" aria-labelledby="listing-h" hidden>
-          <h2 id="listing-h">Publisher-provided file listing</h2>
-          <p class="sub">First two levels</p>
-          <ul id="tree" class="tree" hidden></ul>
-          <p id="tree-omitted" class="small" hidden>More entries omitted</p>
-          <p id="tree-unavailable" class="small" hidden>File listing unavailable</p>
-          <p class="small">Supplied by the publisher in the signed manifest. The ZIP is offered only as a whole download.</p>
-        </section>
-
-        <section aria-labelledby="verify-h">
-          <h2 id="verify-h">Signature and verification</h2>
-          <dl class="kv">
-            <dt>Signature</dt><dd>Ed25519, detached, over <code>manifest.json</code></dd>
-            <dt>Public key (base64url)</dt><dd><code id="pub-key"></code></dd>
-            <dt>Fingerprint</dt><dd><code id="pub-fp"></code></dd>
-            <dt>Manifest SHA-256</dt><dd><code id="pub-manifest"></code></dd>
-          </dl>
-          <p class="note">This page shows what this instance recorded when it verified the signature and every file at acceptance time; your browser does not check signatures. To verify the complete publication yourself, run:</p>
-          <pre id="pull-cmd">sci pull UUID</pre>
-          <p class="small">Original files</p>
-          <ul id="originals" class="originals"></ul>
-        </section>
+  <p id="problem" class="problem" role="alert" hidden></p>
+  <article id="content" hidden>
+    <div class="publication-heading">
+      <div id="categories" class="categories"></div>
+      <h1 id="title"></h1>
+      <p id="abstract" class="abstract"></p>
+      <div id="keywords" class="keywords"></div>
+      <div class="dates"><span id="created"></span><span id="accepted"></span></div>
+    </div>
+    <div class="layout reader-layout">
+      <section>
+        <figure id="headline" hidden><img id="headline-image" alt="Publisher's headline figure" decoding="async"><figcaption id="caption" hidden></figcaption></figure>
+        <div id="readme" class="readme" aria-label="Publication text">Loading publication text…</div>
+        <section class="citations-section"><div class="section-heading"><h2>References</h2><span id="outgoing-count" class="muted"></span></div><div id="outgoing"></div></section>
+        <section class="citations-section"><div class="section-heading"><h2>Cited by</h2><span id="incoming-count" class="muted"></span></div><p class="small">Accepted publications on this instance.</p><div id="incoming"></div><button id="incoming-more" type="button" hidden>Load more citations</button></section>
+      </section>
+      <aside>
+        <section><h2>Publication record</h2><dl><dt>UUID</dt><dd id="uuid" class="mono"></dd><dt>Publisher fingerprint</dt><dd id="fingerprint" class="mono"></dd><dt>Manifest SHA-256</dt><dd id="manifest-hash" class="mono"></dd></dl><p class="verified">Verified by this instance at acceptance.</p><p class="small">This page uses the server's verification. To verify all original files independently:</p><pre><code id="pull-command"></code></pre></section>
+        <section><h2>Original files</h2><div id="downloads" class="downloads"></div><p class="small">Text, figures, and data: CC BY 4.0 · Code: MIT</p><p class="small">A signature establishes integrity. It does not prove rights ownership.</p></section>
+        <section id="file-list-section" hidden><h2>Publisher-provided file listing</h2><p class="small">First two levels · Publisher-declared file preview</p><pre id="file-list"></pre><p id="file-list-note" class="small"></p></section>
       </aside>
     </div>
   </article>
+  <footer><span>Original bytes. Independent verification.</span><a href="../#publishing-terms">Publishing terms</a><a href="https://github.com/azaho/sci">Source code ↗</a></footer>
 </main>
-
-<footer class="site-footer">
-  <a href="../#publishing-terms">Publishing terms</a>
-  <a href="../sci-server.json">Instance descriptor</a>
-  <span>Static site · catalog read directly from this instance's public API</span>
-</footer>
 </body>
 </html>

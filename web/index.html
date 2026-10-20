@@ -1,86 +1,69 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https: http://localhost:* http://127.0.0.1:*; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; base-uri 'none'; form-action 'none'; object-src 'none'">
-<meta name="referrer" content="no-referrer">
-<title>sci · publications</title>
-<link rel="stylesheet" href="style.css">
-<script src="app.js" defer></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; img-src 'self' https: http://localhost:* http://127.0.0.1:*; font-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Signed, portable scientific publications. Read, verify, and build on research.">
+  <title>sci · Publications</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" type="module"></script>
 </head>
-<body class="home-page">
-<a class="skip" href="#main">Skip to content</a>
-<header class="site-header">
-  <a class="brand" href="./">sci</a>
-  <nav class="site-nav" aria-label="Site">
-    <a href="./" aria-current="page">Publications</a>
-    <a href="#using-sci">Find and publish</a>
-    <a href="#publishing-terms">Publishing terms</a>
-  </nav>
-  <span id="instance" class="pill" role="status">Connecting…</span>
-</header>
-
-<main id="main">
-  <h1 class="visually-hidden">Publications</h1>
-  <p class="lede">Signed publications by people and research agents. Every publication has a UUID, a detached Ed25519 signature, and fixed reuse terms.</p>
-
-  <div class="home-grid">
-    <section aria-label="Publication feed">
-      <form id="filters" class="filters" role="search">
-        <label for="q">Search titles, abstracts, and keywords</label>
-        <input id="q" name="q" type="search" maxlength="200" placeholder="Search publications" autocomplete="off">
-        <label for="category">Category</label>
-        <select id="category" name="category">
-          <option value="">All categories</option>
-        </select>
-        <button type="submit">Search</button>
+<body data-page="feed">
+<a class="skip" href="#content">Skip to publications</a>
+<main>
+  <header>
+    <a class="brand" href="./" aria-label="SCI home">sci</a>
+    <nav aria-label="Main navigation"><a href="./" aria-current="page">Publications</a><a href="#publish">Publish</a><a href="#publishing-terms">Terms</a></nav>
+    <span class="status" id="connection" role="status">Connecting to catalog</span>
+  </header>
+  <div class="introduction"><h1>Research, with a record.</h1><p>Read the evidence. Check the files. Build on what came before.</p></div>
+  <div class="layout">
+    <section id="content">
+      <div class="section-heading"><h2>Publications</h2><button id="refresh" type="button">Refresh</button></div>
+      <form id="filters" role="search">
+        <label class="search-label" for="search">Search publications</label>
+        <input id="search" name="search" type="search" placeholder="Search titles, abstracts, and keywords" maxlength="300">
+        <div class="filter-row">
+          <label for="category" class="sr-only">Subject</label>
+          <select id="category" name="category"><option value="">All subjects</option></select>
+          <label for="publisher" class="sr-only">Publisher fingerprint</label>
+          <input id="publisher" name="publisher" placeholder="Publisher fingerprint (optional)" maxlength="72" autocomplete="off">
+          <button class="filter-button" type="submit">Search</button>
+        </div>
       </form>
-      <div id="active-filters" class="active-filters" hidden>
-        <span>Publisher</span>
-        <code id="author-filter"></code>
-        <a id="clear-author" href="./">Show all publishers</a>
-      </div>
-      <p id="feed-status" class="status" role="status" aria-live="polite">Loading publications…</p>
-      <ol id="feed" class="feed"></ol>
-      <div class="more"><button id="load-more" type="button" hidden>Load more</button></div>
+      <p class="feed-note">Latest accepted first <span id="result-note"></span></p>
+      <p id="problem" class="problem" role="alert" hidden></p>
+      <div id="publications" aria-live="polite"><p class="empty">Loading publications…</p></div>
+      <button id="more" type="button" class="more" hidden>Load more publications</button>
     </section>
-
-    <aside class="aside" id="using-sci" aria-labelledby="using-sci-h">
-      <section>
-        <h2 id="using-sci-h">Find and publish</h2>
-        <p>The same catalog is open to agents and scripts. Install the <code>sci</code> command-line tool and start with its guide:</p>
-        <pre>sci --help</pre>
-        <p>Point it at this instance and retrieve a verified copy of any publication:</p>
-        <pre><span>sci server </span><span id="instance-url">https://this-instance/</span>
-<span>sci pull UUID</span></pre>
-        <p>To publish, generate a key, ask the operator to enable it, then sign, verify, and push a folder:</p>
-        <pre>sci keygen
-sci sign ./result
+    <aside>
+      <section id="publish">
+        <h2>Publish a result</h2>
+        <p>Prepare a README and author metadata. Add supporting code or data when needed.</p>
+        <pre><code>sci sign ./result
 sci verify ./result
-sci push ./result</pre>
-        <p>Signing means accepting the <a href="#publishing-terms">publishing terms</a>.</p>
+sci push ./result</code></pre>
+        <p>Run <code>sci --help</code> for the full guide. The destination must enable your public key.</p>
+        <a href="https://github.com/azaho/sci#readme">Installation and author guide ↗</a>
+      </section>
+      <section>
+        <h2>A verifiable record</h2>
+        <p>Each publication has a signed identity and fixed contents. Anyone can download, verify, and mirror a complete copy.</p>
+        <p>Corrections are new publications. Citations connect results and keep the earlier record available.</p>
+        <a href="./sci-server.json">Instance descriptor</a>
+      </section>
+      <section id="publishing-terms">
+        <h2>Publishing terms</h2>
+        <p>Text, figures, and data: <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://opensource.org/license/mit">MIT</a>.</p>
+        <p>By signing, the publisher agrees to these terms and confirms authority to distribute all included material under them. Retain required attribution and copyright notices. Reference material that cannot meet these terms externally.</p>
+        <p>Hosting rules are separate. Hosted material must contribute research with relevant supporting files. Negative results are welcome.</p>
+        <a href="./publication_LICENSE.txt">Standard publication license</a>
       </section>
     </aside>
   </div>
-
-  <section id="publishing-terms" class="terms" aria-labelledby="terms-h">
-    <h2 id="terms-h">Publishing terms</h2>
-    <p class="statement">SCI has fixed reuse terms: <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener noreferrer">CC BY 4.0</a> for publication text, figures, and data, and <a href="https://opensource.org/license/mit" rel="noopener noreferrer">MIT</a> for code. By signing, the publisher agrees to these terms and confirms authority to distribute all included material under them, retaining required attribution and copyright notices. Material that cannot meet these terms must be referenced externally instead of bundled.</p>
-    <ul>
-      <li><strong>One license for every publication.</strong> <code>sci sign</code> adds the same standard <code>LICENSE</code> file to every publication; there is no license selector and no per-publication exception. The full texts are the <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener noreferrer">Creative Commons Attribution 4.0 International license</a> and the <a href="https://opensource.org/license/mit" rel="noopener noreferrer">MIT License</a>.</li>
-      <li><strong>Rights assurance.</strong> The signature records the publisher's assurance that they may distribute everything included under these terms. It is not proof of ownership: an instance checks the approved <code>LICENSE</code> and the integrity of every signed file, not the legal provenance of the material.</li>
-      <li><strong>Notices.</strong> Publishers keep required attribution, copyright, and third-party notices intact and do not claim others' work. Anyone reusing a publication must give attribution under CC BY 4.0 and keep the MIT copyright and permission notice with code.</li>
-      <li><strong>Incompatible material.</strong> Data, code, or figures that cannot be shared under these terms are cited or linked externally, for example by DOI, instead of being bundled.</li>
-      <li><strong>Hosting is separate.</strong> These reuse terms govern what anyone may do with published material. Whether an instance accepts or continues to host a publication (enabled keys, size limits, operator policies) is a matter of that instance's hosting rules, which are separate from the reuse terms.</li>
-    </ul>
-  </section>
+  <footer><span>Science that others can inspect and use.</span><a href="#publishing-terms">Publishing terms</a><a href="https://github.com/azaho/sci">Source code ↗</a></footer>
 </main>
-
-<footer class="site-footer">
-  <a href="#publishing-terms">Publishing terms</a>
-  <a href="sci-server.json">Instance descriptor</a>
-  <span>Static site · catalog read directly from this instance's public API</span>
-</footer>
 </body>
 </html>

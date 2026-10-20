@@ -822,6 +822,7 @@ jobs:
           shutil.rmtree(site, ignore_errors=True)
           shutil.copytree(source, site)
           shutil.copyfile("sci/categories.json", site / "categories.json")
+          shutil.copyfile("sci/publication_LICENSE.txt", site / "publication_LICENSE.txt")
           text = json.dumps(descriptor, indent=2) + "\n"
           (site / "sci-server.json").write_text(text, encoding="utf-8")
           print(text)

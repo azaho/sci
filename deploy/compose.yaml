@@ -136,6 +136,7 @@ services:
     volumes:
       - ../web:/usr/share/nginx/html:ro
       - ../sci/categories.json:/srv/sci/categories.json:ro
+      - ../sci/publication_LICENSE.txt:/srv/sci/publication_LICENSE.txt:ro
       - generated:/srv/generated:ro
     configs:
       - source: nginx
@@ -163,6 +164,12 @@ configs:
           add_header Access-Control-Allow-Origin * always;
           add_header X-Content-Type-Options nosniff always;
           add_header Cache-Control no-cache always;
+        }
+        location = /publication_LICENSE.txt {
+          root /srv/sci;
+          charset utf-8;
+          default_type text/plain;
+          add_header X-Content-Type-Options nosniff always;
         }
         location = /categories.json {
           root /srv/sci;
