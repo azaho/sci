@@ -4,7 +4,7 @@ This guide describes the online setup for a public SCI installation. It covers a
 
 The system requirements are in [DESIGN.md](DESIGN.md). Release checks are in [TEST_PLAN.md](TEST_PLAN.md).
 
-**Implementation status:** this guide records the setup procedure and the configuration names agreed during bootstrap. The application, Terraform configuration, and deployment workflow still need to be implemented. Completing account and token setup does not mean the platform is deployed. Commands below that use those files apply once the files exist.
+The application, Terraform configuration, and deployment workflow are included in the repository. This guide covers the account setup and first deployment using that workflow. Completing account and token setup does not mean the platform is deployed or its runtime credentials have been tested. See [README.md](README.md#hosted-deployment) for the full deployment configuration reference.
 
 ## 1. Understand the services
 
@@ -28,7 +28,11 @@ Set up the accounts and credentials first. Create the cloud resources through re
 4. Choose a separate archive hostname, such as `archive.example.org`, on a domain managed in Cloudflare.
 5. Plan to use the DigitalOcean app's HTTPS hostname for the publisher initially. A custom publisher hostname is optional.
 
-Enable Pages deployment from **GitHub Actions** when the website workflow is ready. The website and descriptor must support a project subpath, not just a domain root.
+In **Settings → Pages → Build and deployment**, set **Source: GitHub Actions**. The website and descriptor must support a project subpath, not just a domain root.
+
+Create a GitHub environment named **`production`** under **Settings → Environments**. Configure **Required reviewers** and restrict deployment branches to `main`. The infrastructure apply job waits for approval in this environment. Reviewers should read the plan summary from the same workflow run before approving. Keep the `github-pages` environment restricted to `main` as well.
+
+Protect `main` and limit repository write access. The current workflow uses repository secrets, so the `production` environment's approval gate applies to infrastructure apply, not every operation that can use a secret.
 
 Do not commit environment-specific configuration, passwords, tokens, private signing keys, SQL backups, Terraform state, or saved Terraform plans. Plans and state can contain secrets even when terminal output marks fields as sensitive. Commit `deploy/.terraform.lock.hcl` once generated; it is the provider dependency lockfile, not state.
 
@@ -194,69 +198,94 @@ Open **Repository → Settings → Secrets and variables → Actions → Variabl
 
 These values are identifiers rather than credentials, but keep real installation values out of this general guide.
 
-The deployment will also need the instance URL, archive hostname and zone ID, bucket names, publisher region and size, and the public Supabase publishable key. Their workflow variable names must be documented when the deployment code is implemented. Do not substitute a Supabase secret or service-role key for the public publishable key.
+The main optional deployment variables are:
+
+| Variable | Default / use |
+| --- | --- |
+| `SCI_INSTANCE_URL` | Defaults to the repository's standard GitHub Pages URL. Set the actual URL when using a custom domain. |
+| `SCI_TEMP_BUCKET` | `sci-temp`; private uploads. Keep stable after creation. |
+| `SCI_PUBLIC_BUCKET` | `sci-publications`; publication archive. Keep stable after creation. |
+| `SCI_DEPLOY_PUBLISHER` | `false` during initial provisioning; set to `true` only after the runtime secrets and database login are ready. |
+| `SCI_PUBLISHER_REGION` | `nyc`; choose near the database. |
+| `SCI_PUBLISHER_SIZE` | `apps-s-1vcpu-0.5gb`; review current App Platform pricing before applying. |
+| `SCI_ARCHIVE_HOSTNAME` | Custom archive hostname, such as `archive.example.org`. Empty uses the development `r2.dev` domain. |
+| `SCI_ARCHIVE_ZONE_ID` | Set only when Terraform should connect the custom domain; leave empty when connecting it manually. |
+| `SCI_ARCHIVE_NOSNIFF_RULE` | `false`; enabling the response-header rule requires additional zone permissions. |
+| `SUPABASE_PUBLISHABLE_KEY` | Public frontend key; the website workflow looks it up when unset. Never use a secret or service-role key here. |
+
+See [the complete variable reference](README.md#github-variables) for additional names and overrides. These are GitHub Actions **variables**, not secrets.
 
 At this point, account and credential bootstrap is complete. Secret presence confirms only that GitHub stored a value; it does not prove that the token is valid, correctly scoped, or unexpired.
 
-## 9. Implement and provision the infrastructure
+## 9. Provision infrastructure and run the first migration
 
-The following work remains after the browser setup:
+Run operations from **Actions → deploy → Run workflow**, selecting branch **`main`** and the named **operation**. Pushes and pull requests run tests; they do not deploy infrastructure.
 
-1. Implement and test the application, shared publication validation, database migrations, and local Compose installation.
-2. Implement `deploy/infra.tf`, pin provider versions, and generate the provider lockfile.
-3. Configure the existing HCP workspace as the state backend. Import the existing Supabase project using the provider's documented import mechanism.
-4. Protect persistent resources with Terraform lifecycle rules and available provider protections. Review the initial plan for unexpected replacement or deletion.
-5. Create the private temporary R2 bucket and public publication bucket. Configure CORS, archive-domain delivery, response headers, and overwrite protection for published objects.
-6. Configure cleanup to preserve temporary objects still required by committed finalizations. A blanket age-based deletion rule must not destroy recovery sources.
-7. Create the DigitalOcean project and App Platform service from `server/Dockerfile`, near the database. Configure health checks and recovery execution.
-8. Apply incremental SQL migrations. Create the private operational schema, the `catalog_v1` read interface, and separate administrator, publisher, and public read permissions.
-9. Configure Supabase to expose only the approved catalog interface. Test grants and row policies through anonymous HTTP.
+1. Keep `SCI_DEPLOY_PUBLISHER` unset or `false`.
+2. Run **`infrastructure-plan`**. Terraform uses the existing HCP workspace and the committed provider lockfile. The configuration imports the existing Supabase project; it must not replace it. The first plan should create the two R2 buckets and their settings, the Data API settings, and the DigitalOcean project. It should not create the publisher yet.
+3. Check for unexpected deletes, replacements, or changes to unrelated resources. The Supabase project and both buckets have `prevent_destroy`. If the DigitalOcean project already exists, import it as described in [README.md](README.md#hosted-deployment).
+4. Run **`infrastructure-apply`**. This run generates its own plan summary. Read that summary, then use **Review deployments** to approve the **`production`** job. Wait for apply to succeed.
+5. Run **`migrate`**. It creates the database schemas, catalog views, grants, and the `sci_publisher` role. With `PUBLISHER_DATABASE_URL` absent, it leaves the publisher login password unchanged. If the Data API setting is rejected because `catalog_v1` does not exist yet, run the migration first and retry the apply.
 
-After the configuration exists, the equivalent infrastructure commands from the repository root are:
+The temporary bucket stays private. The publication bucket uses a lock for published objects. Temporary cleanup must preserve sources needed by committed finalizations; do not add a blanket age-based object deletion rule.
 
-```sh
-terraform -chdir=deploy init
-terraform -chdir=deploy plan
-terraform -chdir=deploy apply
-```
-
-Review the plan before approving apply. These commands do not perform the complete application release. Never run a production destroy operation as a routine way to stop service or reduce costs.
+The workflow prints resource actions and changed attribute names rather than raw plan values, and removes its saved plan file. HCP state still contains sensitive values once runtime credentials are supplied. Never run a production destroy operation as a routine way to stop service or reduce costs.
 
 ## 10. Create runtime credentials after provisioning
 
 The five bootstrap secrets are not the complete runtime configuration.
 
-Once the buckets exist, create a separate R2 **Object Read & Write** token restricted to the two SCI buckets. Store its Access Key ID and Secret Access Key in secret storage, then inject them into the publisher. This token must support the required upload, verification, copy, and cleanup operations without bucket-administration access.
+### R2 runtime key pair
 
-Create a dedicated publisher database role with the permissions required for publication transactions and whitelist reads. It must not be able to administer the whitelist.
+1. In Cloudflare, open **R2 Object Storage → Manage API Tokens → Create Account API Token**.
+2. Use a descriptive name, such as `SCI publisher runtime`.
+3. Select **Object Read & Write** and **Apply to specific buckets only**.
+4. Select both `sci-temp` and `sci-publications`, or the actual names configured in section 8. Do not select all buckets.
+5. Choose **30 days** for the pilot and record the expiration privately. This is a live service credential: publishing will stop working if it expires before rotation. Choose a different lifetime only with a corresponding rotation plan.
+6. Create the token and save its S3 **Access Key ID** and **Secret Access Key** in your password manager.
+7. In GitHub Actions repository secrets, add `R2_ACCESS_KEY_ID` with the Access Key ID and `R2_SECRET_ACCESS_KEY` with the Secret Access Key.
 
-The proposed names for this later stage are:
+Use those two S3 fields, not Cloudflare's separate **Token value**. Keep `CLOUDFLARE_API_TOKEN` as the infrastructure administration credential. The runtime token does not need bucket-administration permissions.
 
-| Secret | Intended value |
+### Publisher database URL
+
+1. Generate a new, strong password for `sci_publisher` and save it in your password manager. A randomly generated 32-character password using letters and numbers avoids URL-encoding issues. Do not reuse the PostgreSQL administrator password.
+2. Open the Supabase project's **Connect** dialog and select **Session pooler**. Copy the actual pooler host; do not infer it from the project's region.
+3. Construct the following connection string, replacing all placeholders:
+
+   ```text
+   postgresql://sci_publisher.<project-ref>:<url-encoded-password>@<session-pooler-host>:5432/postgres?sslmode=require
+   ```
+
+4. Save the complete string as the GitHub Actions repository secret **`PUBLISHER_DATABASE_URL`**. If the password contains reserved URL characters, percent-encode the password component locally; never send it to an online encoding website.
+5. Run **`migrate`** again and wait for success. The workflow extracts the password from this URL and applies it to `sci_publisher`, enabling login. Saving the GitHub secret alone does not set the database password.
+
+Use session pooling on port **5432**, not transaction pooling on port **6543**: the publisher uses session advisory locks. The dedicated role has publication permissions and whitelist reads; it must not administer the whitelist.
+
+Terraform maps these GitHub secrets to encrypted App Platform runtime variables:
+
+| GitHub secret | Publisher runtime variable |
 | --- | --- |
-| `R2_ACCESS_KEY_ID` | Bucket-scoped runtime token's S3 Access Key ID. |
-| `R2_SECRET_ACCESS_KEY` | The same token's S3 Secret Access Key. |
-| `PUBLISHER_DATABASE_URL` | TLS connection string for the dedicated publisher database role. |
+| `R2_ACCESS_KEY_ID` | `SCI_S3_ACCESS_KEY_ID` |
+| `R2_SECRET_ACCESS_KEY` | `SCI_S3_SECRET_ACCESS_KEY` |
+| `PUBLISHER_DATABASE_URL` | `SCI_DATABASE_URL` |
 
-These names are reserved by this guide; the server's environment mapping and deployment workflow still need implementation. If supplied through GitHub Actions, store them as secrets under these names. Configure their runtime destinations as encrypted App Platform variables.
-
-Use the documented Supabase connection endpoint appropriate to the publisher's network and connection model. Test connectivity and transaction/locking behavior. A connection string containing a password is a secret.
-
-The author signing private key stays on the author's machine. Enable only the author's public key through the private whitelist administration helpers after migrations are installed.
+These values also enter Terraform state, so restrict HCP state access. A successful plan verifies configuration, not that the R2 keys or publisher login work; test them after deployment.
 
 ## 11. Deploy and verify the first release
 
-1. Implement `.github/workflows/deploy.yml` with separate operations for infrastructure changes, publisher releases, migrations, and website releases.
-2. Require review of the Terraform plan before applying infrastructure changes. Use GitHub deployment controls where appropriate; keep credential-bearing jobs away from untrusted pull-request code.
-3. Authenticate using the saved secrets and verify access without printing credentials or uploading private state as public artifacts.
-4. Deploy the publisher and wait for readiness.
-5. Publish `web/` and a generated `sci-server.json` through GitHub Pages.
-6. Populate the descriptor with `schema_version`, `publishing_api_url`, `catalog_url`, `catalog_schema`, `archive_url`, and, for Supabase, `supabase_publishable_key`. `archive_url` ends at the `publications/` base path. Include no private credentials.
-7. Test HTTPS, CORS, catalog profile/key headers, content types, download behavior, and browser rendering at the actual production URLs.
-8. Test real R2 presigned PUT size enforcement and conditional copies. If R2 does not enforce the intended upload cap, resolve the upload-handler versus limited-pilot choice in `DESIGN.md` before launch.
-9. Run sign → verify → push → browse → pull and compare exact signed bytes.
-10. Complete `TEST_PLAN.md`, including interrupted finalization, whitelist enforcement, mirroring, database restoration, archive recovery, and preservation across redeployment.
-11. Import existing research only after those checks pass and the import-attestation format is defined.
+1. Confirm all three runtime secrets are saved and the second migration succeeded.
+2. Under **Actions → Variables**, set **`SCI_DEPLOY_PUBLISHER=true`**.
+3. Run **`infrastructure-plan`**. After initial provisioning, the expected new resource is `digitalocean_app.publisher[0]`, plus its outputs. Investigate any unexpected changes.
+4. Review the selected app size and [current DigitalOcean pricing](https://docs.digitalocean.com/products/app-platform/details/pricing/). Running a plan does not create the app; applying it starts the paid service.
+5. Run **`infrastructure-apply`**, review that run's plan summary, and approve **`production`**. Wait for App Platform's initial build and deployment to succeed, then check the publisher's `/health` endpoint. Leave `SCI_DEPLOY_PUBLISHER=true` afterward; setting it back to `false` would propose deleting the app on the next apply.
+6. Run **`website`** to publish `web/` and the generated `sci-server.json` through GitHub Pages. For subsequent deployments, **`publisher`** rebuilds the app; **`release`** runs the combined test, migration, publisher, and website sequence after infrastructure exists.
+7. Check that the descriptor contains the actual HTTPS publisher, catalog, and archive URLs, `catalog_schema`, `schema_version`, and the public `supabase_publishable_key`. Its `archive_url` must end at the `publications/` base path. Include no private credentials.
+8. For production archive delivery, connect a custom domain as described in [README.md](README.md#first-deployment-bootstrap-order), apply the configuration, and rerun **`website`**. A dashboard-connected domain uses `SCI_ARCHIVE_HOSTNAME` with `SCI_ARCHIVE_ZONE_ID` empty. Managing the zone through Terraform requires additional scoped permissions.
+9. Keep the author's signing private key on the author's machine. Enable only the author's public key using the whitelist administration helpers in the Supabase SQL editor.
+10. Test HTTPS, CORS, catalog permissions, and archive delivery. Run sign → verify → push → browse → pull against the live instance and compare exact signed bytes. This is where the runtime credentials and their actual permissions are exercised.
+11. Complete [TEST_PLAN.md](TEST_PLAN.md), including real R2 upload-size enforcement, conditional copies, interrupted finalization, whitelist enforcement, backup restoration, archive recovery, and preservation across redeployment. Resolve the upload-handler versus limited-pilot choice in `DESIGN.md` if real R2 does not enforce the intended upload cap.
+12. Import existing research only after those checks pass and the import-attestation format is defined.
 
 Test public reads while the publisher is stopped. Test pulling a known publication with the catalog unavailable. Neither case should depend on private deployment credentials.
 
@@ -264,7 +293,7 @@ Test public reads while the publisher is stopped. Test pulling a known publicati
 
 ### Credential expiration
 
-The initial procedure above selects 30 days for all four management tokens. Confirm each token's actual expiration in its provider dashboard and record it in a private operations log. GitHub secret update timestamps are not token-expiration dates.
+The initial procedure above selects 30 days for all four management tokens and the R2 runtime token. Confirm each token's actual expiration in its provider dashboard and record it in a private operations log. GitHub secret update timestamps are not token-expiration dates.
 
 | Credential | When to update | Where to update |
 | --- | --- | --- |
@@ -286,6 +315,10 @@ For token rotation:
 4. Revoke the old token after the replacement works. If it is compromised, revoke it immediately and recover access through a trusted account.
 
 Management-token expiration normally blocks future deployment or administration. Runtime credential expiration can stop publishing. Keep those credentials separate. Password rotation requires coordination because replacing a GitHub secret alone does not change the password accepted by PostgreSQL.
+
+For this workflow, rotating the R2 runtime keys means replacing both GitHub secrets, then running and reviewing **`infrastructure-apply`** so the new pair reaches App Platform. A **`publisher`** rebuild alone does not copy changed GitHub secrets into the app specification. Verify a live upload and pull before revoking the old token.
+
+For the publisher database password, update `PUBLISHER_DATABASE_URL`, run **`migrate`** to change the role password, then run the reviewed **`infrastructure-apply`** to update the app's connection string. Coordinate this as a maintenance window: the old app password can fail between those steps. Verify publisher health and a live publication afterward.
 
 ### Operational upkeep
 
