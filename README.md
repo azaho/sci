@@ -162,7 +162,7 @@ The hosted installation is described by two files:
 | --- | --- |
 | `deploy/infra.tf` | Terraform for Cloudflare R2, the existing Supabase project, and DigitalOcean App Platform. State is stored in HCP Terraform. |
 | `deploy/.terraform.lock.hcl` | Provider lockfile (cloudflare 5.28.0, digitalocean 2.106.0, supabase 1.11.0; linux_amd64, darwin_arm64, darwin_amd64). Commit it; regenerate with `terraform -chdir=deploy providers lock -platform=linux_amd64 -platform=darwin_arm64 -platform=darwin_amd64` after changing provider versions. |
-| `.github/workflows/deploy.yml` | Tests on every push and pull request to `main`, plus the manual deployment operations. |
+| `.github/workflows/deploy.yml` | Tests on every push and pull request to `main`; successful pushes deploy the website. Other deployment operations are manual. |
 
 ### Resources managed by Terraform
 
@@ -244,7 +244,7 @@ Repository → Settings → Secrets and variables → Actions → Variables. Uns
 
 1. **GitHub Pages**: Settings → Pages → Build and deployment → Source: **GitHub Actions**. The `github-pages` environment should only allow the `main` branch (the default for Actions-based Pages).
 2. **`production` environment**: Settings → Environments → New environment `production`. Add **Required reviewers** (the people who approve infrastructure changes), optionally enable **Prevent self-review**, and under **Deployment branches and tags** select **Selected branches** → `main`. Only `infrastructure-apply` uses it.
-3. **Protect `main`** (branch protection or ruleset) and limit write access. Repository secrets are available to any workflow that a user with write access runs on any branch; the workflow itself never exposes them to `push`/`pull_request` runs, and pull requests from forks never receive secrets. For stronger isolation, move the credentials into the `production` environment's secrets later.
+3. **Protect `main`** (branch protection or ruleset) and limit write access. Repository secrets are available to any workflow that a user with write access runs on any branch; pull request runs only execute secret-free tests. After tests pass on `main`, automatic website releases use `TF_API_TOKEN` to read deployment endpoints and, when needed, `SUPABASE_ACCESS_TOKEN` to look up the public frontend key. Other credential-bearing operations remain manual. For stronger isolation, move the credentials into the `production` environment's secrets later.
 4. **HCP Terraform**: keep the workspace in **Local** execution mode and restrict who can read state. State contains the App Platform secret values (database URL, R2 keys).
 5. **Existing DigitalOcean project**: if a project named `sci` already exists, import it once from a local shell (see below): `terraform -chdir=deploy import digitalocean_project.sci <project-id>`.
 6. **Supabase**: keep "Automatically expose new tables" disabled. Terraform sets the exposed schema to `catalog_v1` only.
@@ -262,7 +262,9 @@ Repository → Settings → Secrets and variables → Actions → Variables. Uns
 
 ### Workflow operations
 
-Run Actions → **deploy** → **Run workflow**, choose the branch (`main` for everything except plans) and the `operation`.
+Every push to `main` runs tests and, after they pass, publishes the website to GitHub Pages at the configured domain. Pull requests run tests only. Automatic website releases do not run database migrations, rebuild the publisher, or apply infrastructure.
+
+For a manual operation or website retry, run Actions → **deploy** → **Run workflow**, choose the branch (`main` for everything except plans) and the `operation`.
 
 | Operation | What it does |
 | --- | --- |
@@ -272,10 +274,10 @@ Run Actions → **deploy** → **Run workflow**, choose the branch (`main` for e
 | `publisher-recover` | Behind the `production` approval gate, verifies an ACTIVE publisher deployment, matching Terraform app ID, and database health, then clears only `digitalocean_app.publisher[0]`'s taint flag. Used after a failed initial creation has been repaired by a successful publisher release. Does not replace the app or export state. Review a new infrastructure plan afterward. `main` only. |
 | `migrate` | Looks up the session pooler through `GET /v1/projects/{ref}/config/database/pooler` (falls back to `db.<ref>.supabase.co:5432`, which is IPv6-only on most plans), builds a masked admin DSN for `postgres.<ref>` with `SUPABASE_DB_PASSWORD` and `sslmode=require`, and runs `python -m server.database migrate` with `SCI_ADMIN_DATABASE_URL`, optional `SCI_PUBLISHER_DB_PASSWORD` (parsed from `PUBLISHER_DATABASE_URL`), `SCI_INSTANCE_URL`, and `SCI_ARCHIVE_URL`. `main` only. |
 | `publisher` | Finds the App Platform app (Terraform output, else by name), creates a deployment with `force_build`, polls until `ACTIVE` (fails on `ERROR`/`CANCELED`/`SUPERSEDED`), warns if the built commit differs from the workflow commit, and checks that `GET <publishing_api_url>/health` returns 200. `main` only. |
-| `website` | Copies `web/` to `_site/`, adds `sci/categories.json`, `sci/publication_LICENSE.txt`, and a generated `sci-server.json` (`schema_version`, `publishing_api_url`, `catalog_url`, `catalog_schema: catalog_v1`, `archive_url`, `supabase_publishable_key`), validates that all URLs are HTTPS and that the key is a publishable/anon key, deploys to GitHub Pages, then fetches the descriptor (must match), `index.html`, and `publication/` from the instance URL. `main` only. |
+| `website` | Also runs automatically after successful tests on a push to `main`. Copies `web/` to `_site/`, adds `sci/categories.json`, `sci/publication_LICENSE.txt`, and a generated `sci-server.json` (`schema_version`, `publishing_api_url`, `catalog_url`, `catalog_schema: catalog_v1`, `archive_url`, `supabase_publishable_key`), validates that all URLs are HTTPS and that the key is a publishable/anon key, deploys to GitHub Pages, then fetches the descriptor (must match), `index.html`, and `publication/` from the instance URL. `main` only. |
 | `release` | `test` → `migrate` → `publisher` → `website`, stopping at the first failure. |
 
-All manual operations share one concurrency group (`sci-production-deploy`), so deployments never overlap; GitHub keeps at most one queued run and cancels older queued runs.
+Automatic website releases and all manual operations share one concurrency group (`sci-production-deploy`), so deployments never overlap. A running deployment is not cancelled by a new push; GitHub keeps at most one queued run and replaces an older queued run with a newer one. Pull request test runs use a separate group per ref.
 
 ### Local Terraform usage
 

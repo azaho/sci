@@ -1,12 +1,14 @@
 # SCI tests and hosted deployment.
 #
-# push / pull_request to main: run tests only, with no secrets.
+# pull_request to main: run tests only, with no secrets.
+# push to main: run tests, then release the website if they pass.
 # workflow_dispatch: choose one operation (see README.md, "Hosted deployment").
 #
-# Credential-bearing jobs run only for workflow_dispatch. Release operations
-# and infrastructure-apply also require the default branch. Plans and state can
-# contain secrets: they are never uploaded and the human-readable plan is not
-# printed; only resource addresses, actions, and changed attribute names are.
+# Automatic website releases use deployment lookup credentials only after tests
+# pass on the default branch. Other credential-bearing operations stay manual.
+# Release operations and infrastructure-apply require the default branch. Plans
+# and state can contain secrets: they are never uploaded and the human-readable
+# plan is not printed; only addresses, actions, and changed attribute names are.
 
 name: deploy
 
@@ -35,10 +37,10 @@ on:
 permissions:
   contents: read
 
-# All manual operations share one queue, so deployments never overlap.
-# Test runs for pushes and pull requests are grouped per ref instead.
+# Automatic website releases and manual operations share one queue.
+# Pull request test runs are isolated per ref and may cancel older test runs.
 concurrency:
-  group: ${{ github.event_name == 'workflow_dispatch' && 'sci-production-deploy' || format('sci-test-{0}', github.ref) }}
+  group: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && 'sci-production-deploy' || format('sci-test-{0}', github.ref) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 defaults:
@@ -105,7 +107,10 @@ jobs:
   # -------------------------------------------------------------------------
   config:
     name: resolve configuration
-    if: github.event_name == 'workflow_dispatch' && inputs.operation != 'test'
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.operation != 'test')
+      || (github.event_name == 'push'
+          && github.ref == format('refs/heads/{0}', github.event.repository.default_branch))
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
@@ -128,7 +133,7 @@ jobs:
       - name: Resolve repository variables and defaults
         id: cfg
         env:
-          OPERATION: ${{ inputs.operation }}
+          OPERATION: ${{ github.event_name == 'push' && 'website' || inputs.operation }}
           REPOSITORY: ${{ github.repository }}
           REPOSITORY_OWNER: ${{ github.repository_owner }}
           REPOSITORY_NAME: ${{ github.event.repository.name }}
@@ -457,8 +462,15 @@ jobs:
   # -------------------------------------------------------------------------
   endpoints:
     name: read deployment endpoints
-    needs: config
-    if: contains(fromJSON('["migrate", "publisher", "website", "release"]'), inputs.operation)
+    needs: [config, test]
+    if: >-
+      ${{ !cancelled()
+      && needs.config.result == 'success'
+      && ((github.event_name == 'workflow_dispatch'
+           && contains(fromJSON('["migrate", "publisher", "website", "release"]'), inputs.operation))
+          || (github.event_name == 'push'
+              && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+              && needs.test.result == 'success')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
@@ -744,13 +756,15 @@ jobs:
 
   website:
     name: website release
-    needs: [config, endpoints, publisher]
+    needs: [config, test, endpoints, publisher]
     if: >-
       ${{ !cancelled()
       && needs.config.result == 'success'
       && needs.endpoints.result == 'success'
-      && (inputs.operation == 'website'
-          || (inputs.operation == 'release' && needs.publisher.result == 'success'))
+      && ((github.event_name == 'push' && needs.test.result == 'success')
+          || (github.event_name == 'workflow_dispatch'
+              && (inputs.operation == 'website'
+                  || (inputs.operation == 'release' && needs.publisher.result == 'success'))))
       && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20

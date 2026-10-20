@@ -250,7 +250,7 @@ At this point, account and credential bootstrap is complete. Secret presence con
 
 ## 9. Initialize the database and provision infrastructure
 
-Run operations from **Actions → deploy → Run workflow**, selecting branch **`main`** and the named **operation**. Pushes and pull requests run tests; they do not deploy infrastructure.
+Run operations from **Actions → deploy → Run workflow**, selecting branch **`main`** and the named **operation**. Pull requests run tests only. Pushes to `main` run tests and automatically publish the website after they pass; they do not run migrations, rebuild the publisher, or deploy infrastructure. Initial provisioning still follows the manual steps below.
 
 1. Confirm the six secrets from §7 and variables from §8 are saved. Keep `SCI_DEPLOY_PUBLISHER=false`.
 2. Run **`migrate`** and wait for success. It creates the schemas, catalog views, grants, and `sci_publisher` role, and sets the role's password from `PUBLISHER_DATABASE_URL`. Running it before Terraform configures the Data API ensures `catalog_v1` already exists. The workflow supports an empty Terraform workspace at this stage; endpoint outputs are not needed to create the schema and login.
@@ -407,7 +407,7 @@ The `<UUID>` command placeholder must be replaced before running. `pull` validat
 
 ### Subsequent releases
 
-After initial setup, **`release`** runs tests, migrations, a publisher rebuild, and website deployment. Use **`publisher`** for a publisher rebuild or **`website`** for a website-only release. Infrastructure or runtime-secret changes require a reviewed **`infrastructure-apply`**; neither rebuild operation applies them.
+After initial setup, each push to `main` automatically publishes the website after tests pass. **`release`** remains a manual operation that runs tests, migrations, a publisher rebuild, and website deployment. Use **`publisher`** for a publisher rebuild or **`website`** for a website-only release. Infrastructure or runtime-secret changes require a reviewed **`infrastructure-apply`**; neither rebuild operation applies them.
 
 ### Credential expiration
 
