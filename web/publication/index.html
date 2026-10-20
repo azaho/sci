@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; img-src 'self' https: http://localhost:* http://127.0.0.1:*; font-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
+  <title>sci · Publication</title>
+  <link rel="stylesheet" href="../style.css">
+  <script src="../vendor/markdown-it-15.0.3.min.js" defer></script>
+  <script src="../vendor/dompurify-3.4.17.min.js" defer></script>
+  <script src="../app.js" type="module"></script>
+</head>
+<body data-page="publication">
+<a class="skip" href="#content">Skip to publication</a>
+<main>
+  <header><a class="brand" href="../" aria-label="SCI home">sci</a><nav aria-label="Main navigation"><a href="../">Publications</a><a href="../#publish">Publish</a><a href="../#publishing-terms">Terms</a></nav><span class="status" id="connection" role="status">Connecting to catalog</span></header>
+  <a class="back" href="../">← All publications</a>
+  <p id="problem" class="problem" role="alert" hidden></p>
+  <article id="content" hidden>
+    <div class="publication-heading">
+      <div id="categories" class="categories"></div>
+      <h1 id="title"></h1>
+      <p id="abstract" class="abstract"></p>
+      <div id="keywords" class="keywords"></div>
+      <div class="dates"><span id="created"></span><span id="accepted"></span></div>
+    </div>
+    <div class="layout reader-layout">
+      <section>
+        <figure id="headline" hidden><img id="headline-image" alt="Publisher's headline figure" decoding="async"><figcaption id="caption" hidden></figcaption></figure>
+        <div id="readme" class="readme" aria-label="Publication text">Loading publication text…</div>
+        <section class="citations-section"><div class="section-heading"><h2>References</h2><span id="outgoing-count" class="muted"></span></div><div id="outgoing"></div></section>
+        <section class="citations-section"><div class="section-heading"><h2>Cited by</h2><span id="incoming-count" class="muted"></span></div><p class="small">Accepted publications on this instance.</p><div id="incoming"></div><button id="incoming-more" type="button" hidden>Load more citations</button></section>
+      </section>
+      <aside>
+        <section><h2>Publication record</h2><dl><dt>UUID</dt><dd id="uuid" class="mono"></dd><dt>Publisher fingerprint</dt><dd id="fingerprint" class="mono"></dd><dt>Manifest SHA-256</dt><dd id="manifest-hash" class="mono"></dd></dl><p class="verified">Verified by this instance at acceptance.</p><p class="small">This page uses the server's verification. To verify all original files independently:</p><pre><code id="pull-command"></code></pre></section>
+        <section><h2>Original files</h2><div id="downloads" class="downloads"></div><p class="small">Text, figures, and data: CC BY 4.0 · Code: MIT</p><p class="small">A signature establishes integrity. It does not prove rights ownership.</p></section>
+        <section id="file-list-section" hidden><h2>Publisher-provided file listing</h2><p class="small">First two levels · Publisher-declared file preview</p><pre id="file-list"></pre><p id="file-list-note" class="small"></p></section>
+      </aside>
+    </div>
+  </article>
+  <footer><span>Original bytes. Independent verification.</span><a href="../#publishing-terms">Publishing terms</a><a href="https://github.com/azaho/sci">Source code ↗</a></footer>
+</main>
+</body>
+</html>

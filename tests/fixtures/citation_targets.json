@@ -1,0 +1,262 @@
+{
+ "description": "Shared conformance fixtures for sci.publication.normalize_citation_target and sci.citation_target_key (SQL).",
+ "valid": [
+  {
+   "target": "sci:b2836a2b-6f5d-4c3f-9e7e-92b19656b627",
+   "key": "sci:b2836a2b-6f5d-4c3f-9e7e-92b19656b627",
+   "note": "canonical SCI target is its own key"
+  },
+  {
+   "target": "sci:00000000-0000-4000-8000-000000000000",
+   "key": "sci:00000000-0000-4000-8000-000000000000",
+   "note": "many zeros are allowed"
+  },
+  {
+   "target": "doi:10.1000/182",
+   "key": "doi:10.1000/182",
+   "note": "DOI Handbook"
+  },
+  {
+   "target": "doi:10.48550/arXiv.1706.03762",
+   "key": "doi:10.48550/arxiv.1706.03762",
+   "note": "ASCII case-insensitive"
+  },
+  {
+   "target": "doi:10.48550/arxiv.1706.03762",
+   "key": "doi:10.48550/arxiv.1706.03762",
+   "note": "already lowercase"
+  },
+  {
+   "target": "DOI:10.1000/182",
+   "key": "doi:10.1000/182",
+   "note": "URI scheme names are case-insensitive"
+  },
+  {
+   "target": "doi:10.1000/ABC%2fdef",
+   "key": "doi:10.1000/abc/def",
+   "note": "encoded slash equals slash in the DOI name"
+  },
+  {
+   "target": "doi:10.1000/a/b/c",
+   "key": "doi:10.1000/a/b/c",
+   "note": "suffix slashes"
+  },
+  {
+   "target": "doi:10.1000/%41BC",
+   "key": "doi:10.1000/abc",
+   "note": "encoded unreserved character"
+  },
+  {
+   "target": "doi:10.1000/100%25",
+   "key": "doi:10.1000/100%25",
+   "note": "literal percent sign"
+  },
+  {
+   "target": "doi:10.1000/100%2525",
+   "key": "doi:10.1000/100%2525",
+   "note": "percent then digits"
+  },
+  {
+   "target": "doi:10.1000/a%3cb%3E",
+   "key": "doi:10.1000/a%3Cb%3E",
+   "note": "hex case of escapes is normalized"
+  },
+  {
+   "target": "doi:10.1000/%C3%A9t%C3%A9",
+   "key": "doi:10.1000/%C3%A9t%C3%A9",
+   "note": "non-ASCII stays encoded"
+  },
+  {
+   "target": "doi:10.1000/%C3%89T%C3%89",
+   "key": "doi:10.1000/%C3%89t%C3%89",
+   "note": "non-ASCII letters are not case-folded"
+  },
+  {
+   "target": "doi:10.1000/a%20b",
+   "key": "doi:10.1000/a%20b",
+   "note": "encoded space"
+  },
+  {
+   "target": "doi:10.1000/a%3Fb%23c",
+   "key": "doi:10.1000/a%3Fb%23c",
+   "note": "encoded ? and # are part of the name"
+  },
+  {
+   "target": "doi:10.1002/(SICI)1097-4636(199706)35:4%3C407::AID-JBM1%3E3.0.CO;2-G",
+   "key": "doi:10.1002/(sici)1097-4636(199706)35:4%3C407::aid-jbm1%3E3.0.co;2-g",
+   "note": "SICI-style DOI"
+  },
+  {
+   "target": "doi:10.5281/zenodo.1234567",
+   "key": "doi:10.5281/zenodo.1234567",
+   "note": "dataset DOI"
+  },
+  {
+   "target": "doi:10.1000.10/xyz",
+   "key": "doi:10.1000.10/xyz",
+   "note": "registrant subdivision"
+  },
+  {
+   "target": "doi:10.1000/~!$&'()*+,;=:@-._",
+   "key": "doi:10.1000/~!$&'()*+,;=:@-._",
+   "note": "all safe characters"
+  },
+  {
+   "target": "doi:%31%30.1000/x",
+   "key": "doi:10.1000/x",
+   "note": "encoded prefix digits"
+  },
+  {
+   "target": "doi:10.1000/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "key": "doi:10.1000/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "note": "exactly 512 characters"
+  },
+  {
+   "target": "doi:10.1000/%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41bb",
+   "key": "doi:10.1000/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabb",
+   "note": "512 characters counting escapes"
+  }
+ ],
+ "invalid": [
+  {
+   "target": "",
+   "note": "empty"
+  },
+  {
+   "target": "10.1000/182",
+   "note": "bare DOI"
+  },
+  {
+   "target": "https://doi.org/10.1000/182",
+   "note": "resolver URL"
+  },
+  {
+   "target": "doi:https://doi.org/10.1000/182",
+   "note": "resolver URL after prefix"
+  },
+  {
+   "target": "b2836a2b-6f5d-4c3f-9e7e-92b19656b627",
+   "note": "bare UUID"
+  },
+  {
+   "target": "sci:B2836A2B-6F5D-4C3F-9E7E-92B19656B627",
+   "note": "uppercase UUID"
+  },
+  {
+   "target": "SCI:b2836a2b-6f5d-4c3f-9e7e-92b19656b627",
+   "note": "uppercase sci prefix"
+  },
+  {
+   "target": "sci:b2836a2b-6f5d-1c3f-9e7e-92b19656b627",
+   "note": "UUID version 1"
+  },
+  {
+   "target": "sci:b2836a2b-6f5d-4c3f-7e7e-92b19656b627",
+   "note": "wrong variant"
+  },
+  {
+   "target": "sci:00000-00001",
+   "note": "malformed UUID"
+  },
+  {
+   "target": "doi:10/182",
+   "note": "shortDOI"
+  },
+  {
+   "target": "doi:10.1000",
+   "note": "no suffix"
+  },
+  {
+   "target": "doi:10.1000/",
+   "note": "empty suffix"
+  },
+  {
+   "target": "doi:11.1000/x",
+   "note": "not a 10. prefix"
+  },
+  {
+   "target": "doi:10.abc/x",
+   "note": "non-numeric registrant"
+  },
+  {
+   "target": "doi:10.1000/a?b",
+   "note": "query"
+  },
+  {
+   "target": "doi:10.1000/a#b",
+   "note": "fragment"
+  },
+  {
+   "target": "doi:10.1000/a b",
+   "note": "raw space"
+  },
+  {
+   "target": "doi:10.1000/a<b",
+   "note": "raw angle bracket"
+  },
+  {
+   "target": "doi:10.1000/a%",
+   "note": "truncated escape"
+  },
+  {
+   "target": "doi:10.1000/a%2",
+   "note": "truncated escape"
+  },
+  {
+   "target": "doi:10.1000/a%zz",
+   "note": "non-hex escape"
+  },
+  {
+   "target": "doi:10.1000/%C3",
+   "note": "malformed UTF-8"
+  },
+  {
+   "target": "doi:10.1000/%FF",
+   "note": "invalid UTF-8 byte"
+  },
+  {
+   "target": "doi:10.1000/%ED%A0%80",
+   "note": "encoded surrogate"
+  },
+  {
+   "target": "doi:10.1000/a%00b",
+   "note": "encoded NUL"
+  },
+  {
+   "target": "doi:10.1000/a%0Ab",
+   "note": "encoded line feed"
+  },
+  {
+   "target": "doi:10.1000/a%C2%85",
+   "note": "encoded C1 control"
+  },
+  {
+   "target": "doi:10.1000/a%E2%80%A8",
+   "note": "encoded line separator"
+  },
+  {
+   "target": "doi:10.1000/a%EF%BF%BE",
+   "note": "encoded noncharacter"
+  },
+  {
+   "target": "doi:10.1000/é",
+   "note": "raw non-ASCII"
+  },
+  {
+   "target": "isbn:978-3-16-148410-0",
+   "note": "unsupported scheme"
+  },
+  {
+   "target": "urn:doi:10.1000/182",
+   "note": "unsupported scheme"
+  },
+  {
+   "target": "doi:10.1000/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "note": "513 characters"
+  },
+  {
+   "target": "doi:10.1000/%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41%41aa",
+   "note": "513 characters counting escapes"
+  }
+ ]
+}

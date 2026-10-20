@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+
+# Local secrets and state: never commit these.
+.env
+*.pem
+!tests/fixtures/**/*.pem
+deploy/.terraform/
+deploy/*.tfstate
+deploy/*.tfstate.*
+deploy/*.tfplan
+deploy/tfplan*
+crash.log
+
+# Generated local site output
+_site/
+deploy/local/

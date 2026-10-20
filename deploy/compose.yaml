@@ -1,0 +1,184 @@
+# Complete local SCI installation.
+#
+#   docker compose -f deploy/compose.yaml up -d --build
+#   docker compose -f deploy/compose.yaml down          # keeps data volumes
+#
+# Data lives in the named volumes sci-local_db and sci-local_archive and
+# survives restarts, rebuilds, and `down`. Deleting them is a separate,
+# destructive reset: `docker compose -f deploy/compose.yaml down --volumes`.
+#
+# Host endpoints (change the *_PORT variables to run a second instance
+# under another project name):
+#   website          http://localhost:${SCI_WEB_PORT:-8000}/
+#   publishing API   http://localhost:${SCI_API_PORT:-8080}
+#   catalog          http://localhost:${SCI_CATALOG_PORT:-3000}
+#   archive (S3)     http://localhost:${SCI_STORAGE_PORT:-9000}
+#
+# The passwords below are local defaults for a machine-local installation.
+# Override them with environment variables; never reuse them in production.
+
+name: sci-local
+
+x-sci-env: &sci-env
+  SCI_INSTANCE_URL: http://localhost:${SCI_WEB_PORT:-8000}/
+  SCI_ARCHIVE_URL: http://localhost:${SCI_STORAGE_PORT:-9000}/sci-publications/publications
+  SCI_DATABASE_URL: postgresql://sci_publisher:${SCI_PUBLISHER_DB_PASSWORD:-local-publisher}@db:5432/sci
+  SCI_S3_ENDPOINT: http://storage:9000
+  # Presigned upload URLs must use the address that host-side CLI clients reach.
+  SCI_S3_PRESIGN_ENDPOINT: http://localhost:${SCI_STORAGE_PORT:-9000}
+  SCI_S3_REGION: us-east-1
+  SCI_S3_ACCESS_KEY_ID: ${SCI_STORAGE_ACCESS_KEY:-sci-local}
+  SCI_S3_SECRET_ACCESS_KEY: ${SCI_STORAGE_SECRET_KEY:-sci-local-secret}
+  SCI_TEMP_BUCKET: sci-temp
+  SCI_PUBLIC_BUCKET: sci-publications
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: sci
+      POSTGRES_USER: sci_admin
+      POSTGRES_PASSWORD: ${SCI_ADMIN_DB_PASSWORD:-local-admin}
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${SCI_DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sci_admin -d sci"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  storage:
+    image: rustfs/rustfs:1.0.3
+    environment:
+      RUSTFS_ACCESS_KEY: ${SCI_STORAGE_ACCESS_KEY:-sci-local}
+      RUSTFS_SECRET_KEY: ${SCI_STORAGE_SECRET_KEY:-sci-local-secret}
+    volumes:
+      - archive:/data
+    ports:
+      - "127.0.0.1:${SCI_STORAGE_PORT:-9000}:9000"
+    restart: unless-stopped
+
+  # One-shot: apply pending migrations (idempotent; never resets data).
+  migrate:
+    build: &publisher-build
+      context: ..
+      dockerfile: server/Dockerfile
+    image: sci-publisher:local
+    command: ["python", "-m", "server.database", "migrate"]
+    environment:
+      SCI_ADMIN_DATABASE_URL: postgresql://sci_admin:${SCI_ADMIN_DB_PASSWORD:-local-admin}@db:5432/sci
+      SCI_PUBLISHER_DB_PASSWORD: ${SCI_PUBLISHER_DB_PASSWORD:-local-publisher}
+      SCI_AUTHENTICATOR_PASSWORD: ${SCI_AUTHENTICATOR_PASSWORD:-local-authenticator}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  # One-shot: create missing buckets and write the local sci-server.json.
+  init:
+    image: sci-publisher:local
+    command:
+      - python
+      - -m
+      - server.app
+      - init-local
+      - --descriptor
+      - /generated/sci-server.json
+      - --catalog-url
+      - http://localhost:${SCI_CATALOG_PORT:-3000}
+      - --publishing-api-url
+      - http://localhost:${SCI_API_PORT:-8080}
+    environment: *sci-env
+    volumes:
+      - generated:/generated
+    user: "0"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      storage:
+        condition: service_started
+    restart: "no"
+
+  catalog:
+    image: postgrest/postgrest:v12.2.12
+    environment:
+      PGRST_DB_URI: postgresql://authenticator:${SCI_AUTHENTICATOR_PASSWORD:-local-authenticator}@db:5432/sci
+      PGRST_DB_SCHEMAS: catalog_v1
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_DB_MAX_ROWS: "100"
+      PGRST_DB_AGGREGATES_ENABLED: "false"
+      PGRST_SERVER_PORT: "3000"
+    ports:
+      - "127.0.0.1:${SCI_CATALOG_PORT:-3000}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  publisher:
+    image: sci-publisher:local
+    build: *publisher-build
+    environment: *sci-env
+    ports:
+      - "127.0.0.1:${SCI_API_PORT:-8080}:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  web:
+    image: nginx:1.29-alpine
+    volumes:
+      - ../web:/usr/share/nginx/html:ro
+      - ../sci/categories.json:/srv/sci/categories.json:ro
+      - ../sci/publication_LICENSE.txt:/srv/sci/publication_LICENSE.txt:ro
+      - generated:/srv/generated:ro
+    configs:
+      - source: nginx
+        target: /etc/nginx/conf.d/default.conf
+    ports:
+      - "127.0.0.1:${SCI_WEB_PORT:-8000}:80"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+configs:
+  nginx:
+    content: |
+      server {
+        listen 80;
+        root /usr/share/nginx/html;
+        index index.html;
+        charset utf-8;
+        add_header X-Content-Type-Options nosniff always;
+        add_header Referrer-Policy no-referrer always;
+        add_header X-Frame-Options DENY always;
+        location = /sci-server.json {
+          root /srv/generated;
+          add_header Access-Control-Allow-Origin * always;
+          add_header X-Content-Type-Options nosniff always;
+          add_header Cache-Control no-cache always;
+        }
+        location = /publication_LICENSE.txt {
+          root /srv/sci;
+          charset utf-8;
+          default_type text/plain;
+          add_header X-Content-Type-Options nosniff always;
+        }
+        location = /categories.json {
+          root /srv/sci;
+          add_header Access-Control-Allow-Origin * always;
+          add_header X-Content-Type-Options nosniff always;
+        }
+      }
+
+volumes:
+  db:
+  archive:
+  generated:
