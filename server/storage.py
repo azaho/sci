@@ -262,12 +262,22 @@ class Storage:
         except (ClientError, BotoCoreError) as exc:
             raise StorageError(f"list archive: {exc}") from exc
 
+    HEALTH_PROBE_KEY = "sci-health-probe/absent"
+
     def check_buckets(self) -> None:
+        """Check object access to both buckets.
+
+        Uses an object-level HEAD on a key that does not exist, so a runtime
+        token with only Object Read & Write permission passes (404 = access
+        works). Bucket-level calls such as HeadBucket need more permission.
+        """
         for b in (self.temp_bucket, self.public_bucket):
             try:
-                self._call(self.s3.head_bucket, Bucket=b)
+                self._call(self.s3.head_object, Bucket=b, Key=self.HEALTH_PROBE_KEY)
             except ClientError as exc:
-                raise StorageError(f"bucket {b}: {exc}") from exc
+                if _is_missing(exc):
+                    continue
+                raise StorageError(f"no object access to bucket {b}: {exc}") from exc
 
     def ensure_buckets(self, public_policy: bool = True) -> None:
         """Create missing buckets (local installations only)."""
