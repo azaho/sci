@@ -1,0 +1,782 @@
+{
+  "source": "https://arxiv.org/category_taxonomy",
+  "snapshot_date": "2026-10-20",
+  "license": "CC0 classification metadata; descriptions excluded; no arXiv endorsement",
+  "categories": [
+    {
+      "code": "cs.AI",
+      "label": "Artificial Intelligence",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.AR",
+      "label": "Hardware Architecture",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.CC",
+      "label": "Computational Complexity",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.CE",
+      "label": "Computational Engineering, Finance, and Science",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.CG",
+      "label": "Computational Geometry",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.CL",
+      "label": "Computation and Language",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.CR",
+      "label": "Cryptography and Security",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.CV",
+      "label": "Computer Vision and Pattern Recognition",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.CY",
+      "label": "Computers and Society",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.DB",
+      "label": "Databases",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.DC",
+      "label": "Distributed, Parallel, and Cluster Computing",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.DL",
+      "label": "Digital Libraries",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.DM",
+      "label": "Discrete Mathematics",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.DS",
+      "label": "Data Structures and Algorithms",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.ET",
+      "label": "Emerging Technologies",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.FL",
+      "label": "Formal Languages and Automata Theory",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.GL",
+      "label": "General Literature",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.GR",
+      "label": "Graphics",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.GT",
+      "label": "Computer Science and Game Theory",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.HC",
+      "label": "Human-Computer Interaction",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.IR",
+      "label": "Information Retrieval",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.IT",
+      "label": "Information Theory",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.LG",
+      "label": "Machine Learning",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.LO",
+      "label": "Logic in Computer Science",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.MA",
+      "label": "Multiagent Systems",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.MM",
+      "label": "Multimedia",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.MS",
+      "label": "Mathematical Software",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.NA",
+      "label": "Numerical Analysis",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.NE",
+      "label": "Neural and Evolutionary Computing",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.NI",
+      "label": "Networking and Internet Architecture",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.OH",
+      "label": "Other Computer Science",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.OS",
+      "label": "Operating Systems",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.PF",
+      "label": "Performance",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.PL",
+      "label": "Programming Languages",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.RO",
+      "label": "Robotics",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.SC",
+      "label": "Symbolic Computation",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.SD",
+      "label": "Sound",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.SE",
+      "label": "Software Engineering",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.SI",
+      "label": "Social and Information Networks",
+      "group": "Computer Science"
+    },
+    {
+      "code": "cs.SY",
+      "label": "Systems and Control",
+      "group": "Computer Science"
+    },
+    {
+      "code": "econ.EM",
+      "label": "Econometrics",
+      "group": "Economics"
+    },
+    {
+      "code": "econ.GN",
+      "label": "General Economics",
+      "group": "Economics"
+    },
+    {
+      "code": "econ.TH",
+      "label": "Theoretical Economics",
+      "group": "Economics"
+    },
+    {
+      "code": "eess.AS",
+      "label": "Audio and Speech Processing",
+      "group": "Electrical Engineering and Systems Science"
+    },
+    {
+      "code": "eess.IV",
+      "label": "Image and Video Processing",
+      "group": "Electrical Engineering and Systems Science"
+    },
+    {
+      "code": "eess.SP",
+      "label": "Signal Processing",
+      "group": "Electrical Engineering and Systems Science"
+    },
+    {
+      "code": "eess.SY",
+      "label": "Systems and Control",
+      "group": "Electrical Engineering and Systems Science"
+    },
+    {
+      "code": "math.AC",
+      "label": "Commutative Algebra",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.AG",
+      "label": "Algebraic Geometry",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.AP",
+      "label": "Analysis of PDEs",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.AT",
+      "label": "Algebraic Topology",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.CA",
+      "label": "Classical Analysis and ODEs",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.CO",
+      "label": "Combinatorics",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.CT",
+      "label": "Category Theory",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.CV",
+      "label": "Complex Variables",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.DG",
+      "label": "Differential Geometry",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.DS",
+      "label": "Dynamical Systems",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.FA",
+      "label": "Functional Analysis",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.GM",
+      "label": "General Mathematics",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.GN",
+      "label": "General Topology",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.GR",
+      "label": "Group Theory",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.GT",
+      "label": "Geometric Topology",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.HO",
+      "label": "History and Overview",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.IT",
+      "label": "Information Theory",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.KT",
+      "label": "K-Theory and Homology",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.LO",
+      "label": "Logic",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.MG",
+      "label": "Metric Geometry",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.MP",
+      "label": "Mathematical Physics",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.NA",
+      "label": "Numerical Analysis",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.NT",
+      "label": "Number Theory",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.OA",
+      "label": "Operator Algebras",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.OC",
+      "label": "Optimization and Control",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.PR",
+      "label": "Probability",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.QA",
+      "label": "Quantum Algebra",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.RA",
+      "label": "Rings and Algebras",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.RT",
+      "label": "Representation Theory",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.SG",
+      "label": "Symplectic Geometry",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.SP",
+      "label": "Spectral Theory",
+      "group": "Mathematics"
+    },
+    {
+      "code": "math.ST",
+      "label": "Statistics Theory",
+      "group": "Mathematics"
+    },
+    {
+      "code": "astro-ph.CO",
+      "label": "Cosmology and Nongalactic Astrophysics",
+      "group": "Physics"
+    },
+    {
+      "code": "astro-ph.EP",
+      "label": "Earth and Planetary Astrophysics",
+      "group": "Physics"
+    },
+    {
+      "code": "astro-ph.GA",
+      "label": "Astrophysics of Galaxies",
+      "group": "Physics"
+    },
+    {
+      "code": "astro-ph.HE",
+      "label": "High Energy Astrophysical Phenomena",
+      "group": "Physics"
+    },
+    {
+      "code": "astro-ph.IM",
+      "label": "Instrumentation and Methods for Astrophysics",
+      "group": "Physics"
+    },
+    {
+      "code": "astro-ph.SR",
+      "label": "Solar and Stellar Astrophysics",
+      "group": "Physics"
+    },
+    {
+      "code": "cond-mat.dis-nn",
+      "label": "Disordered Systems and Neural Networks",
+      "group": "Physics"
+    },
+    {
+      "code": "cond-mat.mes-hall",
+      "label": "Mesoscale and Nanoscale Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "cond-mat.mtrl-sci",
+      "label": "Materials Science",
+      "group": "Physics"
+    },
+    {
+      "code": "cond-mat.other",
+      "label": "Other Condensed Matter",
+      "group": "Physics"
+    },
+    {
+      "code": "cond-mat.quant-gas",
+      "label": "Quantum Gases",
+      "group": "Physics"
+    },
+    {
+      "code": "cond-mat.soft",
+      "label": "Soft Condensed Matter",
+      "group": "Physics"
+    },
+    {
+      "code": "cond-mat.stat-mech",
+      "label": "Statistical Mechanics",
+      "group": "Physics"
+    },
+    {
+      "code": "cond-mat.str-el",
+      "label": "Strongly Correlated Electrons",
+      "group": "Physics"
+    },
+    {
+      "code": "cond-mat.supr-con",
+      "label": "Superconductivity",
+      "group": "Physics"
+    },
+    {
+      "code": "gr-qc",
+      "label": "General Relativity and Quantum Cosmology",
+      "group": "Physics"
+    },
+    {
+      "code": "hep-ex",
+      "label": "High Energy Physics - Experiment",
+      "group": "Physics"
+    },
+    {
+      "code": "hep-lat",
+      "label": "High Energy Physics - Lattice",
+      "group": "Physics"
+    },
+    {
+      "code": "hep-ph",
+      "label": "High Energy Physics - Phenomenology",
+      "group": "Physics"
+    },
+    {
+      "code": "hep-th",
+      "label": "High Energy Physics - Theory",
+      "group": "Physics"
+    },
+    {
+      "code": "math-ph",
+      "label": "Mathematical Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "nlin.AO",
+      "label": "Adaptation and Self-Organizing Systems",
+      "group": "Physics"
+    },
+    {
+      "code": "nlin.CD",
+      "label": "Chaotic Dynamics",
+      "group": "Physics"
+    },
+    {
+      "code": "nlin.CG",
+      "label": "Cellular Automata and Lattice Gases",
+      "group": "Physics"
+    },
+    {
+      "code": "nlin.PS",
+      "label": "Pattern Formation and Solitons",
+      "group": "Physics"
+    },
+    {
+      "code": "nlin.SI",
+      "label": "Exactly Solvable and Integrable Systems",
+      "group": "Physics"
+    },
+    {
+      "code": "nucl-ex",
+      "label": "Nuclear Experiment",
+      "group": "Physics"
+    },
+    {
+      "code": "nucl-th",
+      "label": "Nuclear Theory",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.acc-ph",
+      "label": "Accelerator Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.ao-ph",
+      "label": "Atmospheric and Oceanic Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.app-ph",
+      "label": "Applied Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.atm-clus",
+      "label": "Atomic and Molecular Clusters",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.atom-ph",
+      "label": "Atomic Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.bio-ph",
+      "label": "Biological Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.chem-ph",
+      "label": "Chemical Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.class-ph",
+      "label": "Classical Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.comp-ph",
+      "label": "Computational Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.data-an",
+      "label": "Data Analysis, Statistics and Probability",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.ed-ph",
+      "label": "Physics Education",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.flu-dyn",
+      "label": "Fluid Dynamics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.gen-ph",
+      "label": "General Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.geo-ph",
+      "label": "Geophysics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.hist-ph",
+      "label": "History and Philosophy of Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.ins-det",
+      "label": "Instrumentation and Detectors",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.med-ph",
+      "label": "Medical Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.optics",
+      "label": "Optics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.plasm-ph",
+      "label": "Plasma Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.pop-ph",
+      "label": "Popular Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.soc-ph",
+      "label": "Physics and Society",
+      "group": "Physics"
+    },
+    {
+      "code": "physics.space-ph",
+      "label": "Space Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "quant-ph",
+      "label": "Quantum Physics",
+      "group": "Physics"
+    },
+    {
+      "code": "q-bio.BM",
+      "label": "Biomolecules",
+      "group": "Quantitative Biology"
+    },
+    {
+      "code": "q-bio.CB",
+      "label": "Cell Behavior",
+      "group": "Quantitative Biology"
+    },
+    {
+      "code": "q-bio.GN",
+      "label": "Genomics",
+      "group": "Quantitative Biology"
+    },
+    {
+      "code": "q-bio.MN",
+      "label": "Molecular Networks",
+      "group": "Quantitative Biology"
+    },
+    {
+      "code": "q-bio.NC",
+      "label": "Neurons and Cognition",
+      "group": "Quantitative Biology"
+    },
+    {
+      "code": "q-bio.OT",
+      "label": "Other Quantitative Biology",
+      "group": "Quantitative Biology"
+    },
+    {
+      "code": "q-bio.PE",
+      "label": "Populations and Evolution",
+      "group": "Quantitative Biology"
+    },
+    {
+      "code": "q-bio.QM",
+      "label": "Quantitative Methods",
+      "group": "Quantitative Biology"
+    },
+    {
+      "code": "q-bio.SC",
+      "label": "Subcellular Processes",
+      "group": "Quantitative Biology"
+    },
+    {
+      "code": "q-bio.TO",
+      "label": "Tissues and Organs",
+      "group": "Quantitative Biology"
+    },
+    {
+      "code": "q-fin.CP",
+      "label": "Computational Finance",
+      "group": "Quantitative Finance"
+    },
+    {
+      "code": "q-fin.EC",
+      "label": "Economics",
+      "group": "Quantitative Finance"
+    },
+    {
+      "code": "q-fin.GN",
+      "label": "General Finance",
+      "group": "Quantitative Finance"
+    },
+    {
+      "code": "q-fin.MF",
+      "label": "Mathematical Finance",
+      "group": "Quantitative Finance"
+    },
+    {
+      "code": "q-fin.PM",
+      "label": "Portfolio Management",
+      "group": "Quantitative Finance"
+    },
+    {
+      "code": "q-fin.PR",
+      "label": "Pricing of Securities",
+      "group": "Quantitative Finance"
+    },
+    {
+      "code": "q-fin.RM",
+      "label": "Risk Management",
+      "group": "Quantitative Finance"
+    },
+    {
+      "code": "q-fin.ST",
+      "label": "Statistical Finance",
+      "group": "Quantitative Finance"
+    },
+    {
+      "code": "q-fin.TR",
+      "label": "Trading and Market Microstructure",
+      "group": "Quantitative Finance"
+    },
+    {
+      "code": "stat.AP",
+      "label": "Applications",
+      "group": "Statistics"
+    },
+    {
+      "code": "stat.CO",
+      "label": "Computation",
+      "group": "Statistics"
+    },
+    {
+      "code": "stat.ME",
+      "label": "Methodology",
+      "group": "Statistics"
+    },
+    {
+      "code": "stat.ML",
+      "label": "Machine Learning",
+      "group": "Statistics"
+    },
+    {
+      "code": "stat.OT",
+      "label": "Other Statistics",
+      "group": "Statistics"
+    },
+    {
+      "code": "stat.TH",
+      "label": "Statistics Theory",
+      "group": "Statistics"
+    }
+  ]
+}

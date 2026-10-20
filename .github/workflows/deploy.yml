@@ -1,0 +1,215 @@
+name: Hosted release
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Select one release operation
+        required: true
+        type: choice
+        options:
+          - infrastructure
+          - migrations
+          - publisher
+          - website
+          - verify
+          - storage-probe
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sci-hosted-release
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    if: github.ref == 'refs/heads/main' && inputs.operation == 'infrastructure'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      TF_VAR_supabase_db_password: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      TF_VAR_publisher_database_url: ${{ secrets.PUBLISHER_DATABASE_URL }}
+      TF_VAR_r2_access_key_id: ${{ secrets.R2_ACCESS_KEY_ID }}
+      TF_VAR_r2_secret_access_key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      TF_VAR_cloudflare_zone_api_token: ${{ secrets.CLOUDFLARE_ZONE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.23"
+      - run: uv sync --frozen --extra server
+      - name: Verify that infrastructure review is configured
+        run: uv run python -m deploy.release check-review
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: "1.16.6"
+          terraform_wrapper: false
+      - run: uv run python -m deploy.terraform_config
+        env:
+          DEPLOY_CONFIG: ${{ toJSON(vars) }}
+      - run: terraform -chdir=deploy init -input=false -lockfile=readonly
+      - name: Create the plan for review
+        run: terraform -chdir=deploy plan -input=false -var-file=../.local/infra.tfvars.json -out=../.local/plan.tfplan
+      - name: Encrypt the exact saved plan
+        run: uv run python -m deploy.plan_crypto encrypt .local/plan.tfplan .local/plan.enc
+        env:
+          TF_PLAN_ENCRYPTION_KEY: ${{ secrets.TF_PLAN_ENCRYPTION_KEY }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: encrypted-infrastructure-plan
+          path: .local/plan.enc
+          include-hidden-files: true
+          retention-days: 1
+      - name: Remove plaintext plan and inputs
+        if: always()
+        run: rm -f .local/plan.tfplan .local/infra.tfvars.json
+
+  apply:
+    needs: plan
+    runs-on: ubuntu-24.04
+    environment: production-infrastructure
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: "0.12.23"
+      - run: uv sync --frozen
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e
+        with:
+          terraform_version: "1.16.6"
+          terraform_wrapper: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: encrypted-infrastructure-plan
+          path: .local
+      - run: uv run python -m deploy.plan_crypto decrypt .local/plan.enc .local/plan.tfplan
+        env:
+          TF_PLAN_ENCRYPTION_KEY: ${{ secrets.TF_PLAN_ENCRYPTION_KEY }}
+      - run: terraform -chdir=deploy init -input=false -lockfile=readonly
+      - name: Apply the reviewed saved plan
+        run: terraform -chdir=deploy apply -input=false ../.local/plan.tfplan
+      - if: always()
+        run: rm -f .local/plan.tfplan .local/plan.enc
+
+  migrations:
+    if: github.ref == 'refs/heads/main' && inputs.operation == 'migrations'
+    runs-on: ubuntu-24.04
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: "0.12.23"
+      - run: uv sync --frozen --extra server
+      - run: uv run python -m deploy.release migrations
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_DB_HOST: ${{ vars.SUPABASE_DB_HOST }}
+          SUPABASE_DB_PORT: ${{ vars.SUPABASE_DB_PORT || '5432' }}
+          SUPABASE_DB_USER: ${{ vars.SUPABASE_DB_USER || 'postgres' }}
+          PUBLISHER_DATABASE_URL: ${{ secrets.PUBLISHER_DATABASE_URL }}
+
+  publisher:
+    if: github.ref == 'refs/heads/main' && inputs.operation == 'publisher'
+    runs-on: ubuntu-24.04
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: "0.12.23"
+      - run: uv sync --frozen --extra server
+      - run: uv run python -m deploy.release publisher
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+          PUBLISHER_APP_ID: ${{ vars.PUBLISHER_APP_ID }}
+          PUBLISHING_API_URL: ${{ vars.PUBLISHING_API_URL }}
+
+  website:
+    if: github.ref == 'refs/heads/main' && inputs.operation == 'website'
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: "0.12.23"
+      - run: uv sync --frozen
+      - run: uv run python -m deploy.site .local/site
+        env:
+          PUBLISHING_API_URL: ${{ vars.PUBLISHING_API_URL }}
+          CATALOG_URL: ${{ vars.CATALOG_URL }}
+          ARCHIVE_URL: ${{ vars.ARCHIVE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9
+        with:
+          path: .local/site
+      - name: Deploy static website
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346
+      - run: uv run python -m deploy.release verify-site
+        env:
+          INSTANCE_URL: ${{ vars.INSTANCE_URL }}
+
+  verify:
+    if: github.ref == 'refs/heads/main' && inputs.operation == 'verify'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: "0.12.23"
+      - run: uv sync --frozen
+      - run: uv run python -m deploy.release verify-site
+        env:
+          INSTANCE_URL: ${{ vars.INSTANCE_URL }}
+
+  storage-probe:
+    if: github.ref == 'refs/heads/main' && inputs.operation == 'storage-probe'
+    runs-on: ubuntu-24.04
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: "0.12.23"
+      - run: uv sync --frozen --extra server
+      - run: uv run python -m deploy.check_r2
+        env:
+          SCI_ALLOW_STORAGE_PROBE: "true"
+          PUBLISHER_DATABASE_URL: ${{ secrets.PUBLISHER_DATABASE_URL }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          S3_ENDPOINT_URL: https://${{ vars.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          TEMPORARY_BUCKET: ${{ vars.TEMPORARY_BUCKET }}
+          ARCHIVE_BUCKET: ${{ vars.ARCHIVE_BUCKET }}
+          INSTANCE_URL: ${{ vars.INSTANCE_URL }}
+          ARCHIVE_URL: ${{ vars.ARCHIVE_URL }}

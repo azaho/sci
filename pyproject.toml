@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sci-publications"
+version = "0.1.0"
+description = "Signed, portable scientific publications"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+authors = [{name = "Andrii Zahorodnii"}]
+dependencies = [
+  "cryptography>=45,<49",
+  "httpx>=0.28,<1",
+  "Pillow>=12,<13",
+]
+
+[project.optional-dependencies]
+server = [
+  "fastapi>=0.119,<1",
+  "uvicorn>=0.37,<1",
+  "python-multipart>=0.0.20,<1",
+  "psycopg[binary,pool]>=3.2,<4",
+  "boto3>=1.40,<2",
+]
+test = [
+  "pytest>=8.4,<10",
+  "pytest-cov>=6,<8",
+  "moto[s3,server]>=5.1,<6",
+  "ruff>=0.14,<1",
+]
+
+[project.scripts]
+sci = "sci.cli:main"
+sci-maintain = "server.maintenance:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["sci", "server"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "integration: requires a disposable PostgreSQL database",
+  "r2: requires explicitly configured disposable R2 test buckets",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

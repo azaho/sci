@@ -1,0 +1,87 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:18.6-bookworm
+        env:
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: sci_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d sci_test"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      SCI_TEST_DATABASE_URL: postgresql://postgres:test-only@localhost:5432/sci_test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: "0.12.23"
+          python-version: "3.12"
+      - run: uv sync --frozen --extra server --extra test
+      - run: uv run ruff check sci server deploy tests examples
+      - run: uv run pytest -q --cov=sci --cov=server --cov-report=term-missing
+      - run: uv build
+      - run: docker compose -f deploy/compose.yaml config --quiet
+
+  local-system:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: "0.12.23"
+          python-version: "3.12"
+      - run: uv sync --frozen --extra server
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - run: docker compose -f deploy/compose.yaml up -d --build --wait --wait-timeout 240
+      - run: uv run python -m tests.system_smoke
+      - run: npm run test:browser
+      - name: Check stop, start, and rebuild persistence
+        run: |
+          docker compose -f deploy/compose.yaml down
+          docker compose -f deploy/compose.yaml up -d --build --wait --wait-timeout 240
+          uv run python -m tests.system_smoke --existing
+      - name: Check reading while publisher and catalog are stopped
+        run: |
+          docker compose -f deploy/compose.yaml stop publisher
+          npm run test:browser
+          docker compose -f deploy/compose.yaml stop catalog database
+          uv run python -m tests.offline_pull
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: browser-screenshots
+          path: test-results/screenshots
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Service diagnostics
+        if: failure()
+        run: docker compose -f deploy/compose.yaml logs --no-color --tail 100
+      - if: always()
+        run: docker compose -f deploy/compose.yaml down
+
+  terraform:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e
+        with:
+          terraform_version: "1.16.6"
+          terraform_wrapper: false
+      - run: terraform -chdir=deploy fmt -check
+      - run: terraform -chdir=deploy init -backend=false -input=false -lockfile=readonly
+      - run: terraform -chdir=deploy validate -no-color
+      - run: terraform -chdir=deploy test -no-color

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Signed, portable scientific publications. Read, verify, and build on research.">
+  <title>sci · Publications</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" type="module"></script>
+</head>
+<body data-page="feed">
+<a class="skip" href="#content">Skip to publications</a>
+<main>
+  <header>
+    <a class="brand" href="./" aria-label="SCI home">sci</a>
+    <nav aria-label="Main navigation"><a href="./" aria-current="page">Publications</a><a href="#publish">Publish</a><a href="#publishing-terms">Terms</a></nav>
+    <span class="status" id="connection" role="status">Connecting to catalog</span>
+  </header>
+  <div class="introduction"><h1>Research, with a record.</h1><p>Read the evidence. Check the files. Build on what came before.</p></div>
+  <div class="layout">
+    <section id="content">
+      <div class="section-heading"><h2>Publications</h2><button id="refresh" type="button">Refresh</button></div>
+      <form id="filters" role="search">
+        <label class="search-label" for="search">Search publications</label>
+        <input id="search" name="search" type="search" placeholder="Search titles, abstracts, and keywords" maxlength="300">
+        <div class="filter-row">
+          <label for="category" class="sr-only">Subject</label>
+          <select id="category" name="category"><option value="">All subjects</option></select>
+          <label for="publisher" class="sr-only">Publisher fingerprint</label>
+          <input id="publisher" name="publisher" placeholder="Publisher fingerprint (optional)" maxlength="72" autocomplete="off">
+          <button class="filter-button" type="submit">Search</button>
+        </div>
+      </form>
+      <p class="feed-note">Latest accepted first <span id="result-note"></span></p>
+      <p id="problem" class="problem" role="alert" hidden></p>
+      <div id="publications" aria-live="polite"><p class="empty">Loading publications…</p></div>
+      <button id="more" type="button" class="more" hidden>Load more publications</button>
+    </section>
+    <aside>
+      <section id="publish">
+        <h2>Publish a result</h2>
+        <p>Prepare a README and author metadata. Add supporting code or data when needed.</p>
+        <pre><code>sci sign ./result
+sci verify ./result
+sci push ./result</code></pre>
+        <p>Run <code>sci --help</code> for the full guide. The destination must enable your public key.</p>
+        <a href="https://github.com/azaho/sci#readme">Installation and author guide ↗</a>
+      </section>
+      <section>
+        <h2>A verifiable record</h2>
+        <p>Each publication has a signed identity and fixed contents. Anyone can download, verify, and mirror a complete copy.</p>
+        <p>Corrections are new publications. Citations connect results and keep the earlier record available.</p>
+        <a href="./sci-server.json">Instance descriptor</a>
+      </section>
+      <section id="publishing-terms">
+        <h2>Publishing terms</h2>
+        <p>Text, figures, and data: <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Code: <a href="https://opensource.org/license/mit">MIT</a>.</p>
+        <p>By signing, the publisher agrees to these terms and confirms authority to distribute all included material under them. Retain required attribution and copyright notices. Reference material that cannot meet these terms externally.</p>
+        <p>Hosting rules are separate. Hosted material must contribute research with relevant supporting files. Negative results are welcome.</p>
+        <a href="./publication_LICENSE.txt">Standard publication license</a>
+      </section>
+    </aside>
+  </div>
+  <footer><span>Science that others can inspect and use.</span><a href="#publishing-terms">Publishing terms</a><a href="https://github.com/azaho/sci">Source code ↗</a></footer>
+</main>
+</body>
+</html>

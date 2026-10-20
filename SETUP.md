@@ -4,7 +4,7 @@ This guide describes the online setup for a public SCI installation. It covers a
 
 The system requirements are in [DESIGN.md](DESIGN.md). Release checks are in [TEST_PLAN.md](TEST_PLAN.md).
 
-**Implementation status:** this guide records the setup procedure and the configuration names agreed during bootstrap. The application, Terraform configuration, and deployment workflow still need to be implemented. Completing account and token setup does not mean the platform is deployed. Commands below that use those files apply once the files exist.
+**Implementation status:** the application, local installation, Terraform configuration, and deployment workflow are implemented in this repository. Completing account and token setup does not mean the platform is deployed. Use [README.md](README.md) for local operation and [docs/HOSTED.md](docs/HOSTED.md) for the implemented configuration names, release order, runtime credentials, and remaining hosted checks.
 
 ## 1. Understand the services
 
