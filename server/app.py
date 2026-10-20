@@ -50,6 +50,8 @@ log = logging.getLogger("sci.server")
 MAX_SUBMISSION_BODY = pub.MAX_JSON_BYTES + keys.SIGNATURE_BYTES + 16_384
 MAX_COMPLETE_BODY = 4_096
 FINALIZE_LOCK_WAIT = 0.0  # busy: answer 503 at once; clients retry
+# About $200 per month of R2 Standard storage at $0.015 per GB-month.
+DEFAULT_MAX_STORAGE_BYTES = 13_000_000_000_000
 
 
 # ---------------------------------------------------------------------------
@@ -84,6 +86,7 @@ class Settings:
     writes_enabled: bool = True
     worker_interval_seconds: float = 60.0
     expiry_grace_seconds: int = 60
+    max_storage_bytes: int = DEFAULT_MAX_STORAGE_BYTES
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -111,6 +114,7 @@ class Settings:
             presign_content_length=_env_bool("SCI_PRESIGN_CONTENT_LENGTH", False),
             writes_enabled=_env_bool("SCI_WRITES_ENABLED", True),
             worker_interval_seconds=float(os.environ.get("SCI_WORKER_INTERVAL_SECONDS") or 60),
+            max_storage_bytes=int(os.environ.get("SCI_MAX_STORAGE_BYTES") or DEFAULT_MAX_STORAGE_BYTES),
         )
 
     def storage(self) -> Storage:
@@ -239,6 +243,21 @@ class Publisher:
         if ident["public_key"] != docs.manifest.public_key_b64:
             raise ApiError(403, "key_mismatch", "The whitelisted key does not match the manifest's public key.")
 
+    def _check_storage_quota(self, conn, files: dict) -> None:
+        """Reject new uploads once stored plus reserved bytes would exceed the limit."""
+        Database.xact_lock(conn, "storage", "quota")
+        used = conn.execute(
+            """
+            select coalesce(sum((f.value ->> 'bytes')::bigint), 0) as used
+            from (select files from sci.publications
+                  union all
+                  select files from sci.uploads where state = 'pending' and deadline > now()) t,
+                 jsonb_each(t.files) f
+            """
+        ).fetchone()["used"]
+        if used + sum(e["bytes"] for e in files.values()) > self.settings.max_storage_bytes:
+            raise ApiError(507, "storage_full", "This server has reached its storage limit and is not accepting new publications.")
+
     def _uploads_for(self, upload_row: dict, docs_files: dict) -> dict:
         remaining = max(1, int((upload_row["deadline"].timestamp() - time.time())))
         expires = min(remaining, 3600)
@@ -287,6 +306,8 @@ class Publisher:
                     )
                 self._check_whitelist(conn, docs, lock=False)
                 if up is None:
+                    files = expected_objects(docs)
+                    self._check_storage_quota(conn, files)
                     upload_id = str(_uuid.uuid4())
                     up = conn.execute(
                         """
@@ -301,7 +322,7 @@ class Publisher:
                             docs.manifest_sha256,
                             docs.manifest.fingerprint,
                             upload_id,
-                            json.dumps(expected_objects(docs)),
+                            json.dumps(files),
                             self.settings.upload_ttl_seconds,
                         ),
                     ).fetchone()

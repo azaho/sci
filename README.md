@@ -193,6 +193,7 @@ The publisher receives these App Platform environment variables:
 | `SCI_S3_ACCESS_KEY_ID`, `SCI_S3_SECRET_ACCESS_KEY` | `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` (encrypted `SECRET`). |
 | `SCI_TEMP_BUCKET`, `SCI_PUBLIC_BUCKET` | Bucket names. |
 | `SCI_CLIENT_IP_HEADER` | `do-connecting-ip`. |
+| `SCI_MAX_STORAGE_BYTES` | Optional. Total publication bytes accepted before new pushes are rejected with `507 storage_full`; default `13000000000000` (13 TB, about $200/month of R2 storage). |
 
 ### GitHub secrets
 
