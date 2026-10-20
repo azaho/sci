@@ -458,7 +458,11 @@ jobs:
           SCI_PUBLISHING_API_URL: ${{ vars.SCI_PUBLISHING_API_URL }}
         run: |
           set -euo pipefail
-          terraform -chdir=deploy output -no-color -json > "${RUNNER_TEMP}/outputs.json"
+          # A new workspace has no state yet; treat that as "no outputs".
+          if ! terraform -chdir=deploy output -no-color -json > "${RUNNER_TEMP}/outputs.json"; then
+            echo "::notice::No Terraform state outputs yet; using repository variables and defaults."
+            echo '{}' > "${RUNNER_TEMP}/outputs.json"
+          fi
           python3 - <<'PY'
           import json
           import os
