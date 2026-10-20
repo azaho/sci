@@ -6,6 +6,27 @@ The system requirements are in [DESIGN.md](DESIGN.md). Release checks are in [TE
 
 The application, Terraform configuration, and deployment workflow are included in the repository. This guide covers the account setup and first deployment using that workflow. Completing account and token setup does not mean the platform is deployed or its runtime credentials have been tested. See [README.md](README.md#hosted-deployment) for the full deployment configuration reference.
 
+## Start here: new installation or returning session
+
+For a new installation, follow the numbered sections in order. The complete path is:
+
+| Stage | Action | Evidence before continuing |
+| --- | --- | --- |
+| Accounts and source | Prepare GitHub, Supabase, R2, DigitalOcean, and HCP Terraform (§§1–6). | Implemented code is on `main`; tests pass; account billing is ready; the existing database and state workspace are identified. |
+| Deployment access | Save five bootstrap secrets and the repository variables (§§7–8). | Names and scopes match this guide; expiration dates are recorded privately. |
+| Storage and database | Keep the publisher disabled; run plan → reviewed apply → migrate (§9). | Two buckets and the DigitalOcean project exist; migrations succeed. |
+| Runtime access | Create the bucket-scoped S3 pair and publisher database URL; run migrate again (§10). | All eight repository secrets exist; the publisher role password has been set. |
+| Final URLs | If using custom domains, follow the domain procedure in §11 now that the buckets exist. | DNS and certificates work; final URL variables are set; the temporary bucket remains private. |
+| Publisher and site | Enable the publisher; run plan → reviewed apply → website (§11). | App is active; health body reports database and both buckets `ok`; the descriptor has the final URLs. |
+| Live acceptance | Enable an author key; sign → verify → push → browse → pull (§11). | Exact signed bytes survive the round trip; results and UUID are recorded. |
+| Launch and upkeep | Complete applicable live release checks and establish backups and credential reminders (§12). | Test results, remaining pilot limitations, and restore procedure are recorded. |
+
+For a **returning session**, first read this guide, the current deployment workflow, and the private operations handoff at the end of this guide. Inspect current repository variables, secret **names and update dates**, recent Actions runs, provider resource status, and token expiry. Do not ask anyone to paste secret values into chat.
+
+Resume at the first incomplete stage. Do not create a second Supabase project or HCP workspace, overwrite an author's signing key, or reset `SCI_DEPLOY_PUBLISHER` to `false` on an existing deployment. A saved secret or a green historical workflow run is not evidence that the live service works now. Run a fresh plan before applying and stop to investigate unexpected replacement or deletion.
+
+This guide sets up GitHub Pages, not Cloudflare Pages. Cloudflare provides archive hosting and can manage the site's DNS. Switching hosting providers or making the repository private requires separate changes to the publisher's source access and CLI distribution.
+
 ## 1. Understand the services
 
 | Service | Responsibility |
@@ -22,8 +43,8 @@ Set up the accounts and credentials first. Create the cloud resources through re
 
 ## 2. Prepare GitHub and choose URLs
 
-1. Create the repository and retain administrator access for setup.
-2. Keep `DESIGN.md`, `TEST_PLAN.md`, and this guide in the repository.
+1. Fork or copy the **complete implemented repository** into a public repository you administer. A repository containing only the design documents is insufficient.
+2. Use `main` as the default branch for this procedure. Confirm `.github/workflows/deploy.yml`, `deploy/`, `server/`, `sci/`, and `web/` are present on it. Enable GitHub Actions if prompted for a fork, and run **Actions → deploy → Run workflow → operation: test**. Keep `DESIGN.md`, `TEST_PLAN.md`, and this guide with the code. Deployment tooling runs in Actions; you do not need local Terraform or Docker for this path.
 3. Choose an instance URL. A project site can use `https://<owner>.github.io/<repository>/`. If the owner's personal Pages site has a custom domain, project sites normally inherit it, for example `https://example.org/sci/`. See [GitHub's domain rules](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages#using-a-custom-domain-across-multiple-repositories).
 4. Choose a separate archive hostname, such as `archive.example.org`, on a domain managed in Cloudflare.
 5. Plan to use the DigitalOcean app's HTTPS hostname for the publisher initially. A custom publisher hostname is optional.
@@ -206,14 +227,22 @@ The main optional deployment variables are:
 | `SCI_TEMP_BUCKET` | `sci-temp`; private uploads. Keep stable after creation. |
 | `SCI_PUBLIC_BUCKET` | `sci-publications`; publication archive. Keep stable after creation. |
 | `SCI_DEPLOY_PUBLISHER` | `false` during initial provisioning; set to `true` only after the runtime secrets and database login are ready. |
+| `SUPABASE_REGION` | `us-east-1`; set to the actual existing project's region. |
+| `SUPABASE_PROJECT_NAME` | `sci`; set to the existing project's display name. Terraform ignores name/region changes after import. |
+| `SCI_DIGITALOCEAN_PROJECT` | `sci`; use a distinct project name for a separate installation. |
+| `SCI_PUBLISHER_APP_NAME` | `sci-publisher`; use a distinct app name for a separate installation. |
 | `SCI_PUBLISHER_REGION` | `nyc`; choose near the database. |
 | `SCI_PUBLISHER_SIZE` | `apps-s-1vcpu-0.5gb`; review current App Platform pricing before applying. |
 | `SCI_ARCHIVE_HOSTNAME` | Custom archive hostname, such as `archive.example.org`. Empty uses the development `r2.dev` domain. |
 | `SCI_ARCHIVE_ZONE_ID` | Set only when Terraform should connect the custom domain; leave empty when connecting it manually. |
 | `SCI_ARCHIVE_NOSNIFF_RULE` | `false`; enabling the response-header rule requires additional zone permissions. |
 | `SUPABASE_PUBLISHABLE_KEY` | Public frontend key; the website workflow looks it up when unset. Never use a secret or service-role key here. |
+| `SCI_ARCHIVE_URL` | Normally unset; overrides the descriptor's archive URL from Terraform. Includes `/publications`. |
+| `SCI_PUBLISHING_API_URL` | Normally unset; overrides the descriptor's publisher URL from Terraform. |
 
 See [the complete variable reference](README.md#github-variables) for additional names and overrides. These are GitHub Actions **variables**, not secrets.
+
+Prefer Terraform's endpoint outputs. Remove temporary endpoint overrides after recovery; stale overrides can make the website point to a different service than the deployed publisher.
 
 At this point, account and credential bootstrap is complete. Secret presence confirms only that GitHub stored a value; it does not prove that the token is valid, correctly scoped, or unexpired.
 
@@ -247,6 +276,8 @@ The five bootstrap secrets are not the complete runtime configuration.
 
 Use those two S3 fields, not Cloudflare's separate **Token value**. Keep `CLOUDFLARE_API_TOKEN` as the infrastructure administration credential. The runtime token does not need bucket-administration permissions.
 
+The runtime token's **Token value is not needed by SCI**. The Access Key ID and Secret Access Key must come from the same token creation. Store both privately before leaving the success screen; if the pair is uncertain, create a replacement rather than mixing fields from different tokens.
+
 ### Publisher database URL
 
 1. Generate a new, strong password for `sci_publisher` and save it in your password manager. A randomly generated 32-character password using letters and numbers avoids URL-encoding issues. Do not reuse the PostgreSQL administrator password.
@@ -272,6 +303,8 @@ Terraform maps these GitHub secrets to encrypted App Platform runtime variables:
 
 These values also enter Terraform state, so restrict HCP state access. A successful plan verifies configuration, not that the R2 keys or publisher login work; test them after deployment.
 
+The completed installation has **eight repository secrets**: `TF_API_TOKEN`, `CLOUDFLARE_API_TOKEN`, `DIGITALOCEAN_TOKEN`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `PUBLISHER_DATABASE_URL`. The R2 runtime token contributes two secret fields. The author's signing private key is not a deployment secret and must not be added to GitHub Actions.
+
 ## 11. Deploy and verify the first release
 
 1. Confirm all three runtime secrets are saved and the second migration succeeded.
@@ -281,13 +314,101 @@ These values also enter Terraform state, so restrict HCP state access. A success
 5. Run **`infrastructure-apply`**, review that run's plan summary, and approve **`production`**. Wait for App Platform's initial build and deployment to succeed, then check the publisher's `/health` endpoint. Leave `SCI_DEPLOY_PUBLISHER=true` afterward; setting it back to `false` would propose deleting the app on the next apply.
 6. Run **`website`** to publish `web/` and the generated `sci-server.json` through GitHub Pages. For subsequent deployments, **`publisher`** rebuilds the app; **`release`** runs the combined test, migration, publisher, and website sequence after infrastructure exists.
 7. Check that the descriptor contains the actual HTTPS publisher, catalog, and archive URLs, `catalog_schema`, `schema_version`, and the public `supabase_publishable_key`. Its `archive_url` must end at the `publications/` base path. Include no private credentials.
-8. For production archive delivery, connect a custom domain using the procedure below, apply the configuration, and rerun **`website`**.
+8. If not already done before publisher creation, connect the production archive custom domain using the procedure below, apply the configuration, and rerun **`website`**. Choose the final instance URL before the first publication.
 9. Keep the author's signing private key on the author's machine. Enable only the author's public key using the whitelist administration helpers in the Supabase SQL editor.
 10. Test HTTPS, CORS, catalog permissions, and archive delivery. Run sign → verify → push → browse → pull against the live instance and compare exact signed bytes. This is where the runtime credentials and their actual permissions are exercised.
 11. Complete [TEST_PLAN.md](TEST_PLAN.md), including real R2 upload-size enforcement, conditional copies, interrupted finalization, whitelist enforcement, backup restoration, archive recovery, and preservation across redeployment. Resolve the upload-handler versus limited-pilot choice in `DESIGN.md` if real R2 does not enforce the intended upload cap.
 12. Import existing research only after those checks pass and the import-attestation format is defined.
 
 Test public reads while the publisher is stopped. Test pulling a known publication with the catalog unavailable. Neither case should depend on private deployment credentials.
+
+### Check live readiness
+
+Get the publisher URL from the App Platform dashboard or `sci-server.json`, then open its `/health` endpoint. A healthy writable installation reports:
+
+```json
+{
+  "status": "ok",
+  "version": "<deployed-version>",
+  "writes_enabled": true,
+  "database": "ok",
+  "storage": {
+    "<temporary-bucket-name>": "ok",
+    "<publication-bucket-name>": "ok"
+  }
+}
+```
+
+HTTP 200 can also contain `status: degraded` and storage errors. The deployment deliberately avoids restart loops for R2 failures, so inspect the response body. These checks exercise database connectivity and authenticated storage reads; they do not prove uploads, conditional copies, retention locks, CORS, or download integrity. The live test below is still required.
+
+### First live publication and verified download
+
+Use deliberately public test content that may remain permanently in the archive. Signing accepts the publication's fixed reuse terms. Run this only after choosing the final instance URL and preparing the storage and permission checks in `TEST_PLAN.md`; a basic round trip is not the full release test.
+
+On the author's machine, install Python **3.10 or newer**, clone the deployed repository, and run these commands from its root:
+
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install .
+sci server https://sci.example.org/
+sci keygen
+```
+
+Replace the example URL. Run `keygen` only if this author does not already have a signing key; it refuses to overwrite existing files. Back up the private key securely outside the repository and publication folder. The default directory is `~/.sci/`. If using an existing key, its public value is the `public_key.x` field of a signed manifest; do not copy the private key.
+
+In **Supabase → SQL Editor**, using the administrator (`postgres`) role, enable the **unpadded base64url public key** printed by `keygen`:
+
+```sql
+select * from sci.enable_key('<public-key-base64url>');
+select * from sci.list_keys();
+```
+
+Use neither the PEM file nor the key fingerprint as this argument. Whitelist changes apply without redeploying. Later, `select * from sci.disable_key('<public-key-base64url>');` disables new publishing by that author.
+
+Create a new test folder outside the repository so it cannot accidentally be committed:
+
+```sh
+mkdir ../sci-live-check
+cd ../sci-live-check
+mkdir publication
+cat > publication/sci.json <<'JSON'
+{
+  "title": "SCI deployment verification record",
+  "abstract": "Public test content for checking signing, publication, and verified download. This record makes no research claim."
+}
+JSON
+cat > publication/README.md <<'MARKDOWN'
+# Deployment verification
+
+This is intentionally public test content for this SCI installation.
+MARKDOWN
+sci sign ./publication
+sci verify ./publication
+sci push ./publication
+```
+
+Record the UUID and accepted publication URL. Open the website and that publication page; check that it appears without rebuilding the website. Then use the printed UUID:
+
+```sh
+sci pull <UUID> --output ./downloaded
+sci verify ./downloaded
+python - <<'PY'
+import json
+from pathlib import Path
+
+source = Path("publication")
+copy = Path("downloaded")
+manifest = json.loads((source / "manifest.json").read_text())
+names = set(manifest["files"]) | {"sci.json", "manifest.json", "manifest.json.sig"}
+for name in sorted(names):
+    if (source / name).read_bytes() != (copy / name).read_bytes():
+        raise SystemExit(f"Bytes differ: {name}")
+print(f"Exact bytes match for all {len(names)} signed publication files.")
+PY
+```
+
+The `<UUID>` command placeholder must be replaced before running. `pull` validates the archive's `acceptance.json` but does not save it in the downloaded folder. It does not unpack supporting ZIP files. Keep the signed source and test result privately; repeat the full test plan with attachments, permission failures, recovery, and read-only availability before treating the installation as ready for broader use.
 
 ### Custom domains while keeping GitHub Pages
 
@@ -323,6 +444,19 @@ Run **`publisher-recover`** on `main` and approve the **`production`** gate. It 
 Next run **`infrastructure-plan`** again. Confirm the replacement has disappeared, then run and review **`infrastructure-apply`** to update configuration and save the endpoint outputs. Finish with **`website`**. Recovery is for this verified failed-creation case; do not use it to suppress replacement caused by an actual infrastructure change.
 
 ## 12. Maintain the installation
+
+### Common setup failures
+
+| Symptom | Next action |
+| --- | --- |
+| Supabase `infra_add_ons_read` permission error | Replace `SUPABASE_ACCESS_TOKEN` with the scoped permissions in §7, including Add-ons Read; rerun a plan before apply. |
+| Health is HTTP 200 but storage is degraded, including signature errors | Check the token's account, expiry, and both bucket scopes. Replace the matching S3 key pair if uncertain; update both GitHub secrets and run reviewed `infrastructure-apply`. Inspect both bucket statuses, then test upload and pull. |
+| Database login fails | Check session pooler host, role-qualified username, port 5432, and password encoding. Run `migrate` after saving `PUBLISHER_DATABASE_URL`, then apply to update the app. |
+| Publisher works but Terraform proposes `replace_because_tainted` | Follow the guarded `publisher-recover` procedure above; then plan and apply again. |
+| Website job has no publisher endpoint after failed creation | Repair the app/state and complete an apply to save endpoint outputs; rerun `website`. Do not invent an endpoint or create a duplicate app. |
+| Domain resolves but HTTPS fails | Check provider certificate status and DNS target. Wait for certificate readiness, then rerun `website`; do not bypass TLS verification. |
+| Domain works through public DNS but not locally | Check local negative DNS caching separately from authoritative/public DNS. Avoid repeatedly changing correct records. |
+| Runtime secrets changed but behavior did not | `publisher` and `release` do not apply infrastructure. Run reviewed `infrastructure-apply` to update App Platform environment values. |
 
 ### Credential expiration
 
@@ -366,6 +500,8 @@ For the publisher database password, update `PUBLISHER_DATABASE_URL`, run **`mig
 
 Keep SQL backups that include the whitelist, upload outcomes, and failed UUID reservations. Keep independent copies of the publication archive. Terraform state is neither backup.
 
+**Backup automation is not installed by this workflow.** Before broader use, choose a database backup method and schedule, an independent private archive-copy destination, retention, access controls, and a restore procedure. Verify the actual Supabase plan's backup coverage instead of assuming the account includes it. Record successful backup and isolated restore runs. Retention locks in R2 and HCP state history do not replace these backups.
+
 After total SQL loss, an archive rebuild can restore the public catalog but cannot restore publishing permissions or failed UUID reservations. Keep publishing disabled until operational SQL state is restored and reconciled.
 
 Before production use, review whether the Supabase plan provides the availability and backups needed. Track R2 storage and request charges and DigitalOcean compute costs. Budget alerts notify; they do not necessarily cap spending.
@@ -373,3 +509,18 @@ Before production use, review whether the Supabase plan provides the availabilit
 When changing a domain, update DNS, CORS, the website configuration, and the generated descriptor, then rerun delivery checks. Preserve historical `instance_url` values in existing acceptance records.
 
 Keep a private operations log containing credential owners and expiration dates, resource IDs, backup locations, restoration results, and rotation history. Store secret values in a password manager or secret store, not in that log or this public guide.
+
+### Private handoff for the next session
+
+Maintain this information outside the public repository. It lets a new operator resume without repeating account setup or guessing whether a stage completed:
+
+- Repository URL, default branch, deployed commit, Pages settings, and environment approval policy.
+- Cloudflare account/zone, both bucket names, archive domain status, and whether domains are dashboard-managed or Terraform-managed.
+- Supabase organization/project reference and region; DigitalOcean team/project/app ID and endpoint; HCP organization/workspace and execution mode.
+- Current non-secret repository variable values, including `SCI_DEPLOY_PUBLISHER`, final URLs, and any intentional endpoint overrides.
+- The eight GitHub secret names, provider token names/scopes/expiration dates, owner, and password-manager entry references. **No secret values.**
+- Last successful plan/apply, migration, publisher, recovery (if used), and website run links; pending approvals or failures.
+- Latest health response and date, live publication test UUID and byte-comparison result, completed release checks, and unresolved limitations.
+- Backup destination and schedule, last successful restore, domain renewal, credential reminders, and billing-alert owner.
+
+Record “not done” for unfinished checks. A new session should verify current status against this inventory; the public guide does not track an installation's live state.
