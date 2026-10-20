@@ -619,5 +619,20 @@ def test_reused_attempt_does_not_rewrite_server_objects(stack, tmp_path, key):
 
 def test_health_uses_object_level_access(stack):
     status, data, headers = http("GET", f"{stack.api_url}/health")
-    assert status == 200 and json.loads(data)["status"] == "ok"
+    body = json.loads(data)
+    assert status == 200 and body["status"] == "ok" and set(body["storage"].values()) == {"ok"}
     stack.storage.check_buckets()  # 404 for the probe key counts as access
+
+
+def test_health_reports_storage_problems_without_failing(database, rustfs, tmp_path):
+    from .conftest import start_stack
+
+    s, stop = start_stack(database, rustfs, tmp_path)
+    try:
+        s.publisher.storage.temp_bucket = "missing-bucket-xyz"
+        status, data, _ = http("GET", f"{s.api_url}/health")
+        body = json.loads(data)
+        assert status == 200 and body["status"] == "degraded"
+        assert body["storage"]["missing-bucket-xyz"].startswith("error") and body["database"] == "ok"
+    finally:
+        stop()

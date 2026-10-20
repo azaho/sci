@@ -264,19 +264,41 @@ class Storage:
 
     HEALTH_PROBE_KEY = "sci-health-probe/absent"
 
+    def bucket_status(self) -> dict[str, str]:
+        """Per-bucket object access: "ok" or a short error code (no secrets)."""
+        out = {}
+        for b in (self.temp_bucket, self.public_bucket):
+            try:
+                self._probe(b)
+                out[b] = "ok"
+            except ClientError as exc:
+                out[b] = f"error {_status(exc)} {_code(exc)}".strip()
+            except StorageError:
+                out[b] = "unreachable"
+        return out
+
+    def _probe(self, bucket: str) -> None:
+        """GET a key that does not exist. NoSuchKey proves object access; GET
+        (unlike HEAD) distinguishes it from NoSuchBucket and 403."""
+        try:
+            r = self._call(self.s3.get_object, Bucket=bucket, Key=self.HEALTH_PROBE_KEY)
+            r["Body"].close()
+        except ClientError as exc:
+            if _code(exc) == "NoSuchKey":
+                return
+            raise
+
     def check_buckets(self) -> None:
         """Check object access to both buckets.
 
-        Uses an object-level HEAD on a key that does not exist, so a runtime
-        token with only Object Read & Write permission passes (404 = access
-        works). Bucket-level calls such as HeadBucket need more permission.
+        Uses an object-level GET of a key that does not exist, so a runtime
+        token with only Object Read & Write permission passes (NoSuchKey =
+        access works). Bucket-level calls such as HeadBucket need more permission.
         """
         for b in (self.temp_bucket, self.public_bucket):
             try:
-                self._call(self.s3.head_object, Bucket=b, Key=self.HEALTH_PROBE_KEY)
+                self._probe(b)
             except ClientError as exc:
-                if _is_missing(exc):
-                    continue
                 raise StorageError(f"no object access to bucket {b}: {exc}") from exc
 
     def ensure_buckets(self, public_policy: bool = True) -> None:

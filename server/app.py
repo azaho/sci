@@ -800,16 +800,25 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True) -
             return exc.response()
 
     async def health(request: Request):
-        def check():
-            publisher().db.ping()
-            publisher().storage.check_buckets()
-
+        """200 while the process and database work. Storage status is reported
+        per bucket but does not fail the check, so an R2 problem cannot cause
+        restart loops; publishing requests then fail with 503 storage_unavailable."""
         try:
-            await run_in_threadpool(check)
+            await run_in_threadpool(publisher().db.ping)
         except Exception as exc:  # noqa: BLE001 - readiness reports any failure
-            log.warning("health check failed: %s", exc)
-            return json_response({"status": "unavailable"}, 503)
-        return json_response({"status": "ok", "version": __version__, "writes_enabled": settings.writes_enabled})
+            log.warning("health check failed: database: %s", exc)
+            return json_response({"status": "unavailable", "database": "error"}, 503)
+        buckets = await run_in_threadpool(publisher().storage.bucket_status)
+        degraded = any(v != "ok" for v in buckets.values())
+        if degraded:
+            log.warning("storage check failed: %s", buckets)
+        return json_response({
+            "status": "degraded" if degraded else "ok",
+            "version": __version__,
+            "writes_enabled": settings.writes_enabled,
+            "database": "ok",
+            "storage": buckets,
+        })
 
     async def root(request: Request):
         return json_response({"service": "sci-publisher", "version": __version__})
