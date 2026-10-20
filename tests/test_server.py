@@ -615,3 +615,9 @@ def test_reused_attempt_does_not_rewrite_server_objects(stack, tmp_path, key):
     assert r2["upload_id"] == r1["upload_id"]
     assert stack.storage.head(stack.settings.temp_bucket, f"{r1['upload_id']}/sci.json") is not None
     assert stack.storage.head(stack.settings.temp_bucket, f"{r1['upload_id']}/manifest.json").etag == etag
+
+
+def test_health_uses_object_level_access(stack):
+    status, data, headers = http("GET", f"{stack.api_url}/health")
+    assert status == 200 and json.loads(data)["status"] == "ok"
+    stack.storage.check_buckets()  # 404 for the probe key counts as access
