@@ -297,6 +297,9 @@ jobs:
               | "\(.change.actions | join("+"))\t\(.address)"
                 + ( if (.change.actions == ["update"])
                     then "\tchanged: " + ([ (($b|keys) + ($a|keys)) | unique[] | select($b[.] != $a[.]) ] | join(","))
+                    else "" end )
+                + ( if (.change.actions | index("delete")) != null
+                    then "\treason: \(.action_reason // "unspecified")"
                     else "" end ) ),
             ( ( .output_changes // {} ) | to_entries[]
               | select(.value.actions != ["no-op"])
@@ -388,6 +391,9 @@ jobs:
               | "\(.change.actions | join("+"))\t\(.address)"
                 + ( if (.change.actions == ["update"])
                     then "\tchanged: " + ([ (($b|keys) + ($a|keys)) | unique[] | select($b[.] != $a[.]) ] | join(","))
+                    else "" end )
+                + ( if (.change.actions | index("delete")) != null
+                    then "\treason: \(.action_reason // "unspecified")"
                     else "" end ) ),
             ( ( .output_changes // {} ) | to_entries[]
               | select(.value.actions != ["no-op"])
