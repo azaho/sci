@@ -1,0 +1,863 @@
+# SCI tests and hosted deployment.
+#
+# push / pull_request to main: run tests only, with no secrets.
+# workflow_dispatch: choose one operation (see README.md, "Hosted deployment").
+#
+# Credential-bearing jobs run only for workflow_dispatch. Release operations
+# and infrastructure-apply also require the default branch. Plans and state can
+# contain secrets: they are never uploaded and the human-readable plan is not
+# printed; only resource addresses, actions, and changed attribute names are.
+
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Operation to run
+        type: choice
+        required: true
+        default: test
+        options:
+          - test
+          - infrastructure-plan
+          - infrastructure-apply
+          - migrate
+          - publisher
+          - website
+          - release
+
+permissions:
+  contents: read
+
+# All manual operations share one queue, so deployments never overlap.
+# Test runs for pushes and pull requests are grouped per ref instead.
+concurrency:
+  group: ${{ github.event_name == 'workflow_dispatch' && 'sci-production-deploy' || format('sci-test-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  TERRAFORM_VERSION: 1.13.4
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Tests (no secrets)
+  # -------------------------------------------------------------------------
+  test:
+    name: test
+    if: github.event_name != 'workflow_dispatch' || inputs.operation == 'test' || inputs.operation == 'release'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      POSTGREST_VERSION: v12.2.12
+      POSTGREST_SHA256: 5de4092f1719da3353c40bf96c8dec6913f2254a7cd0b61cc05f233153b557d5
+      RUSTFS_VERSION: 1.0.3
+      RUSTFS_SHA256: 29a083f156fe1a246f0336afe16ff77fffe587628e97339448d8f4fba38dba54
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install PostgREST and RustFS for integration tests
+        run: |
+          set -euo pipefail
+          bin="${RUNNER_TEMP}/sci-test-bin"
+          mkdir -p "$bin"
+          curl -fsSL --retry 3 -o "${RUNNER_TEMP}/postgrest.tar.xz" \
+            "https://github.com/PostgREST/postgrest/releases/download/${POSTGREST_VERSION}/postgrest-${POSTGREST_VERSION}-linux-static-x86-64.tar.xz"
+          echo "${POSTGREST_SHA256}  ${RUNNER_TEMP}/postgrest.tar.xz" | sha256sum -c -
+          tar -xJf "${RUNNER_TEMP}/postgrest.tar.xz" -C "$bin" postgrest
+          curl -fsSL --retry 3 -o "${RUNNER_TEMP}/rustfs.zip" \
+            "https://github.com/rustfs/rustfs/releases/download/${RUSTFS_VERSION}/rustfs-linux-x86_64-musl-v${RUSTFS_VERSION}.zip"
+          echo "${RUSTFS_SHA256}  ${RUNNER_TEMP}/rustfs.zip" | sha256sum -c -
+          unzip -q -o "${RUNNER_TEMP}/rustfs.zip" rustfs -d "$bin"
+          chmod +x "$bin/postgrest" "$bin/rustfs"
+          "$bin/postgrest" --version
+          "$bin/rustfs" --version | head -n 1
+          rm -f "${RUNNER_TEMP}/postgrest.tar.xz" "${RUNNER_TEMP}/rustfs.zip"
+          echo "SCI_TEST_POSTGREST=$bin/postgrest" >> "$GITHUB_ENV"
+          echo "SCI_TEST_RUSTFS=$bin/rustfs" >> "$GITHUB_ENV"
+
+      - name: Install SCI with server and test extras
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[server,test]'
+
+      - name: Run tests
+        run: python -m pytest -q
+
+  # -------------------------------------------------------------------------
+  # Non-secret configuration shared by the deployment jobs
+  # -------------------------------------------------------------------------
+  config:
+    name: resolve configuration
+    if: github.event_name == 'workflow_dispatch' && inputs.operation != 'test'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      instance_url: ${{ steps.cfg.outputs.instance_url }}
+      temp_bucket: ${{ steps.cfg.outputs.temp_bucket }}
+      public_bucket: ${{ steps.cfg.outputs.public_bucket }}
+      archive_hostname: ${{ steps.cfg.outputs.archive_hostname }}
+      archive_zone_id: ${{ steps.cfg.outputs.archive_zone_id }}
+      archive_nosniff_rule: ${{ steps.cfg.outputs.archive_nosniff_rule }}
+      supabase_region: ${{ steps.cfg.outputs.supabase_region }}
+      supabase_project_name: ${{ steps.cfg.outputs.supabase_project_name }}
+      digitalocean_project: ${{ steps.cfg.outputs.digitalocean_project }}
+      deploy_publisher: ${{ steps.cfg.outputs.deploy_publisher }}
+      publisher_app_name: ${{ steps.cfg.outputs.publisher_app_name }}
+      publisher_region: ${{ steps.cfg.outputs.publisher_region }}
+      publisher_size: ${{ steps.cfg.outputs.publisher_size }}
+      repository_clone_url: ${{ steps.cfg.outputs.repository_clone_url }}
+      repository_branch: ${{ steps.cfg.outputs.repository_branch }}
+    steps:
+      - name: Resolve repository variables and defaults
+        id: cfg
+        env:
+          OPERATION: ${{ inputs.operation }}
+          REPOSITORY: ${{ github.repository }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          SERVER_URL: ${{ github.server_url }}
+          GIT_REF: ${{ github.ref }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          SUPABASE_ORGANIZATION_ID: ${{ vars.SUPABASE_ORGANIZATION_ID }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+          TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
+          TF_WORKSPACE: ${{ vars.TF_WORKSPACE }}
+          SCI_INSTANCE_URL: ${{ vars.SCI_INSTANCE_URL }}
+          SCI_TEMP_BUCKET: ${{ vars.SCI_TEMP_BUCKET }}
+          SCI_PUBLIC_BUCKET: ${{ vars.SCI_PUBLIC_BUCKET }}
+          SCI_ARCHIVE_HOSTNAME: ${{ vars.SCI_ARCHIVE_HOSTNAME }}
+          SCI_ARCHIVE_ZONE_ID: ${{ vars.SCI_ARCHIVE_ZONE_ID }}
+          SCI_ARCHIVE_NOSNIFF_RULE: ${{ vars.SCI_ARCHIVE_NOSNIFF_RULE }}
+          SUPABASE_REGION: ${{ vars.SUPABASE_REGION }}
+          SUPABASE_PROJECT_NAME: ${{ vars.SUPABASE_PROJECT_NAME }}
+          SCI_DIGITALOCEAN_PROJECT: ${{ vars.SCI_DIGITALOCEAN_PROJECT }}
+          SCI_DEPLOY_PUBLISHER: ${{ vars.SCI_DEPLOY_PUBLISHER }}
+          SCI_PUBLISHER_APP_NAME: ${{ vars.SCI_PUBLISHER_APP_NAME }}
+          SCI_PUBLISHER_REGION: ${{ vars.SCI_PUBLISHER_REGION }}
+          SCI_PUBLISHER_SIZE: ${{ vars.SCI_PUBLISHER_SIZE }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          import sys
+          from urllib.parse import urlsplit
+
+          env = os.environ
+          errors = []
+
+          for name in ("CLOUDFLARE_ACCOUNT_ID", "SUPABASE_ORGANIZATION_ID", "SUPABASE_PROJECT_REF",
+                       "TF_CLOUD_ORGANIZATION", "TF_WORKSPACE"):
+              if not env.get(name, "").strip():
+                  errors.append(f"Repository variable {name} is not set.")
+
+          on_default = env["GIT_REF"] == f"refs/heads/{env['DEFAULT_BRANCH']}"
+          if env["OPERATION"] != "infrastructure-plan" and not on_default:
+              errors.append(f"Operation {env['OPERATION']} must run on the default branch ({env['DEFAULT_BRANCH']}).")
+
+          def value(name, default=""):
+              return env.get(name, "").strip() or default
+
+          instance_url = value("SCI_INSTANCE_URL",
+                               f"https://{env['REPOSITORY_OWNER'].lower()}.github.io/{env['REPOSITORY_NAME']}/")
+          parts = urlsplit(instance_url)
+          if parts.scheme != "https" or not parts.hostname or parts.query or parts.fragment or parts.username:
+              errors.append(f"SCI_INSTANCE_URL must be an absolute https URL: {instance_url!r}")
+          if not instance_url.endswith("/"):
+              instance_url += "/"
+
+          hostname = value("SCI_ARCHIVE_HOSTNAME").lower()
+          zone_id = value("SCI_ARCHIVE_ZONE_ID")
+          if zone_id and not hostname:
+              errors.append("SCI_ARCHIVE_ZONE_ID is set without SCI_ARCHIVE_HOSTNAME.")
+          if hostname and not zone_id:
+              print(f"::notice::{hostname} must be connected to the public bucket manually (no SCI_ARCHIVE_ZONE_ID).")
+          if hostname and not re.fullmatch(r"[a-z0-9.-]+\.[a-z]{2,}", hostname):
+              errors.append(f"SCI_ARCHIVE_HOSTNAME must be a bare hostname: {hostname!r}")
+
+          def boolean(name):
+              raw = value(name, "false").lower()
+              if raw not in ("true", "false"):
+                  errors.append(f"{name} must be true or false, not {raw!r}.")
+              return raw
+
+          outputs = {
+              "instance_url": instance_url,
+              "temp_bucket": value("SCI_TEMP_BUCKET", "sci-temp"),
+              "public_bucket": value("SCI_PUBLIC_BUCKET", "sci-publications"),
+              "archive_hostname": hostname,
+              "archive_zone_id": zone_id,
+              "archive_nosniff_rule": boolean("SCI_ARCHIVE_NOSNIFF_RULE"),
+              "supabase_region": value("SUPABASE_REGION", "us-east-1"),
+              "supabase_project_name": value("SUPABASE_PROJECT_NAME", "sci"),
+              "digitalocean_project": value("SCI_DIGITALOCEAN_PROJECT", "sci"),
+              "deploy_publisher": boolean("SCI_DEPLOY_PUBLISHER"),
+              "publisher_app_name": value("SCI_PUBLISHER_APP_NAME", "sci-publisher"),
+              "publisher_region": value("SCI_PUBLISHER_REGION", "nyc"),
+              "publisher_size": value("SCI_PUBLISHER_SIZE", "apps-s-1vcpu-0.5gb"),
+              "repository_clone_url": f"{env['SERVER_URL']}/{env['REPOSITORY']}.git",
+              "repository_branch": env["DEFAULT_BRANCH"],
+          }
+
+          for message in errors:
+              print(f"::error::{message}")
+          if errors:
+              sys.exit(1)
+
+          with open(env["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              for key, val in outputs.items():
+                  print(f"{key}={val}", file=out)
+                  print(f"{key}: {val}")
+          PY
+
+  # -------------------------------------------------------------------------
+  # Infrastructure: plan (any branch) and reviewed apply (default branch)
+  # -------------------------------------------------------------------------
+  infrastructure-plan:
+    name: terraform plan
+    needs: config
+    if: inputs.operation == 'infrastructure-plan' || inputs.operation == 'infrastructure-apply'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      changes_sha256: ${{ steps.summary.outputs.sha256 }}
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+      TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE }}
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      TF_VAR_instance_url: ${{ needs.config.outputs.instance_url }}
+      TF_VAR_cloudflare_account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      TF_VAR_temp_bucket_name: ${{ needs.config.outputs.temp_bucket }}
+      TF_VAR_public_bucket_name: ${{ needs.config.outputs.public_bucket }}
+      TF_VAR_archive_hostname: ${{ needs.config.outputs.archive_hostname }}
+      TF_VAR_archive_zone_id: ${{ needs.config.outputs.archive_zone_id }}
+      TF_VAR_archive_nosniff_rule: ${{ needs.config.outputs.archive_nosniff_rule }}
+      TF_VAR_supabase_organization_id: ${{ vars.SUPABASE_ORGANIZATION_ID }}
+      TF_VAR_supabase_project_ref: ${{ vars.SUPABASE_PROJECT_REF }}
+      TF_VAR_supabase_project_name: ${{ needs.config.outputs.supabase_project_name }}
+      TF_VAR_supabase_region: ${{ needs.config.outputs.supabase_region }}
+      TF_VAR_digitalocean_project_name: ${{ needs.config.outputs.digitalocean_project }}
+      TF_VAR_deploy_publisher: ${{ needs.config.outputs.deploy_publisher }}
+      TF_VAR_publisher_app_name: ${{ needs.config.outputs.publisher_app_name }}
+      TF_VAR_publisher_region: ${{ needs.config.outputs.publisher_region }}
+      TF_VAR_publisher_size: ${{ needs.config.outputs.publisher_size }}
+      TF_VAR_repository_clone_url: ${{ needs.config.outputs.repository_clone_url }}
+      TF_VAR_repository_branch: ${{ needs.config.outputs.repository_branch }}
+      TF_VAR_publisher_database_url: ${{ secrets.PUBLISHER_DATABASE_URL }}
+      TF_VAR_r2_access_key_id: ${{ secrets.R2_ACCESS_KEY_ID }}
+      TF_VAR_r2_secret_access_key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: terraform init
+        run: terraform -chdir=deploy init -input=false -lockfile=readonly
+
+      - name: terraform plan
+        # The human-readable plan is discarded: it can reveal values that
+        # providers do not mark sensitive. The summary step prints addresses,
+        # actions, and changed attribute names only.
+        run: terraform -chdir=deploy plan -input=false -lock-timeout=10m -no-color -out=tfplan > /dev/null
+
+      - name: Summarize planned changes
+        id: summary
+        run: |
+          set -euo pipefail
+          terraform -chdir=deploy show -json tfplan | jq -r '
+            ( ( .resource_changes // [] )[]
+              | select(.change.actions != ["no-op"] and .change.actions != ["read"])
+              | (.change.before // {}) as $b | (.change.after // {}) as $a
+              | "\(.change.actions | join("+"))\t\(.address)"
+                + ( if (.change.actions == ["update"])
+                    then "\tchanged: " + ([ (($b|keys) + ($a|keys)) | unique[] | select($b[.] != $a[.]) ] | join(","))
+                    else "" end ) ),
+            ( ( .output_changes // {} ) | to_entries[]
+              | select(.value.actions != ["no-op"])
+              | "\(.value.actions | join("+"))\toutput.\(.key)" )
+          ' | sort > "${RUNNER_TEMP}/changes.txt"
+          {
+            echo "### Terraform plan (${TF_WORKSPACE})"
+            echo
+            if [ -s "${RUNNER_TEMP}/changes.txt" ]; then
+              echo '```text'
+              cat "${RUNNER_TEMP}/changes.txt"
+              echo '```'
+            else
+              echo "No changes."
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          if grep -qE '(^|\+)delete' "${RUNNER_TEMP}/changes.txt"; then
+            echo "::warning::The plan deletes or replaces resources. Review it before applying."
+          fi
+          echo "sha256=$(sha256sum "${RUNNER_TEMP}/changes.txt" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Remove plan file
+        if: always()
+        run: rm -f deploy/tfplan
+
+  infrastructure-apply:
+    name: terraform apply (reviewed)
+    needs: [config, infrastructure-plan]
+    if: inputs.operation == 'infrastructure-apply' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    # Configure required reviewers on this environment. Reviewers approve
+    # after reading the "terraform plan" job summary of the same run.
+    environment: production
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+      TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE }}
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      TF_VAR_instance_url: ${{ needs.config.outputs.instance_url }}
+      TF_VAR_cloudflare_account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      TF_VAR_temp_bucket_name: ${{ needs.config.outputs.temp_bucket }}
+      TF_VAR_public_bucket_name: ${{ needs.config.outputs.public_bucket }}
+      TF_VAR_archive_hostname: ${{ needs.config.outputs.archive_hostname }}
+      TF_VAR_archive_zone_id: ${{ needs.config.outputs.archive_zone_id }}
+      TF_VAR_archive_nosniff_rule: ${{ needs.config.outputs.archive_nosniff_rule }}
+      TF_VAR_supabase_organization_id: ${{ vars.SUPABASE_ORGANIZATION_ID }}
+      TF_VAR_supabase_project_ref: ${{ vars.SUPABASE_PROJECT_REF }}
+      TF_VAR_supabase_project_name: ${{ needs.config.outputs.supabase_project_name }}
+      TF_VAR_supabase_region: ${{ needs.config.outputs.supabase_region }}
+      TF_VAR_digitalocean_project_name: ${{ needs.config.outputs.digitalocean_project }}
+      TF_VAR_deploy_publisher: ${{ needs.config.outputs.deploy_publisher }}
+      TF_VAR_publisher_app_name: ${{ needs.config.outputs.publisher_app_name }}
+      TF_VAR_publisher_region: ${{ needs.config.outputs.publisher_region }}
+      TF_VAR_publisher_size: ${{ needs.config.outputs.publisher_size }}
+      TF_VAR_repository_clone_url: ${{ needs.config.outputs.repository_clone_url }}
+      TF_VAR_repository_branch: ${{ needs.config.outputs.repository_branch }}
+      TF_VAR_publisher_database_url: ${{ secrets.PUBLISHER_DATABASE_URL }}
+      TF_VAR_r2_access_key_id: ${{ secrets.R2_ACCESS_KEY_ID }}
+      TF_VAR_r2_secret_access_key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      REVIEWED_SHA256: ${{ needs.infrastructure-plan.outputs.changes_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: terraform init
+        run: terraform -chdir=deploy init -input=false -lockfile=readonly
+
+      - name: terraform plan
+        run: terraform -chdir=deploy plan -input=false -lock-timeout=10m -no-color -out=tfplan > /dev/null
+
+      - name: Check the plan matches the reviewed plan
+        run: |
+          set -euo pipefail
+          terraform -chdir=deploy show -json tfplan | jq -r '
+            ( ( .resource_changes // [] )[]
+              | select(.change.actions != ["no-op"] and .change.actions != ["read"])
+              | (.change.before // {}) as $b | (.change.after // {}) as $a
+              | "\(.change.actions | join("+"))\t\(.address)"
+                + ( if (.change.actions == ["update"])
+                    then "\tchanged: " + ([ (($b|keys) + ($a|keys)) | unique[] | select($b[.] != $a[.]) ] | join(","))
+                    else "" end ) ),
+            ( ( .output_changes // {} ) | to_entries[]
+              | select(.value.actions != ["no-op"])
+              | "\(.value.actions | join("+"))\toutput.\(.key)" )
+          ' | sort > "${RUNNER_TEMP}/changes.txt"
+          {
+            echo "### Terraform apply (${TF_WORKSPACE})"
+            echo
+            if [ -s "${RUNNER_TEMP}/changes.txt" ]; then
+              echo '```text'
+              cat "${RUNNER_TEMP}/changes.txt"
+              echo '```'
+            else
+              echo "No changes."
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          actual="$(sha256sum "${RUNNER_TEMP}/changes.txt" | cut -d' ' -f1)"
+          if [ "$actual" != "$REVIEWED_SHA256" ]; then
+            echo "::error::The planned changes differ from the reviewed plan. Run infrastructure-apply again and review the new plan."
+            exit 1
+          fi
+
+      - name: terraform apply
+        run: terraform -chdir=deploy apply -input=false -lock-timeout=10m -no-color tfplan
+
+      - name: Remove plan file
+        if: always()
+        run: rm -f deploy/tfplan
+
+  # -------------------------------------------------------------------------
+  # Release: endpoints, migrations, publisher, website
+  # -------------------------------------------------------------------------
+  endpoints:
+    name: read deployment endpoints
+    needs: config
+    if: contains(fromJSON('["migrate", "publisher", "website", "release"]'), inputs.operation)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      archive_url: ${{ steps.read.outputs.archive_url }}
+      catalog_url: ${{ steps.read.outputs.catalog_url }}
+      publishing_api_url: ${{ steps.read.outputs.publishing_api_url }}
+      publisher_app_id: ${{ steps.read.outputs.publisher_app_id }}
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+      TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE }}
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: terraform init
+        run: terraform -chdir=deploy init -input=false -lockfile=readonly
+
+      - name: Read Terraform outputs (read-only)
+        id: read
+        env:
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+          SCI_ARCHIVE_URL: ${{ vars.SCI_ARCHIVE_URL }}
+          SCI_PUBLISHING_API_URL: ${{ vars.SCI_PUBLISHING_API_URL }}
+        run: |
+          set -euo pipefail
+          terraform -chdir=deploy output -no-color -json > "${RUNNER_TEMP}/outputs.json"
+          python3 - <<'PY'
+          import json
+          import os
+
+          path = os.path.join(os.environ["RUNNER_TEMP"], "outputs.json")
+          with open(path, encoding="utf-8") as fh:
+              raw = json.load(fh)
+          os.remove(path)
+
+          def tf(name):
+              entry = raw.get(name)
+              if not entry or entry.get("sensitive") or entry.get("value") is None:
+                  return ""
+              return str(entry["value"])
+
+          ref = os.environ["SUPABASE_PROJECT_REF"].strip()
+          values = {
+              # Repository variables override Terraform outputs when set.
+              "archive_url": os.environ.get("SCI_ARCHIVE_URL", "").strip() or tf("archive_url"),
+              "publishing_api_url": os.environ.get("SCI_PUBLISHING_API_URL", "").strip() or tf("publishing_api_url"),
+              "publisher_app_id": tf("publisher_app_id"),
+              "catalog_url": tf("catalog_url") or f"https://{ref}.supabase.co/rest/v1",
+          }
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              for key, val in values.items():
+                  print(f"{key}={val}", file=out)
+                  print(f"{key}: {val or '(unset)'}")
+          PY
+
+  migrate:
+    name: database migrations
+    needs: [config, test, endpoints]
+    if: >-
+      ${{ !cancelled()
+      && needs.config.result == 'success'
+      && needs.endpoints.result == 'success'
+      && (inputs.operation == 'migrate'
+          || (inputs.operation == 'release' && needs.test.result == 'success'))
+      && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install SCI with server extras
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[server]'
+
+      - name: Apply migrations through the Supabase session pooler
+        env:
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PUBLISHER_DATABASE_URL: ${{ secrets.PUBLISHER_DATABASE_URL }}
+          SCI_INSTANCE_URL: ${{ needs.config.outputs.instance_url }}
+          SCI_ARCHIVE_URL: ${{ needs.endpoints.outputs.archive_url }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+          import urllib.request
+          from urllib.parse import quote, unquote, urlsplit
+
+          def mask(value):
+              if value:
+                  print(f"::add-mask::{value}", flush=True)
+
+          ref = os.environ["SUPABASE_PROJECT_REF"].strip()
+          password = os.environ.get("SUPABASE_DB_PASSWORD", "")
+          if not password:
+              print("::error::Secret SUPABASE_DB_PASSWORD is not set.")
+              sys.exit(1)
+          mask(password)
+          mask(quote(password, safe=""))
+
+          # Session-mode pooler endpoint (IPv4; supports session advisory locks).
+          entries = []
+          try:
+              request = urllib.request.Request(
+                  f"https://api.supabase.com/v1/projects/{ref}/config/database/pooler",
+                  headers={
+                      "Authorization": f"Bearer {os.environ['SUPABASE_ACCESS_TOKEN']}",
+                      "Accept": "application/json",
+                      "User-Agent": "sci-deploy",
+                  },
+              )
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  entries = json.load(response)
+          except Exception as exc:  # noqa: BLE001 - fall back below
+              print(f"::warning::Could not read the pooler configuration ({type(exc).__name__}).")
+
+          host = port = user = None
+          database = "postgres"
+          primary = [e for e in entries if isinstance(e, dict)
+                     and e.get("database_type", "PRIMARY") == "PRIMARY" and e.get("db_host")]
+          primary.sort(key=lambda e: (e.get("pool_mode") != "session",
+                                      not str(e.get("db_host", "")).endswith(".pooler.supabase.com")))
+          if primary:
+              entry = primary[0]
+              # The template contains "[YOUR-PASSWORD]", so take only the user name from it.
+              template = entry.get("connection_string") or entry.get("connectionString") or ""
+              match = re.match(r"postgres(?:ql)?://([^:@/]+)[:@]", template)
+              host = entry["db_host"]
+              user = (match.group(1) if match else "") or entry.get("db_user") or f"postgres.{ref}"
+              database = entry.get("db_name") or database
+              # Supavisor serves session mode on 5432 and transaction mode on 6543.
+              port = int(entry.get("db_port") or 5432) if entry.get("pool_mode") == "session" else 5432
+              if host.endswith(".pooler.supabase.com") and "." not in user:
+                  user = f"{user}.{ref}"
+          else:
+              print("::warning::No pooler endpoint found; using the direct connection (IPv6 only on most plans).")
+              host, port, user = f"db.{ref}.supabase.co", 5432, "postgres"
+
+          dsn = (f"postgresql://{quote(user, safe='')}:{quote(password, safe='')}@{host}:{port}/"
+                 f"{quote(database, safe='')}?sslmode=require&application_name=sci-migrate")
+          mask(dsn)
+          print(f"Admin connection: {user}@{host}:{port}/{database} (sslmode=require)")
+
+          env = dict(os.environ)
+          for name in ("SUPABASE_ACCESS_TOKEN", "SUPABASE_DB_PASSWORD", "PUBLISHER_DATABASE_URL"):
+              env.pop(name, None)
+          env["SCI_ADMIN_DATABASE_URL"] = dsn
+
+          publisher_url = os.environ.get("PUBLISHER_DATABASE_URL", "")
+          if publisher_url:
+              mask(publisher_url)
+              parsed = urlsplit(publisher_url)
+              publisher_password = unquote(parsed.password or "")
+              mask(parsed.password)
+              mask(publisher_password)
+              if publisher_password:
+                  env["SCI_PUBLISHER_DB_PASSWORD"] = publisher_password
+              if parsed.port == 6543:
+                  print("::warning::PUBLISHER_DATABASE_URL uses port 6543 (transaction pooler); "
+                        "the publisher needs the session pooler (port 5432).")
+              if not (parsed.username or "").startswith("sci_publisher"):
+                  print("::warning::PUBLISHER_DATABASE_URL does not use the sci_publisher role.")
+          else:
+              print("PUBLISHER_DATABASE_URL is not set; the sci_publisher login password is left unchanged.")
+
+          result = subprocess.run([sys.executable, "-m", "server.database", "migrate"], env=env, check=False)
+          sys.exit(result.returncode)
+          PY
+
+  publisher:
+    name: publisher release
+    needs: [config, endpoints, migrate]
+    if: >-
+      ${{ !cancelled()
+      && needs.config.result == 'success'
+      && needs.endpoints.result == 'success'
+      && (inputs.operation == 'publisher'
+          || (inputs.operation == 'release' && needs.migrate.result == 'success'))
+      && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Deploy the App Platform app and wait until it is active
+        env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+          APP_ID: ${{ needs.endpoints.outputs.publisher_app_id }}
+          APP_NAME: ${{ needs.config.outputs.publisher_app_name }}
+          PUBLISHING_API_URL: ${{ needs.endpoints.outputs.publishing_api_url }}
+        run: |
+          set -euo pipefail
+          api="https://api.digitalocean.com/v2"
+          do_api() {
+            curl -fsS --retry 3 --retry-all-errors -H "Authorization: Bearer ${DIGITALOCEAN_TOKEN}" "$@"
+          }
+
+          if [ -z "${APP_ID}" ]; then
+            APP_ID="$(do_api "${api}/apps?per_page=200" \
+              | jq -r --arg name "${APP_NAME}" '[.apps[]? | select(.spec.name == $name) | .id][0] // empty')"
+          fi
+          if [ -z "${APP_ID}" ]; then
+            echo "::error::App Platform app ${APP_NAME} not found. Apply infrastructure with SCI_DEPLOY_PUBLISHER=true first."
+            exit 1
+          fi
+
+          # No retries here: a retried POST could start a second deployment.
+          deployment="$(curl -fsS -X POST -H "Authorization: Bearer ${DIGITALOCEAN_TOKEN}" \
+            -H "Content-Type: application/json" -d '{"force_build":true}' \
+            "${api}/apps/${APP_ID}/deployments" | jq -r '.deployment.id // empty')"
+          if [ -z "${deployment}" ]; then
+            echo "::error::Could not create an App Platform deployment."
+            exit 1
+          fi
+          echo "App ${APP_ID}: deployment ${deployment} started."
+
+          deadline=$((SECONDS + 2400))
+          while :; do
+            body="$(do_api "${api}/apps/${APP_ID}/deployments/${deployment}")"
+            phase="$(jq -r '.deployment.phase' <<<"${body}")"
+            steps="$(jq -r '"\(.deployment.progress.success_steps // 0)/\(.deployment.progress.total_steps // 0)"' <<<"${body}")"
+            echo "phase=${phase} steps=${steps}"
+            case "${phase}" in
+              ACTIVE) break ;;
+              ERROR|CANCELED|SUPERSEDED)
+                echo "::error::Deployment ${deployment} ended in phase ${phase}. See the App Platform build and deploy logs."
+                exit 1 ;;
+            esac
+            if [ "${SECONDS}" -ge "${deadline}" ]; then
+              echo "::error::Deployment ${deployment} did not become ACTIVE in time."
+              exit 1
+            fi
+            sleep 15
+          done
+
+          commit="$(jq -r '[.deployment.services[]?.source_commit_hash // empty][0] // empty' <<<"${body}")"
+          if [ -n "${commit}" ] && [ "${commit}" != "${GITHUB_SHA}" ]; then
+            echo "::warning::App Platform built ${commit} (branch head), but this workflow ran at ${GITHUB_SHA}."
+          fi
+
+          url="${PUBLISHING_API_URL:-$(do_api "${api}/apps/${APP_ID}" | jq -r '.app.live_url // empty')}"
+          case "${url}" in
+            https://*) ;;
+            *) echo "::error::Publisher URL is not https: '${url}'"; exit 1 ;;
+          esac
+          echo "PUBLISHER_URL=${url%/}" >> "$GITHUB_ENV"
+
+      - name: Check publisher health
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 20); do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "${PUBLISHER_URL}/health" || true)"
+            echo "attempt ${attempt}: GET ${PUBLISHER_URL}/health -> ${code}"
+            if [ "${code}" = "200" ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::${PUBLISHER_URL}/health did not return 200."
+          exit 1
+
+  website:
+    name: website release
+    needs: [config, endpoints, publisher]
+    if: >-
+      ${{ !cancelled()
+      && needs.config.result == 'success'
+      && needs.endpoints.result == 'success'
+      && (inputs.operation == 'website'
+          || (inputs.operation == 'release' && needs.publisher.result == 'success'))
+      && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Build site and sci-server.json
+        env:
+          INSTANCE_URL: ${{ needs.config.outputs.instance_url }}
+          ARCHIVE_URL: ${{ needs.endpoints.outputs.archive_url }}
+          CATALOG_URL: ${{ needs.endpoints.outputs.catalog_url }}
+          PUBLISHING_API_URL: ${{ needs.endpoints.outputs.publishing_api_url }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+          # Only needed to look up the publishable key when the variable is unset.
+          SUPABASE_ACCESS_TOKEN: ${{ vars.SUPABASE_PUBLISHABLE_KEY == '' && secrets.SUPABASE_ACCESS_TOKEN || '' }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          import pathlib
+          import re
+          import shutil
+          import sys
+          import urllib.request
+          from urllib.parse import urlsplit
+
+          env = os.environ
+          errors = []
+
+          def https_url(name, value):
+              value = (value or "").strip()
+              parts = urlsplit(value)
+              if (parts.scheme != "https" or not parts.hostname or parts.username or parts.password
+                      or parts.query or parts.fragment):
+                  errors.append(f"{name} must be an absolute https URL without credentials, query, "
+                                f"or fragment; got {value!r}.")
+              return value
+
+          instance_url = https_url("instance URL", env["INSTANCE_URL"])
+          descriptor = {
+              "schema_version": 1,
+              "publishing_api_url": https_url(
+                  "publishing_api_url (Terraform output or SCI_PUBLISHING_API_URL)",
+                  env.get("PUBLISHING_API_URL", "")).rstrip("/"),
+              "catalog_url": https_url("catalog_url", env["CATALOG_URL"]).rstrip("/"),
+              "catalog_schema": "catalog_v1",
+              "archive_url": https_url("archive_url (Terraform output or SCI_ARCHIVE_URL)",
+                                       env.get("ARCHIVE_URL", "")).rstrip("/"),
+          }
+          if not descriptor["archive_url"].endswith("/publications"):
+              errors.append("archive_url must end at the publications/ base path.")
+
+          key = env.get("SUPABASE_PUBLISHABLE_KEY", "").strip()
+          if not key:
+              try:
+                  request = urllib.request.Request(
+                      f"https://api.supabase.com/v1/projects/{env['SUPABASE_PROJECT_REF']}/api-keys?reveal=false",
+                      headers={"Authorization": f"Bearer {env['SUPABASE_ACCESS_TOKEN']}",
+                               "Accept": "application/json", "User-Agent": "sci-deploy"},
+                  )
+                  with urllib.request.urlopen(request, timeout=30) as response:
+                      keys = json.load(response)
+              except Exception as exc:  # noqa: BLE001
+                  print(f"::error::Could not list Supabase API keys ({type(exc).__name__}). "
+                        "Set the SUPABASE_PUBLISHABLE_KEY repository variable.")
+                  sys.exit(1)
+              publishable = [k for k in keys if k.get("type") == "publishable" and k.get("api_key")]
+              legacy_anon = [k for k in keys if k.get("type") == "legacy" and k.get("name") == "anon"
+                             and k.get("api_key")]
+              chosen = (publishable or legacy_anon or [{}])[0]
+              key = chosen.get("api_key") or ""
+
+          # Accept only a publishable key or a legacy anon JWT; never a secret key.
+          valid = bool(re.fullmatch(r"sb_publishable_[A-Za-z0-9_-]+", key))
+          if not valid and re.fullmatch(r"[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+", key):
+              try:
+                  payload = key.split(".")[1]
+                  claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
+                  valid = claims.get("role") == "anon"
+              except ValueError:
+                  valid = False
+          if not valid:
+              errors.append("No usable Supabase publishable key (expected sb_publishable_... or the legacy anon key).")
+          descriptor["supabase_publishable_key"] = key
+
+          source = pathlib.Path("web")
+          for required in ("index.html", "publication/index.html"):
+              if not (source / required).is_file():
+                  errors.append(f"web/{required} is missing.")
+
+          for message in errors:
+              print(f"::error::{message}")
+          if errors:
+              sys.exit(1)
+
+          site = pathlib.Path("_site")
+          shutil.rmtree(site, ignore_errors=True)
+          shutil.copytree(source, site)
+          shutil.copyfile("sci/categories.json", site / "categories.json")
+          text = json.dumps(descriptor, indent=2) + "\n"
+          (site / "sci-server.json").write_text(text, encoding="utf-8")
+          print(text)
+          print(f"Site for {instance_url} built in _site/.")
+          PY
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Check the published site
+        env:
+          INSTANCE_URL: ${{ needs.config.outputs.instance_url }}
+        run: |
+          set -euo pipefail
+          base="${INSTANCE_URL%/}/"
+          for attempt in $(seq 1 30); do
+            if curl -fsS --max-time 15 -o "${RUNNER_TEMP}/sci-server.json" "${base}sci-server.json?v=${GITHUB_RUN_ID}" \
+              && python3 -c 'import json, sys; sys.exit(json.load(open(sys.argv[1])) != json.load(open(sys.argv[2])))' \
+                "${RUNNER_TEMP}/sci-server.json" _site/sci-server.json; then
+              echo "Descriptor at ${base}sci-server.json matches this release."
+              break
+            fi
+            if [ "${attempt}" = 30 ]; then
+              echo "::error::${base}sci-server.json is missing or differs from this release."
+              exit 1
+            fi
+            sleep 10
+          done
+          curl -fsS --max-time 15 -o /dev/null "${base}?v=${GITHUB_RUN_ID}"
+          curl -fsS --max-time 15 -o /dev/null "${base}index.html?v=${GITHUB_RUN_ID}"
+          curl -fsS --max-time 15 -o /dev/null "${base}publication/?v=${GITHUB_RUN_ID}"
+          echo "index.html and publication/ are reachable at ${base}."

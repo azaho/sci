@@ -1,0 +1,32 @@
+Bundled browser libraries for the SCI website. Files are byte-for-byte copies
+from the npm registry tarballs listed below; do not edit them. To update,
+download the new tarball, copy the same dist file, and refresh this record.
+
+markdown-it
+  version: 15.0.3
+  source:  https://registry.npmjs.org/markdown-it/-/markdown-it-15.0.3.tgz
+           (package/dist/browser/markdown-it.umd.min.js; also
+           https://cdn.jsdelivr.net/npm/markdown-it@15.0.3/dist/browser/markdown-it.umd.min.js)
+  file:    markdown-it.min.js
+  sha256:  391f2aa638e75e6c7859d0a5c5650ef0956722a45998f17e05b83bc655778e1e
+  license: MIT (markdown-it.LICENSE, which also carries the licenses of the
+           bundled entities, linkify-it, mdurl, punycode.js, and uc.micro)
+  tarball sha256: 98a7453983ab0e268c17dbd5260bf7190ba46b4cca912327fc1c1a2578e4b56d
+
+dompurify
+  version: 3.4.17
+  source:  https://registry.npmjs.org/dompurify/-/dompurify-3.4.17.tgz
+           (package/dist/purify.min.js; also
+           https://cdn.jsdelivr.net/npm/dompurify@3.4.17/dist/purify.min.js)
+  file:    purify.min.js
+  sha256:  cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31
+  license: Apache-2.0 OR MPL-2.0 (dompurify.LICENSE contains both texts)
+  tarball sha256: 056cbdae276897208b88c21d1d779adfa09ad7be488a2f510a28e900d3bbffe7
+
+License files:
+  markdown-it.LICENSE  sha256: e01e3064c9c163e4b8deb3e167032f40f21443c01de5e5bbb999a5c771498cb1
+  dompurify.LICENSE    sha256: f6868f1111d60938ab548b05f5393a3c651a6c8b61617826e53ef8cf013d19ea
+
+The minified files end with a sourceMappingURL comment; the .map files are not
+bundled, so browser developer tools may report a missing source map. This does
+not affect rendering.

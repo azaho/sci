@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https: http://localhost:* http://127.0.0.1:*; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<title>sci · publication</title>
+<link rel="stylesheet" href="../style.css">
+<script src="../vendor/markdown-it.min.js" defer></script>
+<script src="../vendor/purify.min.js" defer></script>
+<script src="../app.js" defer></script>
+</head>
+<body class="publication-page">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="brand" href="../">sci</a>
+  <nav class="site-nav" aria-label="Site">
+    <a href="../">Publications</a>
+    <a href="../#using-sci">Find and publish</a>
+    <a href="../#publishing-terms">Publishing terms</a>
+  </nav>
+  <span id="instance" class="pill" role="status">Connecting…</span>
+</header>
+
+<main id="main">
+  <a class="back" href="../">← All publications</a>
+  <p id="pub-status" class="status" role="status" aria-live="polite">Loading publication…</p>
+
+  <article id="publication" hidden>
+    <header class="pub-head">
+      <ul id="pub-categories" class="chips" aria-label="Categories, primary first"></ul>
+      <h1 id="pub-title"></h1>
+      <p id="pub-abstract" class="abstract"></p>
+      <ul id="pub-keywords" class="keywords" aria-label="Keywords"></ul>
+      <dl class="meta">
+        <dt>Publisher</dt><dd id="pub-publisher"></dd>
+        <dt>Created (author's claim)</dt><dd id="pub-created"></dd>
+        <dt>Accepted by this instance</dt><dd id="pub-accepted"></dd>
+        <dt>UUID</dt><dd><code id="pub-uuid"></code></dd>
+      </dl>
+    </header>
+
+    <div id="figure-slot"></div>
+
+    <div class="pub-grid">
+      <div class="pub-main">
+        <section aria-labelledby="readme-h">
+          <h2 id="readme-h" class="visually-hidden">Main text</h2>
+          <p id="readme-status" class="status" role="status" aria-live="polite">Loading main text…</p>
+          <div id="readme" class="readme"></div>
+        </section>
+
+        <section class="block" aria-labelledby="refs-h">
+          <h2 id="refs-h">References</h2>
+          <p id="refs-status" class="status" role="status" aria-live="polite">Loading references…</p>
+          <ol id="refs" class="cites"></ol>
+        </section>
+
+        <section class="block" aria-labelledby="citedby-h">
+          <h2 id="citedby-h">Cited by <span id="citedby-count" class="count"></span></h2>
+          <p id="citedby-status" class="status" role="status" aria-live="polite">Loading incoming citations…</p>
+          <ol id="citedby" class="cites"></ol>
+        </section>
+      </div>
+
+      <aside class="pub-side">
+        <section aria-labelledby="downloads-h">
+          <h2 id="downloads-h">Downloads</h2>
+          <div id="downloads"></div>
+          <p class="license-line">Text, figures, and data: CC BY 4.0 · Code: MIT<br><span id="license-slot"></span><a href="../#publishing-terms">Publishing terms</a></p>
+        </section>
+
+        <section id="listing" aria-labelledby="listing-h" hidden>
+          <h2 id="listing-h">Publisher-provided file listing</h2>
+          <p class="sub">First two levels</p>
+          <ul id="tree" class="tree" hidden></ul>
+          <p id="tree-omitted" class="small" hidden>More entries omitted</p>
+          <p id="tree-unavailable" class="small" hidden>File listing unavailable</p>
+          <p class="small">Supplied by the publisher in the signed manifest. The ZIP is offered only as a whole download.</p>
+        </section>
+
+        <section aria-labelledby="verify-h">
+          <h2 id="verify-h">Signature and verification</h2>
+          <dl class="kv">
+            <dt>Signature</dt><dd>Ed25519, detached, over <code>manifest.json</code></dd>
+            <dt>Public key (base64url)</dt><dd><code id="pub-key"></code></dd>
+            <dt>Fingerprint</dt><dd><code id="pub-fp"></code></dd>
+            <dt>Manifest SHA-256</dt><dd><code id="pub-manifest"></code></dd>
+          </dl>
+          <p class="note">This page shows what this instance recorded when it verified the signature and every file at acceptance time; your browser does not check signatures. To verify the complete publication yourself, run:</p>
+          <pre id="pull-cmd">sci pull UUID</pre>
+          <p class="small">Original files</p>
+          <ul id="originals" class="originals"></ul>
+        </section>
+      </aside>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <a href="../#publishing-terms">Publishing terms</a>
+  <a href="../sci-server.json">Instance descriptor</a>
+  <span>Static site · catalog read directly from this instance's public API</span>
+</footer>
+</body>
+</html>

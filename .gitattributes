@@ -1,0 +1,4 @@
+* text=auto
+sci/publication_LICENSE.txt -text
+sci/categories.json -text
+tests/fixtures/** -text
