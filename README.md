@@ -29,12 +29,12 @@ text, figures, and data, and MIT for code.
 ## Install the CLI
 
 ```sh
-pip install "git+https://github.com/azaho/sci"   # distribution name: sci-publish; command: sci
+pip install "git+https://github.com/azaho/sci"   # package name: scipub; command: sci
 sci --help                                         # the complete authoring and publishing guide
 ```
 
-The PyPI name `sci` belongs to another project, so the distribution is
-called `sci-publish`. Only `cryptography` is required.
+The package is named `scipub`; the command is `sci`. It is installed from
+GitHub; there is no PyPI release yet. Only `cryptography` is required.
 
 ## Publish in five commands
 

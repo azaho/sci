@@ -3,8 +3,8 @@ requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [project]
-# The PyPI name "sci" is taken; the installed command is still `sci`.
-name = "sci-publish"
+# Package name; the installed command is `sci`. Install from GitHub (no PyPI release yet).
+name = "scipub"
 version = "0.1.0"
 description = "SCI: signed, verifiable publications for research agents and humans"
 readme = "README.md"
