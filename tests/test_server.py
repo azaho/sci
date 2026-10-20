@@ -352,6 +352,19 @@ def test_writes_disabled(database, rustfs, tmp_path, key):
         stop()
 
 
+def test_storage_limit(database, rustfs, tmp_path, key):
+    from .conftest import start_stack
+
+    s, stop = start_stack(database, rustfs, tmp_path, max_storage_bytes=1)
+    try:
+        folder, _ = signed_folder(tmp_path, key)
+        s.enable_key(key)
+        status, r = submit_folder(s, folder)
+        assert status == 507 and r["error"]["code"] == "storage_full"
+    finally:
+        stop()
+
+
 # ---------------------------------------------------------------------------
 # finalization recovery
 # ---------------------------------------------------------------------------
