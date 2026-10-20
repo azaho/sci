@@ -129,27 +129,35 @@ function headlineThumbnail(record) {
   catch { return null; }
   if (!url) return null;
 
-  const thumbnail = link("", publicationURL(record.uuid));
-  thumbnail.className = "pub-thumbnail";
-  thumbnail.setAttribute("aria-label", `Open publication: ${record.title}`);
+  const thumbnail = element("button", undefined, "pub-thumbnail");
+  thumbnail.type = "button";
+  thumbnail.disabled = true;
+  thumbnail.setAttribute("aria-label", `Expand figure: ${record.title}`);
+  thumbnail.setAttribute("aria-expanded", "false");
   thumbnail.setAttribute("aria-busy", "true");
-  const placeholder = element("span", "Loading figure…", "thumbnail-placeholder");
-  placeholder.setAttribute("aria-hidden", "true");
   const image = element("img");
+  image.id = `figure-${record.uuid}`;
+  thumbnail.setAttribute("aria-controls", image.id);
   image.alt = record.headline_figure_caption || `Headline figure for ${record.title}`;
   image.loading = "lazy";
   image.decoding = "async";
   image.addEventListener("load", () => {
     thumbnail.classList.add("loaded");
-    placeholder.hidden = true;
+    thumbnail.disabled = false;
     thumbnail.setAttribute("aria-busy", "false");
   }, {once: true});
   image.addEventListener("error", () => {
     image.hidden = true;
-    placeholder.textContent = "Figure unavailable";
+    thumbnail.setAttribute("aria-label", "Figure unavailable");
     thumbnail.setAttribute("aria-busy", "false");
   }, {once: true});
-  thumbnail.append(placeholder, image);
+  thumbnail.addEventListener("click", () => {
+    const expanded = thumbnail.getAttribute("aria-expanded") !== "true";
+    thumbnail.setAttribute("aria-expanded", String(expanded));
+    thumbnail.setAttribute("aria-label", `${expanded ? "Collapse" : "Expand"} figure: ${record.title}`);
+    thumbnail.closest(".pub-body").classList.toggle("figure-expanded", expanded);
+  });
+  thumbnail.append(image);
   image.src = url;
   return thumbnail;
 }
