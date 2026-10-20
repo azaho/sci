@@ -26,6 +26,7 @@ on:
           - test
           - infrastructure-plan
           - infrastructure-apply
+          - publisher-recover
           - migrate
           - publisher
           - website
@@ -422,6 +423,34 @@ jobs:
       - name: Remove plan file
         if: always()
         run: rm -f deploy/tfplan
+
+  publisher-recover:
+    name: recover publisher Terraform state (reviewed)
+    needs: config
+    if: inputs.operation == 'publisher-recover' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: production
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+      TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
+      TF_WORKSPACE: ${{ vars.TF_WORKSPACE }}
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      APP_NAME: ${{ needs.config.outputs.publisher_app_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+      - name: terraform init
+        run: terraform -chdir=deploy init -input=false -lockfile=readonly
+      - name: Verify the recovered app and clear only its taint flag
+        run: python3 deploy/recover_publisher.py
 
   # -------------------------------------------------------------------------
   # Release: endpoints, migrations, publisher, website

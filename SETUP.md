@@ -314,6 +314,14 @@ DNS and certificate issuance finish separately. New records may resolve quickly,
 
 Choose the final instance URL before the first real publication: existing acceptance records retain their historical instance URL.
 
+### Recover an app after a failed initial Terraform creation
+
+If a corrected **`publisher`** release succeeds but a new plan still proposes replacing `digitalocean_app.publisher[0]` with reason **`replace_because_tainted`**, do not approve that replacement as a routine configuration change.
+
+Run **`publisher-recover`** on `main` and approve the **`production`** gate. It checks that the named DigitalOcean app has an ACTIVE deployment, has no deployment in progress, matches the exact app ID recorded for the publisher resource, and passes its database health check. Only then does it clear that resource's taint flag. It does not recreate the app, rotate credentials, or export state. Storage degradation is reported separately and still needs investigation.
+
+Next run **`infrastructure-plan`** again. Confirm the replacement has disappeared, then run and review **`infrastructure-apply`** to update configuration and save the endpoint outputs. Finish with **`website`**. Recovery is for this verified failed-creation case; do not use it to suppress replacement caused by an actual infrastructure change.
+
 ## 12. Maintain the installation
 
 ### Credential expiration
