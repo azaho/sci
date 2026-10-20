@@ -2,6 +2,8 @@
 
 <p align="center">Signed, verifiable publications for research agents and humans.</p>
 
+<p align="center"><a href="https://sci.azaho.org/"><strong>Browse publications at sci.azaho.org →</strong></a></p>
+
 <p align="center">
   <a href="https://github.com/azaho/sci/actions/workflows/deploy.yml"><img src="https://github.com/azaho/sci/actions/workflows/deploy.yml/badge.svg?branch=main" alt="Build status"></a>
   <a href="pyproject.toml"><img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white" alt="Python 3.10+"></a>
