@@ -37,6 +37,53 @@ function link(label, url) {
   return node;
 }
 
+function abstractExcerpt(text) {
+  const words = text.split(" ");
+  if (words.length <= 60) return text;
+
+  let best = null;
+  let wordCount = 0;
+  const sentences = new Intl.Segmenter("en", {granularity: "sentence"}).segment(text);
+  for (const {segment, index} of sentences) {
+    const sentence = segment.trim();
+    wordCount += sentence.split(/\s+/).length;
+    if (wordCount > 80) break;
+    if (wordCount >= 40 && /[.!?]["'”’)\]]*$/.test(sentence) &&
+        (!best || Math.abs(wordCount - 60) < best.distance)) {
+      best = {end: index + segment.trimEnd().length, distance: Math.abs(wordCount - 60)};
+    }
+  }
+  return best ? text.slice(0, best.end) : words.slice(0, 60).join(" ").replace(/[.,;:!?…–—-]+$/, "");
+}
+
+function abstractPreview(abstract, uuid) {
+  const text = abstract.replace(/\s+/g, " ").trim();
+  const excerpt = abstractExcerpt(text);
+  const summary = element("p", undefined, "summary");
+  const content = element("span", text);
+  content.id = `abstract-${uuid}`;
+  summary.append(content);
+  if (excerpt === text) return summary;
+
+  content.textContent = excerpt;
+  const toggle = element("button", "[…]", "abstract-toggle");
+  toggle.type = "button";
+  toggle.title = "Show full abstract";
+  toggle.setAttribute("aria-label", toggle.title);
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.setAttribute("aria-controls", content.id);
+  toggle.addEventListener("click", () => {
+    const expanded = toggle.getAttribute("aria-expanded") !== "true";
+    content.textContent = expanded ? text : excerpt;
+    toggle.textContent = expanded ? "[less]" : "[…]";
+    toggle.title = expanded ? "Collapse abstract" : "Show full abstract";
+    toggle.setAttribute("aria-label", toggle.title);
+    toggle.setAttribute("aria-expanded", String(expanded));
+  });
+  summary.append(" ", toggle);
+  return summary;
+}
+
 function showError(error) {
   $("problem").textContent = error instanceof Error ? error.message : String(error);
   $("problem").hidden = false;
@@ -74,6 +121,45 @@ function dateLabel(value) {
   return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat(undefined, {
     year: "numeric", month: "short", day: "numeric", timeZone: "UTC",
   }).format(date);
+}
+
+function headlineThumbnail(record) {
+  let url;
+  try { url = objectURL(record, "headline_figure.png"); }
+  catch { return null; }
+  if (!url) return null;
+
+  const thumbnail = element("button", undefined, "pub-thumbnail");
+  thumbnail.type = "button";
+  thumbnail.disabled = true;
+  thumbnail.setAttribute("aria-label", `Expand figure: ${record.title}`);
+  thumbnail.setAttribute("aria-expanded", "false");
+  thumbnail.setAttribute("aria-busy", "true");
+  const image = element("img");
+  image.id = `figure-${record.uuid}`;
+  thumbnail.setAttribute("aria-controls", image.id);
+  image.alt = record.headline_figure_caption || `Headline figure for ${record.title}`;
+  image.loading = "lazy";
+  image.decoding = "async";
+  image.addEventListener("load", () => {
+    thumbnail.classList.add("loaded");
+    thumbnail.disabled = false;
+    thumbnail.setAttribute("aria-busy", "false");
+  }, {once: true});
+  image.addEventListener("error", () => {
+    image.hidden = true;
+    thumbnail.setAttribute("aria-label", "Figure unavailable");
+    thumbnail.setAttribute("aria-busy", "false");
+  }, {once: true});
+  thumbnail.addEventListener("click", () => {
+    const expanded = thumbnail.getAttribute("aria-expanded") !== "true";
+    thumbnail.setAttribute("aria-expanded", String(expanded));
+    thumbnail.setAttribute("aria-label", `${expanded ? "Collapse" : "Expand"} figure: ${record.title}`);
+    thumbnail.closest(".pub-body").classList.toggle("figure-expanded", expanded);
+  });
+  thumbnail.append(image);
+  image.src = url;
+  return thumbnail;
 }
 
 async function feed() {
@@ -118,7 +204,7 @@ async function feed() {
         throw new Error("Use the full publisher fingerprint: ed25519: followed by 64 lowercase hex characters.");
       }
       const query = {
-        select: "uuid,title,abstract,categories,author_fingerprint,accepted_at",
+        select: "uuid,title,abstract,categories,author_fingerprint,accepted_at,objects,headline_figure_caption",
         order: "accepted_at.desc,uuid.desc", limit: 20,
       };
       if (search) query.search_document = `wfts(english).${search}`;
@@ -133,25 +219,31 @@ async function feed() {
         seen.add(row.uuid);
         count++;
         const article = element("article", undefined, "pub");
-        article.append(categoryNodes(row.categories));
         const title = link(row.title, publicationURL(row.uuid));
         title.className = "title";
-        article.append(title, element("p", row.abstract, "summary"));
         const details = element("div", undefined, "pub-meta");
-        details.append(element("span", `Accepted ${dateLabel(row.accepted_at)}`));
+        details.append(element("span", dateLabel(row.accepted_at)));
         const publisherURL = new URL(base);
         publisherURL.searchParams.set("publisher", row.author_fingerprint);
         const identity = link(`${row.author_fingerprint.slice(0, 24)}…`, publisherURL.href);
         identity.className = "identity";
         identity.title = row.author_fingerprint;
         details.append(identity);
-        article.append(details);
+        const body = element("div", undefined, "pub-body");
+        const text = element("div", undefined, "pub-text");
+        text.append(details, abstractPreview(row.abstract, row.uuid), categoryNodes(row.categories));
+        body.append(text);
+        const thumbnail = headlineThumbnail(row);
+        if (thumbnail) {
+          body.classList.add("with-figure");
+          body.append(thumbnail);
+        }
+        article.append(title, body);
         $("publications").append(article);
       }
       if (!count) $("publications").append(element("p", "No publications match these filters.", "empty"));
       if (rows.length) last = rows.at(-1);
       $("more").hidden = rows.length < 20;
-      $("result-note").textContent = count ? `· ${count} shown` : "";
       const url = new URL(base);
       if (search) url.searchParams.set("q", search);
       if (category) url.searchParams.set("category", category);
@@ -168,7 +260,6 @@ async function feed() {
   }
   $("filters").addEventListener("submit", (event) => {event.preventDefault(); load();});
   $("category").addEventListener("change", () => load());
-  $("refresh").addEventListener("click", () => load());
   $("more").addEventListener("click", () => load(false));
   await load();
 }
@@ -367,12 +458,9 @@ async function start() {
     categories = new Map(taxonomy.categories.map(item => [item.code, {...item, group: groupLabels.get(item.group) || item.group}]));
   } catch { /* Historical category codes remain readable if labels are unavailable. */ }
   await (page === "publication" ? publication() : feed());
-  $("connection").textContent = "Public catalog";
-  $("connection").classList.add("ready");
 }
 
 start().catch(error => {
-  $("connection").textContent = "Catalog unavailable";
   if (page === "feed") $("publications").replaceChildren();
   showError(error);
 });
