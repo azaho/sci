@@ -281,13 +281,46 @@ These values also enter Terraform state, so restrict HCP state access. A success
 5. Run **`infrastructure-apply`**, review that run's plan summary, and approve **`production`**. Wait for App Platform's initial build and deployment to succeed, then check the publisher's `/health` endpoint. Leave `SCI_DEPLOY_PUBLISHER=true` afterward; setting it back to `false` would propose deleting the app on the next apply.
 6. Run **`website`** to publish `web/` and the generated `sci-server.json` through GitHub Pages. For subsequent deployments, **`publisher`** rebuilds the app; **`release`** runs the combined test, migration, publisher, and website sequence after infrastructure exists.
 7. Check that the descriptor contains the actual HTTPS publisher, catalog, and archive URLs, `catalog_schema`, `schema_version`, and the public `supabase_publishable_key`. Its `archive_url` must end at the `publications/` base path. Include no private credentials.
-8. For production archive delivery, connect a custom domain as described in [README.md](README.md#first-deployment-bootstrap-order), apply the configuration, and rerun **`website`**. A dashboard-connected domain uses `SCI_ARCHIVE_HOSTNAME` with `SCI_ARCHIVE_ZONE_ID` empty. Managing the zone through Terraform requires additional scoped permissions.
+8. For production archive delivery, connect a custom domain using the procedure below, apply the configuration, and rerun **`website`**.
 9. Keep the author's signing private key on the author's machine. Enable only the author's public key using the whitelist administration helpers in the Supabase SQL editor.
 10. Test HTTPS, CORS, catalog permissions, and archive delivery. Run sign → verify → push → browse → pull against the live instance and compare exact signed bytes. This is where the runtime credentials and their actual permissions are exercised.
 11. Complete [TEST_PLAN.md](TEST_PLAN.md), including real R2 upload-size enforcement, conditional copies, interrupted finalization, whitelist enforcement, backup restoration, archive recovery, and preservation across redeployment. Resolve the upload-handler versus limited-pilot choice in `DESIGN.md` if real R2 does not enforce the intended upload cap.
 12. Import existing research only after those checks pass and the import-attestation format is defined.
 
 Test public reads while the publisher is stopped. Test pulling a known publication with the catalog unavailable. Neither case should depend on private deployment credentials.
+
+### Custom domains while keeping GitHub Pages
+
+You can use `sci.example.org` for the website and `archive.sci.example.org` for R2 without migrating website hosting. A personal site at `example.org` can remain on its existing host. Keep this repository public under the setup described here.
+
+1. In the repository's **Settings → Pages**, save `sci.example.org` as the custom domain **before** adding its DNS record. Keep the source set to **GitHub Actions**.
+2. In Cloudflare's existing zone, add a **CNAME** named `sci` targeting `<owner>.github.io`, with **DNS only** and **TTL Auto**. The target has no repository path. Leave the personal site's apex and `www` records unchanged. This serves the website directly from GitHub Pages; Cloudflare manages its DNS.
+3. In **R2 → publication bucket → Settings → Custom Domains → Add**, enter `archive.sci.example.org`, select minimum TLS **1.2**, and connect it. Cloudflare creates the bucket's DNS record. Never connect a public domain to the temporary bucket.
+4. Wait for the archive domain to become **Active**, then verify HTTPS independently. A missing object can return HTTP 404; certificate or handshake errors mean it is not ready. Later, verify a real publication can be downloaded.
+5. Set these GitHub Actions repository **variables**:
+
+   | Variable | Value |
+   | --- | --- |
+   | `SCI_INSTANCE_URL` | `https://sci.example.org/` |
+   | `SCI_ARCHIVE_HOSTNAME` | `archive.sci.example.org` |
+   | `SCI_ARCHIVE_ZONE_ID` | Leave unset for this dashboard-managed domain. |
+
+   The dashboard procedure needs no new Actions secret or broader Cloudflare API token. Leave optional endpoint overrides unset unless intentionally overriding Terraform's outputs.
+6. Run **`infrastructure-apply`** and inspect its plan before approving **`production`**. This updates publisher configuration and archive outputs, and disables the development `r2.dev` endpoint. Domain changes should not require replacing the publisher app. If a replacement appears, investigate the reported reason first. An earlier failed creation can leave an app marked as tainted even after a later publisher release succeeds; resolve that state before treating the plan as a routine URL update.
+7. Run **`website`** to publish the site and regenerate `sci-server.json`. In **Settings → Pages**, enable **Enforce HTTPS** when GitHub makes it available. If the deployment succeeds but its final HTTPS check fails during certificate provisioning, wait for certificate readiness and rerun `website`.
+8. Verify HTTPS for `/`, `/publication/`, and `/sci-server.json` at the website domain. Confirm the descriptor points to the new archive's `/publications` base path and the current publisher. Check the publisher's `/health` response body, including storage status; HTTP 200 alone does not prove publishing works. Complete the live publishing test before importing research.
+
+DNS and certificate issuance finish separately. New records may resolve quickly, but allow for provider provisioning delays; do not promise a fixed completion time or bypass TLS checks. GitHub documents up to 24 hours for DNS propagation. GitHub Actions publishing does not require a `CNAME` file in the site artifact. See [GitHub's custom-domain procedure](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site) and [Cloudflare's public-bucket guide](https://developers.cloudflare.com/r2/buckets/public-buckets/).
+
+Choose the final instance URL before the first real publication: existing acceptance records retain their historical instance URL.
+
+### Recover an app after a failed initial Terraform creation
+
+If a corrected **`publisher`** release succeeds but a new plan still proposes replacing `digitalocean_app.publisher[0]` with reason **`replace_because_tainted`**, do not approve that replacement as a routine configuration change.
+
+Run **`publisher-recover`** on `main` and approve the **`production`** gate. It checks that the named DigitalOcean app has an ACTIVE deployment, has no deployment in progress, matches the exact app ID recorded for the publisher resource, and passes its database health check. Only then does it clear that resource's taint flag. It does not recreate the app, rotate credentials, or export state. Storage degradation is reported separately and still needs investigation.
+
+Next run **`infrastructure-plan`** again. Confirm the replacement has disappeared, then run and review **`infrastructure-apply`** to update configuration and save the endpoint outputs. Finish with **`website`**. Recovery is for this verified failed-creation case; do not use it to suppress replacement caused by an actual infrastructure change.
 
 ## 12. Maintain the installation
 
