@@ -203,7 +203,7 @@ Repository → Settings → Secrets and variables → Actions → Secrets.
 | `TF_API_TOKEN` | existing | HCP Terraform user token (passed as `TF_TOKEN_app_terraform_io`). | plan, apply, endpoint lookup |
 | `CLOUDFLARE_API_TOKEN` | existing | R2 Admin Read & Write account token. | plan, apply |
 | `DIGITALOCEAN_TOKEN` | existing | DigitalOcean token (account read, app CRUD, project CRUD + assign_resource, regions/actions/sizes read). | plan, apply, publisher |
-| `SUPABASE_ACCESS_TOKEN` | existing | Project-scoped Supabase PAT. | plan, apply, migrate (pooler lookup), website (publishable-key lookup, only if `SUPABASE_PUBLISHABLE_KEY` is unset) |
+| `SUPABASE_ACCESS_TOKEN` | existing | Project-scoped Supabase PAT with the [setup permissions](SETUP.md#supabase-deployment-token), including **Add-ons: Read** (`infra_add_ons_read`) for Terraform import/refresh. | plan, apply, migrate (pooler lookup), website (publishable-key lookup, only if `SUPABASE_PUBLISHABLE_KEY` is unset) |
 | `SUPABASE_DB_PASSWORD` | existing | Postgres administrator password. | migrate only |
 | `R2_ACCESS_KEY_ID` | create after the buckets exist | S3 Access Key ID of a bucket-scoped R2 **Object Read & Write** token for the two SCI buckets. | plan, apply (App Platform secret) |
 | `R2_SECRET_ACCESS_KEY` | create after the buckets exist | The same token's S3 Secret Access Key. | plan, apply |

@@ -158,8 +158,21 @@ These scopes apply across the selected team, not only to a future SCI app. App c
 | Connection Pooling | Read |
 | API Keys | Read |
 | API Key Secrets | Read |
+| Add-ons (under Infrastructure and delivery) | Read |
 
-5. Review access, create the token, and save it as `SUPABASE_ACCESS_TOKEN`.
+5. Leave all other permissions at **None**. Review access: the list above grants five read-write capabilities and four read capabilities on the selected project.
+6. Create the token and save it as `SUPABASE_ACCESS_TOKEN`.
+
+**Add-ons read is required by Terraform**, even for an existing Free project with no paid add-ons. The pinned Supabase provider reads the project's add-ons during import and refresh to determine its compute size. The API permission is `infra_add_ons_read`; in the dashboard choose **Infrastructure and delivery → Add-ons → Read**. Do not grant Add-ons read-write. Ignoring changes to `instance_size` does not skip the provider's read. See the [provider's project resource](https://github.com/supabase/terraform-provider-supabase/blob/v1.11.0/internal/provider/project_resource.go).
+
+If a plan fails with `Unable to read project addons` and `Missing required permission: infra_add_ons_read`:
+
+1. Create a replacement project-scoped token with all permissions in the table, including **Add-ons: Read**. Supabase token access cannot be changed after creation.
+2. Edit the existing GitHub Actions secret **`SUPABASE_ACCESS_TOKEN`** and replace its value. Keep the name unchanged; do not place the token in repository variables.
+3. Run the **deploy** workflow on `main` with operation **`infrastructure-plan`**. This validates the replacement without applying infrastructure changes. A different missing-permission error needs separate investigation.
+4. Once the plan succeeds, revoke the old token and record the replacement's expiration privately. Only run **`infrastructure-apply`** after reviewing the plan.
+
+Keep the existing project import and `prevent_destroy` configuration. Removing the project resource or granting full-account access is not necessary to fix this read-permission error. `prevent_destroy` protects Terraform plans while the resource configuration remains present; it is not a Supabase account-level deletion restriction.
 
 This is administrative access within the selected project, including SQL changes, access to API key secrets, and potentially destructive project operations. It is not a frontend key. Use the scoped token instead of a legacy token with full account access. The implemented workflow must test these permissions against its actual provider and CLI versions; add permissions only for a demonstrated requirement. See [Supabase personal access tokens](https://supabase.com/docs/guides/platform/personal-access-tokens).
 
