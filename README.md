@@ -194,6 +194,7 @@ The publisher receives these App Platform environment variables:
 | `SCI_TEMP_BUCKET`, `SCI_PUBLIC_BUCKET` | Bucket names. |
 | `SCI_CLIENT_IP_HEADER` | `do-connecting-ip`. |
 | `SCI_MAX_STORAGE_BYTES` | Optional. Total publication bytes accepted before new pushes are rejected with `507 storage_full`; default `13000000000000` (13 TB, about $200/month of R2 storage). |
+| `SCI_UPLOAD_QUIESCENCE_SECONDS` | Optional. Seconds after an upload attempt's deadline before its temporary objects are deleted; default `900`. Must exceed the longest possible upload, so that no PUT that started before the deadline can land after cleanup. |
 
 ### GitHub secrets
 

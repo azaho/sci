@@ -86,6 +86,10 @@ class Settings:
     writes_enabled: bool = True
     worker_interval_seconds: float = 60.0
     expiry_grace_seconds: int = 60
+    # Presigned PUT URLs never outlive an attempt's deadline, but a request
+    # that started before then can still finish later. Temporary objects are
+    # deleted only after this extra quiet period, so nothing can reappear.
+    upload_quiescence_seconds: int = 900
     max_storage_bytes: int = DEFAULT_MAX_STORAGE_BYTES
 
     @classmethod
@@ -115,6 +119,7 @@ class Settings:
             writes_enabled=_env_bool("SCI_WRITES_ENABLED", True),
             worker_interval_seconds=float(os.environ.get("SCI_WORKER_INTERVAL_SECONDS") or 60),
             max_storage_bytes=int(os.environ.get("SCI_MAX_STORAGE_BYTES") or DEFAULT_MAX_STORAGE_BYTES),
+            upload_quiescence_seconds=int(os.environ.get("SCI_UPLOAD_QUIESCENCE_SECONDS") or 900),
         )
 
     def storage(self) -> Storage:
@@ -608,16 +613,21 @@ class Publisher:
                 ).fetchall()
                 stats["expired"] = len(expired)
             with self.db.connection() as conn:
-                # Never clean sources of committed attempts unless the publication is accepted.
+                # Never clean sources of committed attempts unless the publication
+                # is accepted, and never before the attempt's upload URLs and
+                # in-flight PUTs are finished (SCI-SEC-001): a replayed URL could
+                # otherwise recreate an object after its one-time cleanup.
                 cleanable = conn.execute(
                     """
                     select u.upload_id, u.temp_prefix from sci.uploads u
                     left join sci.publications p on p.upload_id = u.upload_id
                     where u.temp_cleaned_at is null
+                      and u.deadline < now() - make_interval(secs => %s)
                       and (u.state in ('expired', 'failed')
                            or (u.state = 'committed' and p.state = 'accepted'))
                     limit 200
-                    """
+                    """,
+                    (self.settings.upload_quiescence_seconds,),
                 ).fetchall()
             for r in cleanable:
                 try:
