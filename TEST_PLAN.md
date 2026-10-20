@@ -2,6 +2,19 @@
 
 Use [DESIGN.md](DESIGN.md) as the source of requirements. Complete these checks before importing the existing corpus.
 
+## Run the tests
+
+```sh
+python -m venv .venv && . .venv/bin/activate
+pip install -e '.[server,test]'
+pytest -q
+```
+
+Unit tests need nothing else. Integration tests start real services and
+skip when a binary is missing: PostgreSQL comes from the `pgserver` wheel;
+set `SCI_TEST_RUSTFS` and `SCI_TEST_POSTGREST` to RustFS 1.0.3 and PostgREST
+12.2.12 binaries (the CI workflow downloads both).
+
 ## Signatures and keys
 
 Check signature interoperability in both directions. SCI must sign a manifest that OpenSSL can verify. OpenSSL must sign the same manifest in a form that SCI can verify.
@@ -130,3 +143,11 @@ Before deployment, test whether R2 rejects PUTs when the actual length differs f
 After the checks above pass, test corpus migration with a small sample before importing the complete corpus. Preserve valid, nonconflicting UUIDv4s and recorded dates where possible. Verify explicit mappings for other legacy IDs and their citation references.
 
 Convert legacy bare SCI citation UUIDs to `sci:` targets only during import. Never rewrite signed publications. Require the signed import-attestation format to be defined before migrating unsigned historical records.
+
+## Open items
+
+- **R2 upload size enforcement.** Not yet tested against real R2. Presigned
+  URLs carry no size-binding header by default; after testing, set
+  `SCI_PRESIGN_CONTENT_LENGTH=true` to sign `Content-Length`. The server
+  always checks sizes and hashes after upload.
+- **Legacy corpus import** waits for the signed import-attestation format.
