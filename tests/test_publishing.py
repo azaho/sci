@@ -237,13 +237,15 @@ def test_sql_permissions_and_admin_helpers(stack, make_publication):
         admin.execute("RESET ROLE")
 
 
-def test_archive_rebuild_keeps_writes_off_and_keys_disabled(stack, make_publication, settings, monkeypatch):
+def test_archive_rebuild_keeps_writes_off_and_keys_disabled(
+    stack, make_publication, settings, monkeypatch, database_url,
+):
     publisher, admin = stack
     folder, pub = make_publication(attachments=True)
     accept(publisher, admin, folder, pub)
     old = row(admin, pub.uuid)
     admin.execute("TRUNCATE sci_private.citations,sci_private.publications,sci_private.uploads,sci_private.identities CASCADE")
-    admin_db = Database(admin.info.dsn)
+    admin_db = Database(database_url)
     import zipfile
     monkeypatch.setattr(zipfile, "ZipFile", lambda *a, **k: pytest.fail("recovery opened ZIP"))
     try:
@@ -352,12 +354,12 @@ def test_api_shared_rate_limit(stack):
         assert result.headers["retry-after"] == "60"
 
 
-def test_archive_rebuild_cannot_reopen_failed_uuid(stack, make_publication, settings):
+def test_archive_rebuild_cannot_reopen_failed_uuid(stack, make_publication, settings, database_url):
     publisher, admin = stack
     folder, pub = make_publication()
     accept(publisher, admin, folder, pub)
     admin.execute("UPDATE sci_private.publications SET state='failed',failure_reason='restored terminal reservation'")
-    admin_db = Database(admin.info.dsn)
+    admin_db = Database(database_url)
     try:
         with pytest.raises(SCIError, match="terminal failed"):
             rebuild_catalog(admin_db, publisher.storage, settings)

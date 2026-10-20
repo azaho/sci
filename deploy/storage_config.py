@@ -17,6 +17,8 @@ def main():
         "actions": ["Admin", "Read", "Write", "List", "Tagging"],
     }]}
     path.write_text(json.dumps(value), "utf-8")
+    # The pinned SeaweedFS image drops privileges to UID/GID 1000 at entry.
+    os.chown(path, 1000, 1000)
     path.chmod(0o600)
 
 
