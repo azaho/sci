@@ -580,7 +580,7 @@ class Publisher:
     # -- background maintenance ---------------------------------------------------
 
     def run_maintenance_once(self) -> dict:
-        stats = {"resumed": 0, "expired": 0, "cleaned": 0}
+        stats = {"resumed": 0, "expired": 0, "cleaned": 0, "recounted": 0}
         with self.db.session_lock("worker", "maintenance", 0) as (acquired, _conn):
             if not acquired:
                 return stats
@@ -628,6 +628,8 @@ class Publisher:
                 with self.db.transaction() as conn:
                     conn.execute("update sci.uploads set temp_cleaned_at = now() where upload_id = %s", (r["upload_id"],))
                 stats["cleaned"] += 1
+            with self.db.transaction() as conn:
+                stats["recounted"] = conn.execute("select sci.refresh_citation_counts() as n").fetchone()["n"]
         return stats
 
 
