@@ -117,12 +117,10 @@ dd{margin:0}
   .with-figure .pub-text{display:contents}
   .with-figure .pub-meta{grid-row:1}
   .with-figure .summary{grid-row:2}
-  .with-figure .pub-thumbnail{grid-row:3;width:calc(100% + 44px);margin:8px -22px 12px;min-height:240px}
+  .with-figure .pub-thumbnail{grid-row:3;width:100%;margin:8px 0 12px;min-height:240px}
   .with-figure .pub-thumbnail.loaded{min-height:0}
   .with-figure .pub-thumbnail.loaded img{position:static;width:100%;height:auto}
   .with-figure .categories{grid-row:4}
   .figure-toggle{display:none}
-  #headline{margin-left:-22px;margin-right:-22px}
   #headline img{width:100%}
-  #headline figcaption{margin-left:22px;margin-right:22px}
 }

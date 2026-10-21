@@ -56,7 +56,7 @@ Sign a folder with text, citation, headline figure, and supporting files. Push t
 
 Check dates in browsers using different local time zones, including timestamps near midnight UTC and across daylight-saving changes. Feed acceptance times and publication author/acceptance times must show local dates, hours, and minutes without a time-zone abbreviation; their `datetime` attributes retain the original timestamps.
 
-At mobile widths up to 760 px, feed and publication figures must fill the screen width without horizontal scrolling or an expand/collapse control. Check landscape and portrait figures, image loading failures, and tapping the image. On desktop, feed thumbnails must still expand and collapse with mouse and keyboard. Resize between mobile and desktop after expanding a figure; mobile must stay full width.
+At mobile widths up to 760 px, feed and publication figures must fill the text container width, preserving the page's side margins, without horizontal scrolling or an expand/collapse control. Check landscape and portrait figures, image loading failures, and tapping the image. On desktop, feed thumbnails must still expand and collapse with mouse and keyboard. Resize between mobile and desktop after expanding a figure; mobile figures must stay aligned with the text container.
 
 Check the search form at widths from 320 to 760 px: the search placeholder and default subject/sort labels must fit, the Search button must have compact padding, the dropdowns and publisher field must be 34 px tall with 7 px vertical padding below the taller search row, and a horizontal divider must separate the publisher field from the dropdown row. Verify search submission, query preservation when resizing, and restoration of the original desktop labels and layout.
 
