@@ -120,7 +120,7 @@ function dateLabel(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat(undefined, {
     year: "numeric", month: "short", day: "numeric",
-    hour: "numeric", minute: "2-digit", timeZoneName: "short",
+    hour: "numeric", minute: "2-digit",
   }).format(date);
 }
 
