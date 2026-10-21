@@ -58,6 +58,8 @@ Check dates in browsers using different local time zones, including timestamps n
 
 At mobile widths up to 760 px, feed and publication figures must fill the screen width without horizontal scrolling or an expand/collapse control. Check landscape and portrait figures, image loading failures, and tapping the image. On desktop, feed thumbnails must still expand and collapse with mouse and keyboard. Resize between mobile and desktop after expanding a figure; mobile must stay full width.
 
+Check the search form at widths from 320 to 760 px: the search placeholder and default subject/sort labels must fit, the Search button must have compact padding, and a horizontal divider must separate the publisher field from the dropdown row. Verify search submission, query preservation when resizing, and restoration of the original desktop labels and layout.
+
 Repeat with a README-only publication: acceptance still requires verification, and pull retrieves the complete record. Preserve exact author JSON, including whitespace and omitted fields; create no global store. Verify push rejects missing/changed files without re-signing or repackaging. Reject changed JSON, README, manifest, and mixed-publication files.
 
 Confirm exact originals in R2 and only extracted fields/references in SQL. Normal page views must use catalog metadata without original JSON/signature retrieval or verification. Pull must verify every declared file and fail on unavailable or invalid attachments. Confirm that it constructs UUID-only archive paths without a catalog request. Reject missing or invalid acceptance records, a UUID that differs from the requested UUID, and an acceptance hash that differs from the manifest hash. Exclude `acceptance.json` from the pulled folder.

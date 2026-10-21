@@ -166,6 +166,16 @@ function headlineThumbnail(record) {
 }
 
 async function feed() {
+  const mobile = window.matchMedia("(max-width:760px)");
+  const searchPlaceholder = $("search").placeholder;
+  const sortOption = $("sort").options[0];
+  const sortLabel = sortOption.textContent;
+  function updateFilterLabels() {
+    $("search").placeholder = mobile.matches ? "Search publications" : searchPlaceholder;
+    sortOption.textContent = mobile.matches ? "Newest first" : sortLabel;
+  }
+  mobile.addEventListener("change", updateFilterLabels);
+  updateFilterLabels();
   const params = new URLSearchParams(location.search);
   $("search").value = params.get("q") || "";
   $("publisher").value = params.get("publisher") || "";
