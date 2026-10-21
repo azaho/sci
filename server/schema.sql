@@ -92,6 +92,12 @@ create index if not exists publications_categories_idx on sci.publications using
 create index if not exists publications_search_idx on sci.publications using gin (search_document);
 create index if not exists publications_finalizing_idx on sci.publications (uuid) where state = 'finalizing';
 
+-- Distinct accepted publications citing this one. Derived from sci.citations
+-- by sci.refresh_citation_counts(); stored so feeds can sort by it.
+alter table sci.publications add column if not exists citing_publications bigint not null default 0;
+create index if not exists publications_cited_idx
+  on sci.publications (citing_publications desc, accepted_at desc, uuid desc) where state = 'accepted';
+
 -- Citation target keys (DESIGN.md "Citations"). The Python implementation
 -- is sci.publication.normalize_citation_target; both are tested against
 -- tests/fixtures/citation_targets.json.
@@ -207,6 +213,30 @@ create table if not exists sci.citations (
 );
 create index if not exists citations_target_key_idx on sci.citations (target_key, source_uuid, position);
 
+-- Recompute stored citation counts from sci.citations; returns the number of
+-- rows changed. The maintenance worker runs it, so counts lag by at most one
+-- worker interval. Matches catalog_v1.citation_counts for sci: targets.
+create or replace function sci.refresh_citation_counts()
+returns bigint
+language sql
+set search_path = pg_catalog
+as $$
+  with counts as (
+    select substr(c.target_key, 5)::uuid as uuid, count(distinct c.source_uuid) as n
+    from sci.citations c
+    join sci.publications s on s.uuid = c.source_uuid and s.state = 'accepted'
+    where c.target_key like 'sci:%'
+    group by c.target_key
+  ), changed as (
+    update sci.publications p set citing_publications = coalesce(counts.n, 0)
+    from sci.publications q left join counts on counts.uuid = q.uuid
+    where p.uuid = q.uuid and p.state = 'accepted'
+      and p.citing_publications <> coalesce(counts.n, 0)
+    returning 1
+  )
+  select count(*) from changed
+$$;
+
 create table if not exists sci.uploads (
   upload_id uuid primary key,
   publication_uuid uuid not null,
@@ -297,7 +327,7 @@ $$;
 grant select (archive_url) on sci.settings to anon, authenticated;
 grant select (uuid, manifest_sha256, state, author_fingerprint, author_public_key, title, abstract,
               categories, keywords, headline_figure_caption, created_at, files, files_tree,
-              accepted_at, search_document)
+              accepted_at, search_document, citing_publications)
   on sci.publications to anon, authenticated;
 grant select (source_uuid, position, target, target_key, relation, reason) on sci.citations to anon, authenticated;
 
@@ -308,3 +338,4 @@ grant select, insert, update on sci.publications, sci.citations, sci.uploads to 
 grant execute on function sci.search_document(text, text, text[]) to anon, authenticated, sci_publisher;
 grant execute on function sci.citation_target_key(text) to anon, authenticated, sci_publisher;
 grant execute on function sci.lock_key(text, text) to sci_publisher;
+grant execute on function sci.refresh_citation_counts() to sci_publisher;

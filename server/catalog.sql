@@ -42,7 +42,8 @@ select
   p.files_tree,
   p.files,
   sci.publication_objects((select s.archive_url from sci.settings s), p.uuid, p.files) as objects,
-  p.search_document
+  p.search_document,
+  p.citing_publications
 from sci.publications p
 where p.state = 'accepted';
 
@@ -54,6 +55,8 @@ comment on column catalog_v1.publications.objects is
   'Map from file name to its original archive URL. Verify with sci pull; the acceptance record is not included.';
 comment on column catalog_v1.publications.created_at is 'Author-claimed creation time from the signed manifest.';
 comment on column catalog_v1.publications.accepted_at is 'Time this instance accepted the publication.';
+comment on column catalog_v1.publications.citing_publications is
+  'Distinct accepted publications citing this one, refreshed about once a minute. Most cited: order=citing_publications.desc,accepted_at.desc,uuid.desc.';
 
 create or replace view catalog_v1.citations
 with (security_invoker = true)
@@ -93,10 +96,40 @@ as $$ select sci.citation_target_key(target) $$;
 comment on function catalog_v1.normalize_citation_target(text) is
   'Validate a citation target in its original spelling and return the target_key used for matching.';
 
+-- Publications cited by any of the given publishers, with citing_publications
+-- counting only their publications. Cost follows what those publishers cite,
+-- not the catalog size. Filter, order, and page the result like publications.
+create or replace function catalog_v1.cited_by_publishers(fingerprints text[])
+returns setof catalog_v1.publications
+language plpgsql stable
+set search_path = pg_catalog
+as $$
+begin
+  if cardinality(fingerprints) > 50 then
+    raise exception 'at most 50 publisher fingerprints' using errcode = '22023';
+  end if;
+  return query
+  select p.uuid, p.manifest_sha256, p.title, p.abstract, p.categories, p.keywords,
+    p.headline_figure_caption, p.author_public_key, p.author_fingerprint, p.created_at,
+    p.accepted_at, p.files_tree, p.files, p.objects, p.search_document, c.n
+  from (
+    select substr(c.target_key, 5)::uuid as uuid, count(distinct c.source_uuid) as n
+    from sci.publications s
+    join sci.citations c on c.source_uuid = s.uuid
+    where s.state = 'accepted' and s.author_fingerprint = any(fingerprints) and c.target_key like 'sci:%'
+    group by c.target_key
+  ) c
+  join catalog_v1.publications p on p.uuid = c.uuid;
+end
+$$;
+
+comment on function catalog_v1.cited_by_publishers(text[]) is
+  'Publications cited by any of up to 50 publisher fingerprints; citing_publications counts only their citations.';
+
 revoke all on all tables in schema catalog_v1 from public, anon, authenticated;
 revoke all on all functions in schema catalog_v1 from public;
 grant select on catalog_v1.publications, catalog_v1.citations, catalog_v1.citation_counts to anon, authenticated;
-grant execute on function catalog_v1.normalize_citation_target(text) to anon, authenticated;
+grant execute on function catalog_v1.normalize_citation_target(text), catalog_v1.cited_by_publishers(text[]) to anon, authenticated;
 do $$
 begin
   if exists (select 1 from pg_roles where rolname = 'service_role') then

@@ -103,9 +103,51 @@ def test_anonymous_catalog_queries(catalog_stack, tmp_path, key):
     assert status == 200 and len(rows) <= 100
 
 
+def test_citation_sort_and_cited_by_publishers(catalog_stack, tmp_path, key):
+    from sci import keys
+
+    s = catalog_stack
+    uids = _publish_set(s, tmp_path, key)
+    other = keys.generate_private_key()
+    s.enable_key(other)
+    f, _ = signed_folder(tmp_path, other, name="o", sci={"title": "Other lab", "abstract": "Builds on both.",
+                         "citations": [{"target": f"sci:{uids[0]}"}, {"target": f"sci:{uids[1]}"}, {"target": f"sci:{uids[1]}"}]})
+    assert publish(s, f)[0] == 201
+    mine, theirs = keys.fingerprint(key.public_key()), keys.fingerprint(other.public_key())
+
+    # Stored counts appear after the maintenance refresh and match citation_counts.
+    assert get(s, f"/publications?uuid=eq.{uids[0]}&select=citing_publications")[1] == [{"citing_publications": 0}]
+    assert s.publisher.run_maintenance_once()["recounted"] == 2
+    assert s.publisher.run_maintenance_once()["recounted"] == 0
+    order = "order=citing_publications.desc,accepted_at.desc,uuid.desc"
+    status, rows, _ = get(s, f"/publications?select=uuid,citing_publications,accepted_at&{order}&limit=2")
+    assert [(r["uuid"], r["citing_publications"]) for r in rows] == [(uids[0], 2), (uids[1], 1)]
+    for r in rows:
+        assert get(s, f"/citation_counts?target_key=eq.sci:{r['uuid']}")[1][0]["citing_publications"] == r["citing_publications"]
+
+    # Keyset pagination in citation order.
+    last = rows[-1]
+    n, ts = last["citing_publications"], urllib.parse.quote(last["accepted_at"])
+    after = f"accepted_at.lt.{ts},and(accepted_at.eq.{ts},uuid.lt.{last['uuid']})"
+    status, page2, _ = get(s, f"/publications?select=uuid,citing_publications&{order}&limit=10"
+                              f"&or=(citing_publications.lt.{n},and(citing_publications.eq.{n},or({after})))")
+    assert status == 200 and len(page2) == 2 and {r["citing_publications"] for r in page2} == {0}
+
+    # Counting only selected publishers; filters and order still apply.
+    rpc = "/rpc/cited_by_publishers?select=uuid,citing_publications&order=citing_publications.desc,uuid.desc&fingerprints="
+    assert get(s, rpc + f"{{{theirs}}}")[1] == sorted([{"uuid": uids[0], "citing_publications": 1},
+                                                      {"uuid": uids[1], "citing_publications": 1}], key=lambda r: r["uuid"], reverse=True)
+    assert get(s, rpc + f"{{{mine}}}")[1] == [{"uuid": uids[0], "citing_publications": 1}]
+    assert get(s, rpc + f"{{{mine},{theirs}}}&uuid=eq.{uids[0]}")[1] == [{"uuid": uids[0], "citing_publications": 2}]
+    assert get(s, rpc + "{}")[1] == []
+    many = ",".join(keys.fingerprint(keys.generate_private_key().public_key()) for _ in range(51))
+    assert get(s, rpc + f"{{{many}}}")[0] == 400
+
+
 def test_catalog_hides_unaccepted_and_private_data(catalog_stack, tmp_path, key):
     s = catalog_stack
     uids = _publish_set(s, tmp_path, key)
+    assert s.admin("select sci.refresh_citation_counts() as n") == [{"n": 1}]
     s.admin("update sci.publications set state = 'finalizing' where uuid = %s", (uids[2],))
     status, rows, _ = get(s, "/publications?select=uuid")
     assert {r["uuid"] for r in rows} == {uids[0], uids[1]}
@@ -113,6 +155,9 @@ def test_catalog_hides_unaccepted_and_private_data(catalog_stack, tmp_path, key)
     assert rows == []
     status, rows, _ = get(s, f"/citation_counts?target_key=eq.sci:{uids[0]}")
     assert rows == []
+    s.admin("select sci.refresh_citation_counts()")
+    assert s.admin("select citing_publications from sci.publications where uuid = %s", (uids[0],)) == [{"citing_publications": 0}]
+    assert get(s, f"/rpc/cited_by_publishers?fingerprints={{{s.admin('select author_fingerprint from sci.publications limit 1')[0]['author_fingerprint']}}}")[1] == []
     status, rows, _ = get(s, "/citations?select=*,publications(uuid)&limit=100")
     assert all(r["publications"]["uuid"] != uids[2] for r in rows)
 

@@ -168,17 +168,15 @@ function headlineThumbnail(record) {
 async function feed() {
   const mobile = window.matchMedia("(max-width:760px)");
   const searchPlaceholder = $("search").placeholder;
-  const sortOption = $("sort").options[0];
-  const sortLabel = sortOption.textContent;
   function updateFilterLabels() {
     $("search").placeholder = mobile.matches ? "Search publications" : searchPlaceholder;
-    sortOption.textContent = mobile.matches ? "Newest first" : sortLabel;
   }
   mobile.addEventListener("change", updateFilterLabels);
   updateFilterLabels();
   const params = new URLSearchParams(location.search);
   $("search").value = params.get("q") || "";
   $("publisher").value = params.get("publisher") || "";
+  $("sort").value = params.get("sort") === "latest" ? "latest" : "cited";
   const groups = new Map();
   for (const item of categories.values()) {
     if (!groups.has(item.group)) {
@@ -196,6 +194,7 @@ async function feed() {
   let abort = null;
   let count = 0;
   const seen = new Set();
+  let filters;
 
   async function load(reset = true) {
     if (reset) {
@@ -204,26 +203,34 @@ async function feed() {
       last = null;
       count = 0;
       seen.clear();
+      $("more").hidden = true;
+      filters = {
+        search: $("search").value.trim(), category: $("category").value,
+        publisher: $("publisher").value.trim(), sort: $("sort").value,
+      };
       $("publications").replaceChildren(element("p", "Loading publications…", "empty"));
     }
     const signal = abort.signal;
     $("more").disabled = true;
     $("problem").hidden = true;
     try {
-      const search = $("search").value.trim();
-      const category = $("category").value;
-      const publisher = $("publisher").value.trim();
+      const {search, category, publisher, sort} = filters;
       if (publisher && !FINGERPRINT.test(publisher)) {
         throw new Error("Use the full publisher fingerprint: ed25519: followed by 64 lowercase hex characters.");
       }
       const query = {
-        select: "uuid,title,abstract,categories,author_fingerprint,accepted_at,objects,headline_figure_caption",
-        order: "accepted_at.desc,uuid.desc", limit: 20,
+        select: "uuid,title,abstract,categories,author_fingerprint,accepted_at,objects,headline_figure_caption,citing_publications",
+        order: sort === "cited" ? "citing_publications.desc,accepted_at.desc,uuid.desc" : "accepted_at.desc,uuid.desc",
+        limit: 20,
       };
       if (search) query.search_document = `wfts(english).${search}`;
       if (category) query.categories = `cs.{${category}}`;
       if (publisher) query.author_fingerprint = `eq.${publisher}`;
-      if (last) query.or = `(accepted_at.lt.${last.accepted_at},and(accepted_at.eq.${last.accepted_at},uuid.lt.${last.uuid}))`;
+      if (last) {
+        const after = `accepted_at.lt.${last.accepted_at},and(accepted_at.eq.${last.accepted_at},uuid.lt.${last.uuid})`;
+        const cited = last.citing_publications;
+        query.or = sort === "cited" ? `(citing_publications.lt.${cited},and(citing_publications.eq.${cited},or(${after})))` : `(${after})`;
+      }
       const rows = await catalog("publications", query, signal);
       if (signal.aborted) return;
       if (reset) $("publications").replaceChildren();
@@ -244,6 +251,27 @@ async function feed() {
         identity.className = "identity";
         identity.title = row.author_fingerprint;
         details.append(identity);
+        const cited = Number(row.citing_publications) || 0;
+        const citationLabel = `${cited.toLocaleString()} ${cited === 1 ? "citation" : "citations"}`;
+        const citationCount = element("span", undefined, "citation-count");
+        citationCount.title = citationLabel;
+        const quote = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        quote.setAttribute("viewBox", "0 0 24 24");
+        quote.setAttribute("aria-hidden", "true");
+        quote.setAttribute("focusable", "false");
+        quote.setAttribute("fill", "none");
+        quote.setAttribute("stroke", "currentColor");
+        quote.setAttribute("stroke-width", "1.6");
+        quote.setAttribute("stroke-linecap", "round");
+        quote.setAttribute("stroke-linejoin", "round");
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", "M3 5h7v7c0 4-2 6-6 7l-1-2c3-1 4-2 4-5H3V5zm11 0h7v7c0 4-2 6-6 7l-1-2c3-1 4-2 4-5h-4V5z");
+        quote.append(path);
+        const number = element("span", cited.toLocaleString());
+        number.setAttribute("aria-hidden", "true");
+        citationCount.append(quote, number, element("span", citationLabel, "sr-only"));
+        const heading = element("div", undefined, "pub-heading");
+        heading.append(title, citationCount);
         const body = element("div", undefined, "pub-body");
         const text = element("div", undefined, "pub-text");
         text.append(details, abstractPreview(row.abstract, row.uuid), categoryNodes(row.categories));
@@ -253,7 +281,7 @@ async function feed() {
           body.classList.add("with-figure");
           body.append(thumbnail);
         }
-        article.append(title, body);
+        article.append(heading, body);
         $("publications").append(article);
       }
       if (!count) $("publications").append(element("p", "No publications match these filters.", "empty"));
@@ -263,6 +291,7 @@ async function feed() {
       if (search) url.searchParams.set("q", search);
       if (category) url.searchParams.set("category", category);
       if (publisher) url.searchParams.set("publisher", publisher);
+      if (sort === "latest") url.searchParams.set("sort", sort);
       history.replaceState(null, "", url);
     } catch (error) {
       if (error.name !== "AbortError") {
@@ -275,6 +304,7 @@ async function feed() {
   }
   $("filters").addEventListener("submit", (event) => {event.preventDefault(); load();});
   $("category").addEventListener("change", () => load());
+  $("sort").addEventListener("change", () => load());
   $("more").addEventListener("click", () => load(false));
   await load();
 }

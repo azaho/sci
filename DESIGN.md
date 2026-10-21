@@ -530,7 +530,7 @@ Use Supabase's PostgREST Data API for public reads. Expose only the versioned `c
 
 | View | Public contents |
 | --- | --- |
-| `publications` | One row per accepted publication: UUID, manifest hash, title, abstract, ordered categories, keywords, caption, author key/fingerprint, author `created_at`, and instance `accepted_at`. Include optional `files_tree`, original-object URLs and derived full-text search. Exclude private whitelist and upload-state fields. |
+| `publications` | One row per accepted publication: UUID, manifest hash, title, abstract, ordered categories, keywords, caption, author key/fingerprint, author `created_at`, and instance `accepted_at`. Include optional `files_tree`, original-object URLs, derived full-text search, and the stored `citing_publications` count. Exclude private whitelist and upload-state fields. |
 | `citations` | Ordered citations from accepted sources: `source_uuid`, `position`, exact `target`, normalized `target_key`, nullable `relation`, and nullable `reason`. Permit embedded public source-publication metadata through the source relationship. |
 | `citation_counts` | `target_key` and `citing_publications`: distinct accepted source UUIDs per target. Repeated references and equivalent DOI spellings from one source count once. No incoming citations means no row; clients use zero. |
 
@@ -547,6 +547,8 @@ GET /citations?target_key=eq.sci:<UUID>&select=source_uuid,position,target,relat
 GET /citations?source_uuid=eq.<UUID>&order=position.asc&limit=100
 GET /citation_counts?target_key=eq.sci:<UUID>
 GET /citation_counts?order=citing_publications.desc,target_key.asc&limit=20
+GET /publications?select=uuid,title,citing_publications&order=citing_publications.desc,accepted_at.desc,uuid.desc&limit=20
+GET /rpc/cited_by_publishers?fingerprints={<FINGERPRINT>,<FINGERPRINT>}&order=citing_publications.desc,accepted_at.desc,uuid.desc&limit=20
 ```
 
 Filter incoming citations by `target_key`. Filter outgoing citations by `source_uuid`. Either query can also filter by `relation`.
@@ -561,11 +563,11 @@ URL-encode the complete input value, including literal percent signs. Display th
 
 Index a derived `search_document` column for PostgreSQL full-text search over title, abstract, and keywords. Expose it in the publication view. Document its text-search configuration and PostgREST filter syntax. Match category codes exactly at any array position; filter publishers by author fingerprint. README search remains deferred.
 
-Order feeds by `(accepted_at DESC, uuid DESC)`. For each later page, clients keep the last timestamp/UUID pair and the original filters. They use this pair for keyset pagination. PostgREST does not provide an opaque next-page cursor.
+Order feeds by `(accepted_at DESC, uuid DESC)`, or by citations with `(citing_publications DESC, accepted_at DESC, uuid DESC)`. For each later page, clients keep the last row's sort values and the original filters. They use these values for keyset pagination. PostgREST does not provide an opaque next-page cursor.
 
 Refresh the feed to see newly visible publications. Pagination does not preserve one database snapshot across requests. Citation pagination uses `(source_uuid, position)`, or only `position` within one source.
 
-Use a regular `citation_counts` view that groups citations at query time without duplicating publication data.
+Use a regular `citation_counts` view that groups citations at query time. For sorting, store `citing_publications` on each publication: the distinct accepted publications citing it, recomputed from `citations` by the maintenance worker. Counts may lag by one worker interval; the publication page reads `citation_counts` for the current value. `cited_by_publishers` returns the publications cited by up to 50 publisher fingerprints, with `citing_publications` counting only their publications. It groups at query time, so its cost follows what those publishers cite, not the catalog size.
 
 Do not expose unrestricted PostgREST aggregates or arbitrary SQL execution.
 

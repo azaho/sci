@@ -124,3 +124,10 @@ dd{margin:0}
   .figure-toggle{display:none}
   #headline img{width:100%}
 }
+
+.pub-heading{display:flex;align-items:baseline;gap:18px}
+.pub-heading .title{flex:1;min-width:0}
+.citation-count{flex:none;color:#555;white-space:nowrap;font-size:18px;line-height:1.5;font-weight:500;letter-spacing:-.15px;font-variant-numeric:tabular-nums}
+.citation-count svg{width:12px;height:12px;margin-right:2px;vertical-align:0;fill:none;color:var(--muted)}
+@media(max-width:760px){.pub-heading{gap:16px}.citation-count{font-size:17px}}
+#filters :is(input,select,button):focus-visible{outline:2px solid var(--link);outline-offset:1px;border-radius:3px}
