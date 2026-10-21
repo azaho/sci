@@ -111,8 +111,8 @@ dd{margin:0}
   .search-row input{padding:10px 8px;font-size:16px}
   .search-row .filter-button{padding:8px 4px;min-height:44px}
   .filter-row{grid-template-columns:minmax(0,1fr) auto;gap:0 8px;margin-top:0}
-  .filter-row select{height:44px;padding:8px 4px}
-  #filters #publisher{grid-column:1/-1;grid-row:2;height:44px;padding:10px 8px;font-size:16px;border-left-color:transparent;border-top-color:var(--border)}
+  .filter-row select{height:26px;padding:3px 4px}
+  #filters #publisher{grid-column:1/-1;grid-row:2;height:26px;padding:3px 8px;font-size:12px;border-left-color:transparent;border-top-color:var(--border)}
   .pub-body.with-figure{grid-template-columns:minmax(0,1fr);gap:0}
   .with-figure .pub-text{display:contents}
   .with-figure .pub-meta{grid-row:1}
