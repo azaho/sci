@@ -40,8 +40,9 @@ input[type=search]{display:block;width:100%}
 .pub-body.with-figure{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:18px;align-items:stretch}
 .pub-text{min-width:0}
 .pub-thumbnail{display:block;position:relative;min-width:0;min-height:135px;width:100%;padding:0;overflow:hidden;border:0;border-radius:0;background:transparent;color:var(--muted)}
-.pub-thumbnail:hover{text-decoration:none}
-.pub-thumbnail:disabled{opacity:1;cursor:default}
+.figure-toggle{position:absolute;inset:0;width:100%;height:100%;padding:0}
+.figure-toggle:disabled{opacity:1;cursor:default}
+.figure-toggle:focus-visible{outline-offset:-3px}
 .pub-thumbnail img{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;background:#fff}
 .pub-thumbnail.loaded img{opacity:1}
 .pub-body.figure-expanded{grid-template-columns:minmax(0,1fr);gap:0}
@@ -105,4 +106,17 @@ dd{margin:0}
 @media(max-width:1000px){.layout{gap:38px;grid-template-columns:minmax(0,1fr) 250px}main{padding:28px}}
 @media(max-width:760px){main{padding:22px}.layout{grid-template-columns:minmax(0,1fr);gap:40px}header{margin-bottom:34px}.publication-heading h1{font-size:28px}aside{border-top:1px solid var(--border);padding-top:26px}.pub .title{font-size:17px}}
 @media(max-width:430px){.filter-row{grid-template-columns:minmax(0,1fr) auto}.filter-row #publisher{grid-column:1/-1;grid-row:2}#filters #publisher{border-left-color:transparent}.dates{gap:8px}.publication-heading h1{font-size:25px}}
-@media(max-width:430px){.pub-body.with-figure:not(.figure-expanded){grid-template-columns:minmax(0,1fr) 115px;gap:12px}}
+@media(max-width:760px){
+  .pub-body.with-figure{grid-template-columns:minmax(0,1fr);gap:0}
+  .with-figure .pub-text{display:contents}
+  .with-figure .pub-meta{grid-row:1}
+  .with-figure .summary{grid-row:2}
+  .with-figure .pub-thumbnail{grid-row:3;width:calc(100% + 44px);margin:8px -22px 12px;min-height:240px}
+  .with-figure .pub-thumbnail.loaded{min-height:0}
+  .with-figure .pub-thumbnail.loaded img{position:static;width:100%;height:auto}
+  .with-figure .categories{grid-row:4}
+  .figure-toggle{display:none}
+  #headline{margin-left:-22px;margin-right:-22px}
+  #headline img{width:100%}
+  #headline figcaption{margin-left:22px;margin-right:22px}
+}

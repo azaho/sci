@@ -119,7 +119,8 @@ function categoryNodes(codes) {
 function dateLabel(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat(undefined, {
-    year: "numeric", month: "short", day: "numeric", timeZone: "UTC",
+    year: "numeric", month: "short", day: "numeric",
+    hour: "numeric", minute: "2-digit", timeZoneName: "short",
   }).format(date);
 }
 
@@ -129,35 +130,37 @@ function headlineThumbnail(record) {
   catch { return null; }
   if (!url) return null;
 
-  const thumbnail = element("button", undefined, "pub-thumbnail");
-  thumbnail.type = "button";
-  thumbnail.disabled = true;
-  thumbnail.setAttribute("aria-label", `Expand figure: ${record.title}`);
-  thumbnail.setAttribute("aria-expanded", "false");
+  const thumbnail = element("div", undefined, "pub-thumbnail");
   thumbnail.setAttribute("aria-busy", "true");
+  const toggle = element("button", undefined, "figure-toggle");
+  toggle.type = "button";
+  toggle.disabled = true;
+  toggle.setAttribute("aria-label", `Expand figure: ${record.title}`);
+  toggle.setAttribute("aria-expanded", "false");
   const image = element("img");
   image.id = `figure-${record.uuid}`;
-  thumbnail.setAttribute("aria-controls", image.id);
+  toggle.setAttribute("aria-controls", image.id);
   image.alt = record.headline_figure_caption || `Headline figure for ${record.title}`;
   image.loading = "lazy";
   image.decoding = "async";
   image.addEventListener("load", () => {
     thumbnail.classList.add("loaded");
-    thumbnail.disabled = false;
+    toggle.disabled = false;
     thumbnail.setAttribute("aria-busy", "false");
   }, {once: true});
   image.addEventListener("error", () => {
     image.hidden = true;
-    thumbnail.setAttribute("aria-label", "Figure unavailable");
+    toggle.hidden = true;
+    thumbnail.append(element("span", "Figure unavailable", "small"));
     thumbnail.setAttribute("aria-busy", "false");
   }, {once: true});
-  thumbnail.addEventListener("click", () => {
-    const expanded = thumbnail.getAttribute("aria-expanded") !== "true";
-    thumbnail.setAttribute("aria-expanded", String(expanded));
-    thumbnail.setAttribute("aria-label", `${expanded ? "Collapse" : "Expand"} figure: ${record.title}`);
+  toggle.addEventListener("click", () => {
+    const expanded = toggle.getAttribute("aria-expanded") !== "true";
+    toggle.setAttribute("aria-expanded", String(expanded));
+    toggle.setAttribute("aria-label", `${expanded ? "Collapse" : "Expand"} figure: ${record.title}`);
     thumbnail.closest(".pub-body").classList.toggle("figure-expanded", expanded);
   });
-  thumbnail.append(image);
+  thumbnail.append(image, toggle);
   image.src = url;
   return thumbnail;
 }
@@ -222,7 +225,9 @@ async function feed() {
         const title = link(row.title, publicationURL(row.uuid));
         title.className = "title";
         const details = element("div", undefined, "pub-meta");
-        details.append(element("span", dateLabel(row.accepted_at)));
+        const accepted = element("time", dateLabel(row.accepted_at));
+        accepted.dateTime = row.accepted_at;
+        details.append(accepted);
         const publisherURL = new URL(base);
         publisherURL.searchParams.set("publisher", row.author_fingerprint);
         const identity = link(`${row.author_fingerprint.slice(0, 24)}…`, publisherURL.href);
@@ -399,9 +404,9 @@ async function publication() {
   $("categories").replaceWith(Object.assign(categoryNodes(record.categories), {id: "categories"}));
   $("keywords").textContent = (record.keywords || []).join(" · ");
   $("created").textContent = `Author's date: ${dateLabel(record.created_at)}`;
-  $("created").title = record.created_at;
+  $("created").dateTime = record.created_at;
   $("accepted").textContent = `Accepted here: ${dateLabel(record.accepted_at)}`;
-  $("accepted").title = record.accepted_at;
+  $("accepted").dateTime = record.accepted_at;
   $("uuid").textContent = uuid;
   $("fingerprint").textContent = record.author_fingerprint;
   $("manifest-hash").textContent = record.manifest_sha256;
