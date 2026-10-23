@@ -103,6 +103,35 @@ def test_anonymous_catalog_queries(catalog_stack, tmp_path, key):
     assert status == 200 and len(rows) <= 100
 
 
+def test_cached_catalog_totals(catalog_stack, tmp_path, key):
+    s = catalog_stack
+    assert get(s, "/totals")[1] == []  # No misleading zero before the first refresh.
+    s.publisher.run_maintenance_once()
+    empty = get(s, "/totals")[1][0]
+    assert (empty["publications"], empty["citations"]) == (0, 0)
+
+    uids = _publish_set(s, tmp_path, key)
+    assert get(s, "/totals")[1] == [empty]  # Reads do not recalculate the totals.
+    s.publisher.run_maintenance_once()
+    snapshot = get(s, "/totals")[1][0]
+    # Four citation entries, but only three distinct source/normalized-target pairs.
+    assert (snapshot["publications"], snapshot["citations"]) == (3, 3)
+    assert snapshot["updated_at"] > empty["updated_at"]
+
+    s.admin("update sci.publications set state = 'finalizing' where uuid = %s", (uids[2],))
+    assert get(s, "/totals")[1] == [snapshot]
+    # Refresh directly so recovery does not re-accept the publication first.
+    s.admin("select sci.refresh_citation_counts()")
+    totals = get(s, "/totals")[1][0]
+    assert (totals["publications"], totals["citations"]) == (2, 1)
+
+    for method in ("POST", "PATCH", "DELETE"):
+        status, data, _ = http(method, s.postgrest_url + "/totals", b'{"publications":999}',
+                              {**H, "Content-Profile": "catalog_v1", "Content-Type": "application/json"})
+        assert status in (401, 403, 405), (method, status, data)
+    assert get(s, "/totals")[1] == [totals]
+
+
 def test_citation_sort_and_cited_by_publishers(catalog_stack, tmp_path, key):
     from sci import keys
 
@@ -183,7 +212,8 @@ def test_sql_grants(database):
         c.execute("set role anon")
         for q in ("select * from sci.identities", "select * from sci.uploads", "select failure_reason from sci.publications",
                   "insert into sci.identities values ('x','y',true)", "select * from sci.list_keys()",
-                  "select sci.enable_key('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')"):
+                  "select sci.enable_key('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')",
+                  "select sci.refresh_citation_counts()", "update sci.catalog_totals set publications = 999"):
             with pytest.raises(psycopg.errors.InsufficientPrivilege):
                 with c.transaction():
                     c.execute(q)

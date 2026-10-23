@@ -58,6 +58,14 @@ comment on column catalog_v1.publications.accepted_at is 'Time this instance acc
 comment on column catalog_v1.publications.citing_publications is
   'Distinct accepted publications citing this one, refreshed about once a minute. Most cited: order=citing_publications.desc,accepted_at.desc,uuid.desc.';
 
+-- Read a single stored row; never aggregate on a visitor's request.
+create or replace view catalog_v1.totals
+with (security_invoker = true)
+as select publications, citations, updated_at from sci.catalog_totals;
+
+comment on view catalog_v1.totals is
+  'Cached totals refreshed about once a minute: accepted publications and distinct (source publication, normalized target) citations, including SCI and DOI targets. Empty until the first refresh.';
+
 create or replace view catalog_v1.citations
 with (security_invoker = true)
 as
@@ -128,7 +136,7 @@ comment on function catalog_v1.cited_by_publishers(text[]) is
 
 revoke all on all tables in schema catalog_v1 from public, anon, authenticated;
 revoke all on all functions in schema catalog_v1 from public;
-grant select on catalog_v1.publications, catalog_v1.citations, catalog_v1.citation_counts to anon, authenticated;
+grant select on catalog_v1.publications, catalog_v1.citations, catalog_v1.citation_counts, catalog_v1.totals to anon, authenticated;
 grant execute on function catalog_v1.normalize_citation_target(text), catalog_v1.cited_by_publishers(text[]) to anon, authenticated;
 do $$
 begin

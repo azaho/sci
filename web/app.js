@@ -486,6 +486,16 @@ async function publication() {
   }
 }
 
+async function catalogTotals() {
+  try {
+    const [totals] = await catalog("totals", {select: "publications,citations", limit: 1});
+    if (!totals) return;
+    $("publication-total").textContent = `${totals.publications.toLocaleString()} `;
+    $("citation-total").textContent = ` · ${totals.citations.toLocaleString()} Citations`;
+    $("citation-total").hidden = false;
+  } catch { /* Totals are optional; keep the feed usable during a rolling deploy. */ }
+}
+
 async function start() {
   descriptor = await fetchJSON(new URL("sci-server.json", base));
   if (descriptor.schema_version !== 1 || descriptor.catalog_schema !== "catalog_v1") {
@@ -502,6 +512,7 @@ async function start() {
     const groupLabels = new Map((taxonomy.groups || []).map(group => [group.id, group.label]));
     categories = new Map(taxonomy.categories.map(item => [item.code, {...item, group: groupLabels.get(item.group) || item.group}]));
   } catch { /* Historical category codes remain readable if labels are unavailable. */ }
+  if (page === "feed") void catalogTotals();
   await (page === "publication" ? publication() : feed());
 }
 
