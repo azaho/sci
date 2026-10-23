@@ -68,6 +68,11 @@ aside section{padding:0 0 26px;margin:0 0 26px;border-bottom:1px solid var(--bor
 aside section:last-child{border:0}
 aside p{font-size:13px;color:var(--muted);margin:10px 0}
 aside a{font-size:13px}
+.about-sidebar{align-self:start;background:#f7f7f6;border-radius:6px;padding:22px}
+.about-sidebar pre{background:#eaecea}
+.about-sidebar section{padding-bottom:22px;margin-bottom:22px}
+.about-sidebar section>p:last-child{margin-bottom:0}
+.about-sidebar .sidebar-notes p,.about-sidebar .sidebar-notes a{font-size:12px}
 pre{font:12px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:#f8f9fa;padding:14px 16px;border-radius:3px}
 code,.mono{font:12px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
 .problem{padding:16px 0;color:var(--orange);overflow-wrap:anywhere}
