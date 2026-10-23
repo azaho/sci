@@ -244,14 +244,23 @@ class Publisher:
             raise ApiError(403, "key_mismatch", "The whitelisted key does not match the manifest's public key.")
 
     def _check_storage_quota(self, conn, files: dict) -> None:
-        """Reject new uploads once stored plus reserved bytes would exceed the limit."""
+        """Reject new uploads once stored plus reserved bytes would exceed the limit.
+
+        Every pending attempt stays charged until it is explicitly marked
+        expired, even after its deadline (SCI-SEC-002). A completion that
+        checked its attempt before the deadline can still commit, so dropping
+        the reservation on the clock alone would let two publications share
+        one budget. Expiry takes the attempt's row lock, as completion does,
+        so an attempt is either committed (charged as a publication) or
+        expired (no longer able to commit).
+        """
         Database.xact_lock(conn, "storage", "quota")
         used = conn.execute(
             """
             select coalesce(sum((f.value ->> 'bytes')::bigint), 0) as used
             from (select files from sci.publications
                   union all
-                  select files from sci.uploads where state = 'pending' and deadline > now()) t,
+                  select files from sci.uploads where state = 'pending') t,
                  jsonb_each(t.files) f
             """
         ).fetchone()["used"]
