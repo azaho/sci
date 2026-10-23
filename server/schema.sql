@@ -213,7 +213,15 @@ create table if not exists sci.citations (
 );
 create index if not exists citations_target_key_idx on sci.citations (target_key, source_uuid, position);
 
--- Recompute stored citation counts from sci.citations; returns the number of
+-- One shared snapshot for the site header; empty until the first worker refresh.
+create table if not exists sci.catalog_totals (
+  id boolean primary key default true check (id),
+  publications bigint not null check (publications >= 0),
+  citations bigint not null check (citations >= 0),
+  updated_at timestamptz not null
+);
+
+-- Recompute stored citation counts and catalog totals; returns the number of
 -- rows changed. The maintenance worker runs it, so counts lag by at most one
 -- worker interval. Matches catalog_v1.citation_counts for sci: targets.
 create or replace function sci.refresh_citation_counts()
@@ -221,6 +229,16 @@ returns bigint
 language sql
 set search_path = pg_catalog
 as $$
+  insert into sci.catalog_totals (id, publications, citations, updated_at)
+  select true,
+    (select count(*) from sci.publications where state = 'accepted'),
+    (select count(distinct (c.source_uuid, c.target_key))
+     from sci.citations c
+     join sci.publications p on p.uuid = c.source_uuid and p.state = 'accepted'),
+    now()
+  on conflict (id) do update set publications = excluded.publications,
+    citations = excluded.citations, updated_at = excluded.updated_at;
+
   with counts as (
     select substr(c.target_key, 5)::uuid as uuid, count(distinct c.source_uuid) as n
     from sci.citations c
@@ -286,12 +304,18 @@ create trigger identities_serialize
   for each row execute function sci.identities_serialize();
 
 -- Row-level security: public roles see accepted records only.
+alter table sci.catalog_totals enable row level security;
 alter table sci.settings enable row level security;
 alter table sci.identities enable row level security;
 alter table sci.publications enable row level security;
 alter table sci.citations enable row level security;
 alter table sci.uploads enable row level security;
 alter table sci.schema_migrations enable row level security;
+
+drop policy if exists catalog_totals_public_read on sci.catalog_totals;
+create policy catalog_totals_public_read on sci.catalog_totals for select to anon, authenticated using (true);
+drop policy if exists catalog_totals_publisher on sci.catalog_totals;
+create policy catalog_totals_publisher on sci.catalog_totals for all to sci_publisher using (true) with check (true);
 
 drop policy if exists settings_public_read on sci.settings;
 create policy settings_public_read on sci.settings for select to anon, authenticated using (true);
@@ -323,6 +347,9 @@ begin
   end if;
 end
 $$;
+
+grant select on sci.catalog_totals to anon, authenticated;
+grant select, insert, update on sci.catalog_totals to sci_publisher;
 
 grant select (archive_url) on sci.settings to anon, authenticated;
 grant select (uuid, manifest_sha256, state, author_fingerprint, author_public_key, title, abstract,

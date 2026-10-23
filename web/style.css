@@ -5,6 +5,10 @@ body{margin:0;background:var(--bg);color:var(--text);font:14px/1.65 system-ui,-a
 main{max-width:1320px;margin:auto;padding:32px 40px}
 header{display:flex;align-items:center;margin-bottom:32px}
 .header-title{border-left:1px solid #d4d4d4;padding-left:18px;margin:0 0 0 18px;font-size:15px;line-height:22px;font-weight:550;color:var(--text)}
+h1.header-title{display:flex;flex:1;flex-wrap:wrap;column-gap:5px;min-width:0;margin-right:12px}
+h1.header-title+.github-link{flex-shrink:0}
+.header-title span{white-space:nowrap}
+#citation-total{color:var(--muted);font-weight:400}
 .github-link{display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin-left:auto;color:var(--muted)}
 .github-link:hover{color:var(--text)}
 .github-link svg{display:block}
