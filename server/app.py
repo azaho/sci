@@ -532,6 +532,18 @@ class Publisher:
                     reason = f"temporary source for {name} {'is missing' if isinstance(exc, SourceMissing) else 'changed after verification'}"
                     self._mark_failed(conn, uid, reason)
                     raise FinalizationFailed(reason)
+                # The ETag condition is not a cryptographic check: R2-style
+                # MD5 ETags allow a colliding source to be swapped in after
+                # verification. Hash the copied object itself before any
+                # acceptance record can refer to it.
+                copied = self.storage.hash_object(self.storage.public_bucket, dest_key, exp["bytes"])
+                if copied is None:
+                    raise StorageError(f"{dest_key} is not readable after copy")
+                sha, size, _ = copied
+                if sha != exp["sha256"] or size != exp["bytes"]:
+                    reason = f"archived copy of {name} does not match the signed manifest"
+                    self._mark_failed(conn, uid, reason)
+                    raise FinalizationFailed(reason)
             try:
                 self.storage.put_public_if_absent(uid, pub.ACCEPTANCE, record)
             except AlreadyExists:
