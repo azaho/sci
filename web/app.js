@@ -176,7 +176,7 @@ async function feed() {
   const params = new URLSearchParams(location.search);
   $("search").value = params.get("q") || "";
   $("publisher").value = params.get("publisher") || "";
-  $("sort").value = params.get("sort") === "latest" ? "latest" : "cited";
+  $("sort").value = params.get("sort") === "cited" ? "cited" : "latest";
   const groups = new Map();
   for (const item of categories.values()) {
     if (!groups.has(item.group)) {
@@ -291,7 +291,7 @@ async function feed() {
       if (search) url.searchParams.set("q", search);
       if (category) url.searchParams.set("category", category);
       if (publisher) url.searchParams.set("publisher", publisher);
-      if (sort === "latest") url.searchParams.set("sort", sort);
+      if (sort === "cited") url.searchParams.set("sort", sort);
       history.replaceState(null, "", url);
     } catch (error) {
       if (error.name !== "AbortError") {
