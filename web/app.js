@@ -1,4 +1,8 @@
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const CITATION_SORTS = {
+  cited: "citing_publications", cited24h: "citing_publications_24h",
+  cited48h: "citing_publications_48h", cited7d: "citing_publications_7d",
+};
 const FINGERPRINT = /^ed25519:[0-9a-f]{64}$/;
 const page = document.body.dataset.page;
 const base = new URL(page === "publication" ? "../" : "./", location.href);
@@ -176,7 +180,7 @@ async function feed() {
   const params = new URLSearchParams(location.search);
   $("search").value = params.get("q") || "";
   $("publisher").value = params.get("publisher") || "";
-  $("sort").value = params.get("sort") === "cited" ? "cited" : "latest";
+  $("sort").value = Object.hasOwn(CITATION_SORTS, params.get("sort")) ? params.get("sort") : "latest";
   const groups = new Map();
   for (const item of categories.values()) {
     if (!groups.has(item.group)) {
@@ -218,9 +222,10 @@ async function feed() {
       if (publisher && !FINGERPRINT.test(publisher)) {
         throw new Error("Use the full publisher fingerprint: ed25519: followed by 64 lowercase hex characters.");
       }
+      const citationColumn = CITATION_SORTS[sort];
       const query = {
-        select: "uuid,title,abstract,categories,author_fingerprint,accepted_at,objects,headline_figure_caption,citing_publications",
-        order: sort === "cited" ? "citing_publications.desc,accepted_at.desc,uuid.desc" : "accepted_at.desc,uuid.desc",
+        select: "uuid,title,abstract,categories,author_fingerprint,accepted_at,objects,headline_figure_caption,citing_publications" + (citationColumn && citationColumn !== "citing_publications" ? `,${citationColumn}` : ""),
+        order: citationColumn ? `${citationColumn}.desc,accepted_at.desc,uuid.desc` : "accepted_at.desc,uuid.desc",
         limit: 20,
       };
       if (search) query.search_document = `wfts(english).${search}`;
@@ -228,8 +233,8 @@ async function feed() {
       if (publisher) query.author_fingerprint = `eq.${publisher}`;
       if (last) {
         const after = `accepted_at.lt.${last.accepted_at},and(accepted_at.eq.${last.accepted_at},uuid.lt.${last.uuid})`;
-        const cited = last.citing_publications;
-        query.or = sort === "cited" ? `(citing_publications.lt.${cited},and(citing_publications.eq.${cited},or(${after})))` : `(${after})`;
+        const cited = last[citationColumn];
+        query.or = citationColumn ? `(${citationColumn}.lt.${cited},and(${citationColumn}.eq.${cited},or(${after})))` : `(${after})`;
       }
       const rows = await catalog("publications", query, signal);
       if (signal.aborted) return;
@@ -251,8 +256,9 @@ async function feed() {
         identity.className = "identity";
         identity.title = row.author_fingerprint;
         details.append(identity);
-        const cited = Number(row.citing_publications) || 0;
-        const citationLabel = `${cited.toLocaleString()} ${cited === 1 ? "citation" : "citations"}`;
+        const cited = Number(row[citationColumn || "citing_publications"]) || 0;
+        const citationWindow = {cited24h: "24h", cited48h: "48h", cited7d: "7d"}[sort];
+        const citationLabel = `${cited.toLocaleString()} ${cited === 1 ? "citation" : "citations"}${citationWindow ? ` in the past ${citationWindow}` : ""}`;
         const citationCount = element("span", undefined, "citation-count");
         citationCount.title = citationLabel;
         const quote = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -291,7 +297,7 @@ async function feed() {
       if (search) url.searchParams.set("q", search);
       if (category) url.searchParams.set("category", category);
       if (publisher) url.searchParams.set("publisher", publisher);
-      if (sort === "cited") url.searchParams.set("sort", sort);
+      if (citationColumn) url.searchParams.set("sort", sort);
       history.replaceState(null, "", url);
     } catch (error) {
       if (error.name !== "AbortError") {

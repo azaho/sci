@@ -43,7 +43,10 @@ select
   p.files,
   sci.publication_objects((select s.archive_url from sci.settings s), p.uuid, p.files) as objects,
   p.search_document,
-  p.citing_publications
+  p.citing_publications,
+  p.citing_publications_24h,
+  p.citing_publications_48h,
+  p.citing_publications_7d
 from sci.publications p
 where p.state = 'accepted';
 
@@ -56,7 +59,16 @@ comment on column catalog_v1.publications.objects is
 comment on column catalog_v1.publications.created_at is 'Author-claimed creation time from the signed manifest.';
 comment on column catalog_v1.publications.accepted_at is 'Time this instance accepted the publication.';
 comment on column catalog_v1.publications.citing_publications is
-  'Distinct accepted publications citing this one, refreshed about once a minute. Most cited: order=citing_publications.desc,accepted_at.desc,uuid.desc.';
+  'Distinct accepted publications citing this one, refreshed about every five minutes. Most cited: order=citing_publications.desc,accepted_at.desc,uuid.desc.';
+
+comment on column catalog_v1.publications.citing_publications_24h is
+  'Distinct citing publications accepted in the past 24 hours, refreshed about every five minutes. Order by this column desc,accepted_at.desc,uuid.desc.';
+
+comment on column catalog_v1.publications.citing_publications_48h is
+  'Distinct citing publications accepted in the past 48 hours, refreshed about every five minutes. Order by this column desc,accepted_at.desc,uuid.desc.';
+
+comment on column catalog_v1.publications.citing_publications_7d is
+  'Distinct citing publications accepted in the past 7 days, refreshed about every five minutes. Order by this column desc,accepted_at.desc,uuid.desc.';
 
 -- Read a single stored row; never aggregate on a visitor's request.
 create or replace view catalog_v1.totals
@@ -64,7 +76,7 @@ with (security_invoker = true)
 as select publications, citations, updated_at from sci.catalog_totals;
 
 comment on view catalog_v1.totals is
-  'Cached totals refreshed about once a minute: accepted publications and distinct (source publication, normalized target) citations, including SCI and DOI targets. Empty until the first refresh.';
+  'Cached totals refreshed about every five minutes: accepted publications and distinct (source publication, normalized target) citations, including SCI and DOI targets. Empty until the first refresh.';
 
 create or replace view catalog_v1.citations
 with (security_invoker = true)
@@ -119,9 +131,12 @@ begin
   return query
   select p.uuid, p.manifest_sha256, p.title, p.abstract, p.categories, p.keywords,
     p.headline_figure_caption, p.author_public_key, p.author_fingerprint, p.created_at,
-    p.accepted_at, p.files_tree, p.files, p.objects, p.search_document, c.n
+    p.accepted_at, p.files_tree, p.files, p.objects, p.search_document, c.n, c.n24, c.n48, c.n7
   from (
-    select substr(c.target_key, 5)::uuid as uuid, count(distinct c.source_uuid) as n
+    select substr(c.target_key, 5)::uuid as uuid, count(distinct c.source_uuid) as n,
+      count(distinct c.source_uuid) filter (where s.accepted_at > now() - interval '24 hours' and s.accepted_at <= now()) as n24,
+      count(distinct c.source_uuid) filter (where s.accepted_at > now() - interval '48 hours' and s.accepted_at <= now()) as n48,
+      count(distinct c.source_uuid) filter (where s.accepted_at > now() - interval '168 hours' and s.accepted_at <= now()) as n7
     from sci.publications s
     join sci.citations c on c.source_uuid = s.uuid
     where s.state = 'accepted' and s.author_fingerprint = any(fingerprints) and c.target_key like 'sci:%'

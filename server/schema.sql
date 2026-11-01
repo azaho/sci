@@ -98,6 +98,16 @@ alter table sci.publications add column if not exists citing_publications bigint
 create index if not exists publications_cited_idx
   on sci.publications (citing_publications desc, accepted_at desc, uuid desc) where state = 'accepted';
 
+alter table sci.publications add column if not exists citing_publications_24h bigint not null default 0;
+create index if not exists publications_cited_24h_idx
+  on sci.publications (citing_publications_24h desc, accepted_at desc, uuid desc) where state = 'accepted';
+alter table sci.publications add column if not exists citing_publications_48h bigint not null default 0;
+create index if not exists publications_cited_48h_idx
+  on sci.publications (citing_publications_48h desc, accepted_at desc, uuid desc) where state = 'accepted';
+alter table sci.publications add column if not exists citing_publications_7d bigint not null default 0;
+create index if not exists publications_cited_7d_idx
+  on sci.publications (citing_publications_7d desc, accepted_at desc, uuid desc) where state = 'accepted';
+
 -- Citation target keys (DESIGN.md "Citations"). The Python implementation
 -- is sci.publication.normalize_citation_target; both are tested against
 -- tests/fixtures/citation_targets.json.
@@ -222,8 +232,9 @@ create table if not exists sci.catalog_totals (
 );
 
 -- Recompute stored citation counts and catalog totals; returns the number of
--- rows changed. The maintenance worker runs it, so counts lag by at most one
--- worker interval. Matches catalog_v1.citation_counts for sci: targets.
+-- rows changed. The maintenance worker refreshes these about every five minutes.
+-- All-time counts match catalog_v1.citation_counts for sci: targets. Windows
+-- use the citing publication's acceptance time, not the target's age.
 create or replace function sci.refresh_citation_counts()
 returns bigint
 language sql
@@ -240,16 +251,23 @@ as $$
     citations = excluded.citations, updated_at = excluded.updated_at;
 
   with counts as (
-    select substr(c.target_key, 5)::uuid as uuid, count(distinct c.source_uuid) as n
+    select substr(c.target_key, 5)::uuid as uuid, count(distinct c.source_uuid) as n,
+      count(distinct c.source_uuid) filter (where s.accepted_at > now() - interval '24 hours' and s.accepted_at <= now()) as n24,
+      count(distinct c.source_uuid) filter (where s.accepted_at > now() - interval '48 hours' and s.accepted_at <= now()) as n48,
+      count(distinct c.source_uuid) filter (where s.accepted_at > now() - interval '168 hours' and s.accepted_at <= now()) as n7
     from sci.citations c
     join sci.publications s on s.uuid = c.source_uuid and s.state = 'accepted'
     where c.target_key like 'sci:%'
     group by c.target_key
   ), changed as (
-    update sci.publications p set citing_publications = coalesce(counts.n, 0)
+    update sci.publications p set citing_publications = coalesce(counts.n, 0),
+      citing_publications_24h = coalesce(counts.n24, 0),
+      citing_publications_48h = coalesce(counts.n48, 0),
+      citing_publications_7d = coalesce(counts.n7, 0)
     from sci.publications q left join counts on counts.uuid = q.uuid
     where p.uuid = q.uuid and p.state = 'accepted'
-      and p.citing_publications <> coalesce(counts.n, 0)
+      and (p.citing_publications, p.citing_publications_24h, p.citing_publications_48h, p.citing_publications_7d)
+          is distinct from (coalesce(counts.n, 0), coalesce(counts.n24, 0), coalesce(counts.n48, 0), coalesce(counts.n7, 0))
     returning 1
   )
   select count(*) from changed
@@ -354,7 +372,8 @@ grant select, insert, update on sci.catalog_totals to sci_publisher;
 grant select (archive_url) on sci.settings to anon, authenticated;
 grant select (uuid, manifest_sha256, state, author_fingerprint, author_public_key, title, abstract,
               categories, keywords, headline_figure_caption, created_at, files, files_tree,
-              accepted_at, search_document, citing_publications)
+              accepted_at, search_document, citing_publications,
+              citing_publications_24h, citing_publications_48h, citing_publications_7d)
   on sci.publications to anon, authenticated;
 grant select (source_uuid, position, target, target_key, relation, reason) on sci.citations to anon, authenticated;
 
