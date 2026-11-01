@@ -629,7 +629,15 @@ class Publisher:
                     conn.execute("update sci.uploads set temp_cleaned_at = now() where upload_id = %s", (r["upload_id"],))
                 stats["cleaned"] += 1
             with self.db.transaction() as conn:
-                stats["recounted"] = conn.execute("select sci.refresh_citation_counts() as n").fetchone()["n"]
+                # Share the refresh deadline across processes/restarts; recovery still runs each minute.
+                refreshed = conn.execute("""
+                    select sci.refresh_citation_counts() as n
+                    where not exists (
+                        select 1 from sci.catalog_totals where updated_at > now() - interval '5 minutes'
+                    )
+                """).fetchone()
+                if refreshed:
+                    stats["recounted"] = refreshed["n"]
         return stats
 
 

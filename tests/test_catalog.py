@@ -113,6 +113,9 @@ def test_cached_catalog_totals(catalog_stack, tmp_path, key):
     uids = _publish_set(s, tmp_path, key)
     assert get(s, "/totals")[1] == [empty]  # Reads do not recalculate the totals.
     s.publisher.run_maintenance_once()
+    assert get(s, "/totals")[1] == [empty]  # No recount within five minutes.
+    s.admin("update sci.catalog_totals set updated_at = now() - interval '5 minutes'")
+    s.publisher.run_maintenance_once()
     snapshot = get(s, "/totals")[1][0]
     # Four citation entries, but only three distinct source/normalized-target pairs.
     assert (snapshot["publications"], snapshot["citations"]) == (3, 3)
@@ -148,19 +151,20 @@ def test_citation_sort_and_cited_by_publishers(catalog_stack, tmp_path, key):
     assert get(s, f"/publications?uuid=eq.{uids[0]}&select=citing_publications")[1] == [{"citing_publications": 0}]
     assert s.publisher.run_maintenance_once()["recounted"] == 2
     assert s.publisher.run_maintenance_once()["recounted"] == 0
-    order = "order=citing_publications.desc,accepted_at.desc,uuid.desc"
-    status, rows, _ = get(s, f"/publications?select=uuid,citing_publications,accepted_at&{order}&limit=2")
-    assert [(r["uuid"], r["citing_publications"]) for r in rows] == [(uids[0], 2), (uids[1], 1)]
-    for r in rows:
-        assert get(s, f"/citation_counts?target_key=eq.sci:{r['uuid']}")[1][0]["citing_publications"] == r["citing_publications"]
+    for column in ("citing_publications", "citing_publications_24h", "citing_publications_48h", "citing_publications_7d"):
+        order = f"order={column}.desc,accepted_at.desc,uuid.desc"
+        status, rows, _ = get(s, f"/publications?select=uuid,{column},accepted_at&{order}&limit=2")
+        assert [(r["uuid"], r[column]) for r in rows] == [(uids[0], 2), (uids[1], 1)]
+        for r in rows:
+            assert get(s, f"/citation_counts?target_key=eq.sci:{r['uuid']}")[1][0]["citing_publications"] == r[column]
 
-    # Keyset pagination in citation order.
-    last = rows[-1]
-    n, ts = last["citing_publications"], urllib.parse.quote(last["accepted_at"])
-    after = f"accepted_at.lt.{ts},and(accepted_at.eq.{ts},uuid.lt.{last['uuid']})"
-    status, page2, _ = get(s, f"/publications?select=uuid,citing_publications&{order}&limit=10"
-                              f"&or=(citing_publications.lt.{n},and(citing_publications.eq.{n},or({after})))")
-    assert status == 200 and len(page2) == 2 and {r["citing_publications"] for r in page2} == {0}
+        # Keyset pagination in citation order.
+        last = rows[-1]
+        n, ts = last[column], urllib.parse.quote(last["accepted_at"])
+        after = f"accepted_at.lt.{ts},and(accepted_at.eq.{ts},uuid.lt.{last['uuid']})"
+        status, page2, _ = get(s, f"/publications?select=uuid,{column}&{order}&limit=10"
+                                  f"&or=({column}.lt.{n},and({column}.eq.{n},or({after})))")
+        assert status == 200 and len(page2) == 2 and {r[column] for r in page2} == {0}
 
     # Counting only selected publishers; filters and order still apply.
     rpc = "/rpc/cited_by_publishers?select=uuid,citing_publications&order=citing_publications.desc,uuid.desc&fingerprints="
@@ -171,6 +175,57 @@ def test_citation_sort_and_cited_by_publishers(catalog_stack, tmp_path, key):
     assert get(s, rpc + "{}")[1] == []
     many = ",".join(keys.fingerprint(keys.generate_private_key().public_key()) for _ in range(51))
     assert get(s, rpc + f"{{{many}}}")[0] == 400
+
+
+def test_citation_windows_expire_without_new_publications(database, tmp_path, key):
+    from datetime import timedelta, timezone
+
+    from psycopg.rows import dict_row
+    from server.database import insert_publication
+    from sci import keys
+
+    with psycopg.connect(database["admin"], row_factory=dict_row) as c:
+        # A single transaction fixes now() for exact boundary checks.
+        now = c.execute("select now() as t").fetchone()["t"].astimezone(timezone.utc)
+        c.execute("select * from sci.enable_key(%s)", (keys.b64url_encode(keys.raw_public_key(key.public_key())),))
+
+        def add(name, age, citations=(), state="accepted"):
+            folder, _ = signed_folder(tmp_path, key, name=name,
+                                      sci={"title": name, "abstract": "A", "citations": list(citations)})
+            docs = pub.verify_folder(folder)
+            return insert_publication(c, docs=docs, upload_id=None, state=state,
+                                      accepted_at=now - age, object_prefix=f"publications/{docs.manifest.uuid}/")
+
+        target = add("Old target", timedelta(days=30))["uuid"]
+        citations = [{"target": f"sci:{target}"}, {"target": f"sci:{target}", "relation": "uses"},
+                     {"target": "doi:10.1000/example"}]
+        epsilon = timedelta(microseconds=1)
+        ages = [timedelta(0), timedelta(hours=24) - epsilon, timedelta(hours=24),
+                timedelta(hours=48) - epsilon, timedelta(hours=48), timedelta(hours=168) - epsilon,
+                timedelta(hours=168), timedelta(hours=-1)]
+        for i, age in enumerate(ages):
+            add(f"Source {i}", age, citations)
+        add("Not accepted", timedelta(hours=1), citations, state="finalizing")
+
+        columns = "citing_publications, citing_publications_24h, citing_publications_48h, citing_publications_7d"
+        query = f"select {columns} from catalog_v1.publications where uuid = %s"
+        assert c.execute("select sci.refresh_citation_counts() as n").fetchone()["n"] == 1
+        assert list(c.execute(query, (target,)).fetchone().values()) == [8, 2, 4, 6]
+        assert c.execute("select sci.refresh_citation_counts() as n").fetchone()["n"] == 0
+        fingerprint = keys.fingerprint(key.public_key())
+        assert list(c.execute(f"select {columns} from catalog_v1.cited_by_publishers(%s)",
+                              ([fingerprint],)).fetchone().values()) == [8, 2, 4, 6]
+        c.execute("set local role anon")
+        assert list(c.execute(query, (target,)).fetchone().values()) == [8, 2, 4, 6]
+        c.execute("reset role")
+
+        # No new citation: passage of time alone must drop the window counts.
+        c.execute("update sci.publications set accepted_at = accepted_at - interval '8 days'")
+        assert c.execute("select sci.refresh_citation_counts() as n").fetchone()["n"] == 1
+        assert list(c.execute(query, (target,)).fetchone().values()) == [8, 0, 0, 0]
+        c.execute("update sci.publications set state = 'finalizing' where uuid <> %s", (target,))
+        c.execute("select sci.refresh_citation_counts()")
+        assert list(c.execute(query, (target,)).fetchone().values()) == [0, 0, 0, 0]
 
 
 def test_catalog_hides_unaccepted_and_private_data(catalog_stack, tmp_path, key):

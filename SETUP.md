@@ -565,6 +565,18 @@ The publishing role can read the whitelist but cannot change it. Public
 roles cannot see it. Disabling a key blocks uncommitted uploads at once;
 publications whose finalization was already committed still finish.
 
+## Citation ranking refresh
+
+The maintenance worker refreshes stored citation counts and catalog totals about
+every five minutes. The 24-hour, 48-hour, and 7-day counts use the **citing**
+publication's acceptance time; repeated references from one publication count
+once. The feed sorts indexed stored counts, with acceptance time and UUID as
+tie-breakers. Upload recovery still runs every 60 seconds.
+
+For a release that adds these columns, run **`migrate`**, then **`publisher`**,
+then **`website`** (or the combined **`release`** workflow). A website-only
+deployment does not install the new catalog columns or the refresh schedule.
+
 ## Operations and recovery
 
 | Situation | Action |
