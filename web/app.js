@@ -120,6 +120,52 @@ function categoryNodes(codes) {
   return node;
 }
 
+// Lowercase words, split like the server's search_publications().
+function searchWords(text) {
+  return (text.toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).slice(0, 16);
+}
+
+// The same prefix rule as the server: "neuro" also matches "neur…".
+function prefixMatches(word, candidates) {
+  const stem = word.length >= 5 && /[aeiouy]$/.test(word) ? word.slice(0, -1) : word;
+  return candidates.some(candidate => candidate.startsWith(stem));
+}
+
+// Category codes whose code, label, or group matches every search word.
+function matchingSubjects(text) {
+  const words = searchWords(text);
+  if (!words.length) return [];
+  const found = [];
+  for (const item of categories.values()) {
+    const candidates = searchWords(`${item.code} ${item.label} ${item.group || ""}`);
+    if (words.every(word => prefixMatches(word, candidates))) found.push(item.code);
+  }
+  return found.length > 200 ? [] : found;
+}
+
+function shortFingerprint(fingerprint) {
+  return `${fingerprint.slice(0, 16)}…`;
+}
+
+function authorLink(row) {
+  const url = new URL(base);
+  url.searchParams.set("publisher", row.author_fingerprint);
+  const node = link(row.author_name || shortFingerprint(row.author_fingerprint), url.href);
+  node.className = row.author_name ? "identity named" : "identity";
+  node.title = row.author_name ? `${row.author_name} · ${row.author_fingerprint}` : row.author_fingerprint;
+  return node;
+}
+
+function chip(label, onClick, {remove = false, title} = {}) {
+  const node = element("button", undefined, remove ? "chip active" : "chip");
+  node.type = "button";
+  node.append(element("span", label));
+  if (remove) node.append(element("span", "×", "chip-x"));
+  node.title = title || (remove ? `Remove filter: ${label}` : label);
+  node.addEventListener("click", onClick);
+  return node;
+}
+
 function dateLabel(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat(undefined, {
@@ -179,26 +225,43 @@ async function feed() {
   updateFilterLabels();
   const params = new URLSearchParams(location.search);
   $("search").value = params.get("q") || "";
-  $("publisher").value = params.get("publisher") || "";
   $("sort").value = Object.hasOwn(CITATION_SORTS, params.get("sort")) ? params.get("sort") : "latest";
-  const groups = new Map();
-  for (const item of categories.values()) {
-    if (!groups.has(item.group)) {
-      const group = element("optgroup");
-      group.label = item.group;
-      groups.set(item.group, group);
-      $("category").append(group);
-    }
-    const option = element("option", `${item.code} · ${item.label}`);
-    option.value = item.code;
-    groups.get(item.group).append(option);
-  }
-  $("category").value = categories.has(params.get("category")) ? params.get("category") : "";
+  // Strict filters, set from links on publications or from subject suggestions.
+  let category = params.get("category") || "";
+  let publisher = FINGERPRINT.test(params.get("publisher") || "") ? params.get("publisher") : "";
+  let publisherName = "";
   let last = null;
   let abort = null;
   let count = 0;
   const seen = new Set();
   let filters;
+
+  function renderChips(subjects) {
+    const active = [];
+    if (category) {
+      const item = categories.get(category);
+      active.push(chip(`Subject: ${item ? item.label : category}`, () => { category = ""; load(); }, {remove: true}));
+    }
+    if (publisher) {
+      active.push(chip(`Author: ${publisherName || shortFingerprint(publisher)}`, () => { publisher = ""; publisherName = ""; load(); },
+        {remove: true, title: `Remove filter: ${publisher}`}));
+    }
+    $("active-filters").replaceChildren(...active);
+    $("active-filters").hidden = !active.length;
+
+    const shown = category ? [] : subjects.slice(0, 8);
+    $("subject-matches").replaceChildren();
+    if (shown.length) {
+      $("subject-matches").append(element("span", "Including subjects:", "chips-label"));
+      for (const code of shown) {
+        const item = categories.get(code);
+        $("subject-matches").append(chip(item.label, () => { category = code; load(); },
+          {title: `Only ${item.label} (${code})`}));
+      }
+      if (subjects.length > shown.length) $("subject-matches").append(element("span", `+${subjects.length - shown.length} more`, "chips-label"));
+    }
+    $("subject-matches").hidden = !shown.length;
+  }
 
   async function load(reset = true) {
     if (reset) {
@@ -208,27 +271,32 @@ async function feed() {
       count = 0;
       seen.clear();
       $("more").hidden = true;
-      filters = {
-        search: $("search").value.trim(), category: $("category").value,
-        publisher: $("publisher").value.trim(), sort: $("sort").value,
-      };
+      let search = $("search").value.trim();
+      if (FINGERPRINT.test(search)) {  // A pasted fingerprint filters by author.
+        if (publisher !== search) publisherName = "";
+        publisher = search;
+        search = "";
+        $("search").value = "";
+      }
+      filters = {search, category, publisher, sort: $("sort").value, subjects: matchingSubjects(search)};
+      renderChips(filters.subjects);
       $("publications").replaceChildren(element("p", "Loading publications…", "empty"));
     }
     const signal = abort.signal;
     $("more").disabled = true;
     $("problem").hidden = true;
     try {
-      const {search, category, publisher, sort} = filters;
-      if (publisher && !FINGERPRINT.test(publisher)) {
-        throw new Error("Use the full publisher fingerprint: ed25519: followed by 64 lowercase hex characters.");
-      }
+      const {search, category, publisher, sort, subjects} = filters;
       const citationColumn = CITATION_SORTS[sort];
       const query = {
-        select: "uuid,title,abstract,categories,author_fingerprint,accepted_at,objects,headline_figure_caption,citing_publications" + (citationColumn && citationColumn !== "citing_publications" ? `,${citationColumn}` : ""),
+        select: "uuid,title,abstract,categories,author_fingerprint,author_name,accepted_at,objects,headline_figure_caption,citing_publications" + (citationColumn && citationColumn !== "citing_publications" ? `,${citationColumn}` : ""),
         order: citationColumn ? `${citationColumn}.desc,accepted_at.desc,uuid.desc` : "accepted_at.desc,uuid.desc",
         limit: 20,
       };
-      if (search) query.search_document = `wfts(english).${search}`;
+      if (search) {
+        query.q = search;
+        if (subjects.length) query.subjects = `{${subjects.join(",")}}`;
+      }
       if (category) query.categories = `cs.{${category}}`;
       if (publisher) query.author_fingerprint = `eq.${publisher}`;
       if (last) {
@@ -236,9 +304,13 @@ async function feed() {
         const cited = last[citationColumn];
         query.or = citationColumn ? `(${citationColumn}.lt.${cited},and(${citationColumn}.eq.${cited},or(${after})))` : `(${after})`;
       }
-      const rows = await catalog("publications", query, signal);
+      const rows = await catalog(search ? "rpc/search_publications" : "publications", query, signal);
       if (signal.aborted) return;
       if (reset) $("publications").replaceChildren();
+      if (reset && publisher && !publisherName) {
+        publisherName = rows.find(row => row.author_fingerprint === publisher)?.author_name || "";
+        if (publisherName) renderChips(subjects);
+      }
       for (const row of rows) {
         if (!UUID.test(row.uuid) || seen.has(row.uuid)) continue;
         seen.add(row.uuid);
@@ -247,15 +319,10 @@ async function feed() {
         const title = link(row.title, publicationURL(row.uuid));
         title.className = "title";
         const details = element("div", undefined, "pub-meta");
+        details.append(authorLink(row));
         const accepted = element("time", dateLabel(row.accepted_at));
         accepted.dateTime = row.accepted_at;
         details.append(accepted);
-        const publisherURL = new URL(base);
-        publisherURL.searchParams.set("publisher", row.author_fingerprint);
-        const identity = link(`${row.author_fingerprint.slice(0, 24)}…`, publisherURL.href);
-        identity.className = "identity";
-        identity.title = row.author_fingerprint;
-        details.append(identity);
         const cited = Number(row[citationColumn || "citing_publications"]) || 0;
         const citationWindow = {cited24h: "24h", cited48h: "48h", cited7d: "7d"}[sort];
         const citationLabel = `${cited.toLocaleString()} ${cited === 1 ? "citation" : "citations"}${citationWindow ? ` in the past ${citationWindow}` : ""}`;
@@ -290,7 +357,7 @@ async function feed() {
         article.append(heading, body);
         $("publications").append(article);
       }
-      if (!count) $("publications").append(element("p", "No publications match these filters.", "empty"));
+      if (!count) $("publications").append(element("p", search ? `No publications match “${search}”.` : "No publications match these filters.", "empty"));
       if (rows.length) last = rows.at(-1);
       $("more").hidden = rows.length < 20;
       const url = new URL(base);
@@ -308,8 +375,12 @@ async function feed() {
       if (!signal.aborted) $("more").disabled = false;
     }
   }
-  $("filters").addEventListener("submit", (event) => {event.preventDefault(); load();});
-  $("category").addEventListener("change", () => load());
+  let typing = null;
+  $("search").addEventListener("input", () => {
+    clearTimeout(typing);
+    typing = setTimeout(() => load(), 300);
+  });
+  $("filters").addEventListener("submit", (event) => {event.preventDefault(); clearTimeout(typing); load();});
   $("sort").addEventListener("change", () => load());
   $("more").addEventListener("click", () => load(false));
   await load();
@@ -441,7 +512,7 @@ async function citations(uuid) {
 async function publication() {
   const uuid = new URLSearchParams(location.search).get("id") || "";
   if (!UUID.test(uuid)) throw new Error("Use a publication link with a canonical lowercase UUIDv4 in the id parameter.");
-  const rows = await catalog("publications", {uuid: `eq.${uuid}`, limit: 1, select: "uuid,title,abstract,categories,keywords,headline_figure_caption,author_fingerprint,created_at,accepted_at,manifest_sha256,files_tree,objects"});
+  const rows = await catalog("publications", {uuid: `eq.${uuid}`, limit: 1, select: "uuid,title,abstract,categories,keywords,headline_figure_caption,author_fingerprint,author_name,created_at,accepted_at,manifest_sha256,files_tree,objects"});
   if (!rows.length) throw new Error("This publication is not available in this catalog.");
   const record = rows[0];
   $("title").textContent = record.title;
@@ -455,6 +526,7 @@ async function publication() {
   $("accepted").dateTime = record.accepted_at;
   $("uuid").textContent = uuid;
   $("fingerprint").textContent = record.author_fingerprint;
+  $("author").replaceWith(Object.assign(authorLink(record), {id: "author"}));
   $("manifest-hash").textContent = record.manifest_sha256;
   $("pull-command").textContent = `sci pull ${uuid}`;
   for (const [name, label] of [

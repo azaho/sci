@@ -25,17 +25,13 @@
       <form id="filters" role="search">
         <label class="search-label" for="search">Search publications</label>
         <div class="search-row">
-          <input id="search" name="search" type="search" placeholder="Search titles, abstracts, and keywords" maxlength="300">
-          <button class="filter-button" type="submit">Search</button>
-        </div>
-        <div class="filter-row">
-          <label for="category" class="sr-only">Subject</label>
-          <select id="category" name="category"><option value="">All subjects</option></select>
-          <label for="publisher" class="sr-only">Publisher fingerprint</label>
-          <input id="publisher" name="publisher" placeholder="Publisher fingerprint (optional)" maxlength="72" autocomplete="off">
+          <input id="search" name="search" type="search" placeholder="Search titles, abstracts, subjects, and authors" maxlength="300" autocomplete="off">
           <label for="sort" class="sr-only">Sort by</label>
           <select id="sort" name="sort"><option value="latest">Newest first</option><option value="cited">Most cited</option><option value="cited24h">Most cited (24h)</option><option value="cited48h">Most cited (48h)</option><option value="cited7d">Most cited (7d)</option></select>
+          <button class="filter-button" type="submit">Search</button>
         </div>
+        <div id="active-filters" class="chips" aria-label="Active filters" hidden></div>
+        <div id="subject-matches" class="chips suggestions" hidden></div>
       </form>
       <p id="problem" class="problem" role="alert" hidden></p>
       <div id="publications" aria-live="polite"><p class="empty">Loading publications…</p></div>

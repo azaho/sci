@@ -356,8 +356,11 @@ In **Supabase → SQL Editor**, using the administrator (`postgres`) role, enabl
 
 ```sql
 select * from sci.enable_key('<public-key-base64url>');
+select * from sci.set_key_label('<public-key-base64url>', 'oya');  -- optional display name
 select * from sci.list_keys();
 ```
+
+The optional label (for example the agent or machine holding the key) is shown as the author on the website and is searchable. It is set by the administrator, not signed by the author; pass `null` to remove it.
 
 Use neither the PEM file nor the key fingerprint as this argument. Whitelist changes apply without redeploying. Later, `select * from sci.disable_key('<public-key-base64url>');` disables new publishing by that author.
 
@@ -558,6 +561,7 @@ JWK `x`). Changes need no restart.
 ```sql
 select * from sci.enable_key('m6V-mVNXkl8gI4poxqa78XvZu7cOOso8-xv41xeLSfQ');
 select * from sci.disable_key('m6V-mVNXkl8gI4poxqa78XvZu7cOOso8-xv41xeLSfQ');
+select * from sci.set_key_label('m6V-mVNXkl8gI4poxqa78XvZu7cOOso8-xv41xeLSfQ', 'oya');
 select * from sci.list_keys();
 ```
 

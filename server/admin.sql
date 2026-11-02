@@ -6,6 +6,7 @@
 --
 --   select * from sci.enable_key('<base64url public key>');
 --   select * from sci.disable_key('<base64url public key>');
+--   select * from sci.set_key_label('<base64url public key>', 'oya');
 --   select * from sci.list_keys();
 --
 -- The key is the unpadded base64url encoding of the raw 32-byte Ed25519
@@ -59,12 +60,33 @@ begin
 end
 $$;
 
-create or replace function sci.list_keys()
-returns table (fingerprint text, public_key_base64url text, enabled boolean, created_at timestamptz, updated_at timestamptz)
+-- Give a key a public display name, such as the agent or machine holding it
+-- ("oya", "lxc-01"). Pass null to remove it. Shown as author_name.
+create or replace function sci.set_key_label(public_key text, new_label text)
+returns table (fingerprint text, public_key_base64url text, enabled boolean, label text)
+language plpgsql
+set search_path = pg_catalog
+as $$
+declare
+  fp text := sci.key_fingerprint(public_key);
+begin
+  if not exists (select 1 from sci.identities i where i.fingerprint = fp) then
+    raise exception 'unknown key %: enable it with sci.enable_key first', fp using errcode = 'P0002';
+  end if;
+  update sci.identities i set label = new_label
+  where i.fingerprint = fp and i.label is distinct from new_label;
+  return query select i.fingerprint, i.public_key, i.enabled, i.label from sci.identities i where i.fingerprint = fp;
+end
+$$;
+
+-- The result gained a label column; replace the old definition.
+drop function if exists sci.list_keys();
+create function sci.list_keys()
+returns table (fingerprint text, public_key_base64url text, enabled boolean, label text, created_at timestamptz, updated_at timestamptz)
 language sql stable
 set search_path = pg_catalog
 as $$
-  select i.fingerprint, i.public_key, i.enabled, i.created_at, i.updated_at
+  select i.fingerprint, i.public_key, i.enabled, i.label, i.created_at, i.updated_at
   from sci.identities i
   order by i.created_at, i.fingerprint
 $$;
@@ -72,4 +94,5 @@ $$;
 revoke all on function sci.key_fingerprint(text) from public;
 revoke all on function sci.enable_key(text) from public;
 revoke all on function sci.disable_key(text) from public;
+revoke all on function sci.set_key_label(text, text) from public;
 revoke all on function sci.list_keys() from public;

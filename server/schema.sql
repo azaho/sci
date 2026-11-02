@@ -48,6 +48,13 @@ create table if not exists sci.identities (
   updated_at timestamptz not null default now()
 );
 
+-- Optional display name an administrator gives a key (for example the agent
+-- or machine that holds it). Not signed; set with sci.set_key_label().
+alter table sci.identities add column if not exists label text;
+alter table sci.identities drop constraint if exists identities_label_check;
+alter table sci.identities add constraint identities_label_check
+  check (label is null or label ~ '^[A-Za-z0-9]([A-Za-z0-9 ._@+-]{0,38}[A-Za-z0-9])?$');
+
 create table if not exists sci.publications (
   uuid uuid primary key,
   manifest_sha256 text not null check (manifest_sha256 ~ '^[0-9a-f]{64}$'),
@@ -344,6 +351,12 @@ drop policy if exists citations_public_read on sci.citations;
 create policy citations_public_read on sci.citations for select to anon, authenticated
   using (exists (select 1 from sci.publications p where p.uuid = source_uuid and p.state = 'accepted'));
 
+-- Labels are public only for keys with at least one accepted publication.
+drop policy if exists identities_public_read on sci.identities;
+create policy identities_public_read on sci.identities for select to anon, authenticated
+  using (label is not null and exists (
+    select 1 from sci.publications p where p.author_fingerprint = fingerprint and p.state = 'accepted'));
+
 drop policy if exists settings_publisher on sci.settings;
 create policy settings_publisher on sci.settings for all to sci_publisher using (true) with check (true);
 drop policy if exists identities_publisher_read on sci.identities;
@@ -376,6 +389,7 @@ grant select (uuid, manifest_sha256, state, author_fingerprint, author_public_ke
               citing_publications_24h, citing_publications_48h, citing_publications_7d)
   on sci.publications to anon, authenticated;
 grant select (source_uuid, position, target, target_key, relation, reason) on sci.citations to anon, authenticated;
+grant select (fingerprint, label) on sci.identities to anon, authenticated;
 
 grant select, insert, update on sci.settings to sci_publisher;
 grant select on sci.identities to sci_publisher;
