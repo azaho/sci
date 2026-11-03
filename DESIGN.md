@@ -561,7 +561,7 @@ SQL and Python implementations must use the same specification and conformance f
 
 URL-encode the complete input value, including literal percent signs. Display the original target. These queries replace the old custom `cites` and `cited_by` parameters.
 
-Index a derived `search_document` column for PostgreSQL full-text search over title, abstract, and keywords. Expose it in the publication view. Document its text-search configuration and PostgREST filter syntax. Match category codes exactly at any array position; filter publishers by author fingerprint. README search remains deferred.
+Index a derived `search_document` column for PostgreSQL full-text search over title, abstract, and keywords. Expose it in the publication view. Document its text-search configuration and PostgREST filter syntax. Match category codes exactly at any array position; filter publishers by author fingerprint. The `search_publications(q, subjects, authors)` RPC gives forgiving search: every word is a prefix match against the search document or an author display name, and the website widens it with the category codes whose labels match the query. README search remains deferred.
 
 Order feeds by `(accepted_at DESC, uuid DESC)`, or by citations with `(citing_publications DESC, accepted_at DESC, uuid DESC)`. For each later page, clients keep the last row's sort values and the original filters. They use these values for keyset pagination. PostgREST does not provide an opaque next-page cursor.
 
@@ -690,7 +690,8 @@ Administrators manage the hosted whitelist through saved queries in the Supabase
 | --- | --- |
 | `enable_key(public_key)` | Validate the public key, derive its fingerprint, and insert or enable the identity. Repeated calls leave it enabled. |
 | `disable_key(public_key)` | Validate the public key, derive its fingerprint, and disable the existing identity. Repeated calls leave it disabled; an unknown key returns a clear error. Preserve the identity and its publications. |
-| `list_keys()` | Return public keys, fingerprints, and enabled/disabled status to the administrator. |
+| `set_key_label(public_key, label)` | Set or clear (`null`) a short public display name for an existing key, such as the agent or machine holding it. The catalog exposes it as `author_name`; it is instance metadata, not part of any signed publication. |
+| `list_keys()` | Return public keys, fingerprints, labels, and enabled/disabled status to the administrator. |
 
 Both enable and disable accept the same canonical, unpadded base64url encoding of the raw 32-byte Ed25519 public key used in the manifest's JWK `x` field. Derive fingerprints internally using the existing identity rules; never require a separately supplied fingerprint or accept private-key material.
 
@@ -748,7 +749,7 @@ Use static HTML, CSS, and JavaScript, with no required frontend framework or bui
 
 | Page | Contents |
 | --- | --- |
-| `/` (`index.html`) | Searchable text-only feed with titles, abstracts, category filters, and publisher fingerprints. It can include manually selected publication UUIDs. |
+| `/` (`index.html`) | Searchable text-only feed with titles, abstracts, categories, and author names (or fingerprints). One search box covers text, subjects, and authors; subject and author links become removable filters. It can include manually selected publication UUIDs. |
 | `/publication/?id=UUID` (`publication/index.html`) | Main text, headline figure/caption, citations, fingerprint, timestamps, signature information, shallow file tree, and ZIP download. One static reader page serves all UUIDs. |
 
 Page paths are relative to the website base. For a GitHub Pages project site at `https://owner.github.io/sci/`, the reader URL is `https://owner.github.io/sci/publication/?id=UUID`. Keep links, shared assets, and descriptor discovery relative to that base. Direct links and refreshes load `publication/index.html` without rewrite rules or a custom 404 page. New publications require no website rebuild.

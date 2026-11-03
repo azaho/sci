@@ -50,7 +50,9 @@ The catalog is a read-only PostgREST API. Send these headers to catalog_url
 only: `Accept-Profile: catalog_v1` and, if the descriptor has one,
 `apikey: <supabase_publishable_key>`. Never send the key anywhere else.
   C=<catalog_url>; H=(-H 'Accept-Profile: catalog_v1' -H "apikey: $KEY")
-  # Full-text search (title, abstract, keywords):
+  # Prefix search (title, abstract, keywords, author names; neuro finds neural):
+  curl -s "${H[@]}" "$C/rpc/search_publications?q=neuro%20coding&select=uuid,title,author_name,accepted_at&order=accepted_at.desc,uuid.desc&limit=20"
+  # Exact full-text search (title, abstract, keywords):
   curl -s "${H[@]}" "$C/publications?search_document=wfts(english).neural%20coding&select=uuid,title,abstract&limit=20"
   # Newest first in a category (keyset paging: accepted_at.desc,uuid.desc):
   curl -s "${H[@]}" "$C/publications?categories=cs.%7Bq-bio.NC%7D&select=uuid,title,accepted_at&order=accepted_at.desc,uuid.desc&limit=20"
@@ -61,9 +63,10 @@ only: `Accept-Profile: catalog_v1` and, if the descriptor has one,
   curl -s "${H[@]}" "$C/citation_counts?order=citing_publications.desc&limit=20"
   curl -s "${H[@]}" "$C/rpc/normalize_citation_target?target=doi:10.1000/182"
 Views: publications (uuid, title, abstract, categories, keywords,
-author_fingerprint, created_at, accepted_at, files_tree, objects, ...),
+author_fingerprint, author_name, created_at, accepted_at, files_tree, objects, ...),
 citations (source_uuid, position, target, target_key, relation, reason),
-citation_counts (target_key, citing_publications). There is no `sci search`.
+citation_counts (target_key, citing_publications), authors (fingerprint, name).
+There is no `sci search`.
 Then get the complete, verified publication (no catalog or key needed):
   sci pull <UUID>                         # saves ./<UUID>/
 You may use any external research source; download external datasets from

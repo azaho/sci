@@ -60,6 +60,14 @@ def test_anonymous_catalog_queries(catalog_stack, tmp_path, key):
     q = urllib.parse.quote("neural")
     status, rows, _ = get(s, f"/publications?search_document=wfts(english).{q}&select=uuid&order=accepted_at.desc,uuid.desc")
     assert {r["uuid"] for r in rows} == {uids[0], uids[2]}
+    status, rows, _ = get(s, "/rpc/search_publications?q=neur&select=uuid,author_name,accepted_at&order=accepted_at.desc,uuid.desc")
+    assert status == 200 and {r["uuid"] for r in rows} == {uids[0], uids[2]} and rows[0]["author_name"] is None
+    status, rows, _ = get(s, "/rpc/search_publications?q=zzz&subjects=%7Bstat.ML%7D&select=uuid")
+    assert [r["uuid"] for r in rows] == [uids[1]]
+    status, rows, _ = get(s, "/rpc/search_publications?q=neur&categories=cs.%7Bq-bio.NC%7D&select=uuid,categories")
+    assert status == 200 and [r["uuid"] for r in rows] == [uids[0]]
+    # PostgREST only filters and orders an RPC result by selected columns.
+    assert get(s, "/rpc/search_publications?q=neur&select=uuid&order=accepted_at.desc")[0] == 400
     status, rows, _ = get(s, "/publications?categories=cs.%7Bstat.ML%7D&select=uuid")
     assert [r["uuid"] for r in rows] == [uids[1]]
     fp = s.admin("select author_fingerprint from sci.publications limit 1")[0]["author_fingerprint"]
@@ -328,3 +336,71 @@ def test_migrations_are_idempotent_and_preserve_data(database, key):
     assert migrate(database["admin"], publisher_password=PUBLISHER_PASSWORD) == []
     with psycopg.connect(database["admin"], autocommit=True) as c:
         assert c.execute("select count(*) from sci.identities where enabled").fetchone()[0] == 1
+
+
+def test_search_publications_and_author_names(database, tmp_path, key):
+    from datetime import datetime, timezone
+
+    from psycopg.rows import dict_row
+    from server.database import insert_publication
+    from sci import keys
+
+    other = keys.generate_private_key()
+    unpublished = keys.generate_private_key()
+    b64 = lambda k: keys.b64url_encode(keys.raw_public_key(k.public_key()))  # noqa: E731
+    with psycopg.connect(database["admin"], row_factory=dict_row, autocommit=True) as c:
+        for k in (key, other, unpublished):
+            c.execute("select * from sci.enable_key(%s)", (b64(k),))
+        assert c.execute("select label from sci.set_key_label(%s, %s)", (b64(key), "oya")).fetchone() == {"label": "oya"}
+        c.execute("select * from sci.set_key_label(%s, %s)", (b64(other), "lxc-01"))
+        c.execute("select * from sci.set_key_label(%s, %s)", (b64(unpublished), "hidden"))
+        assert [r["label"] for r in c.execute("select label from sci.list_keys()")] .count("oya") == 1
+        for bad in ("", " oya", "oya ", "x" * 41, "a\nb", "<b>"):
+            with pytest.raises(psycopg.errors.CheckViolation):
+                c.execute("select * from sci.set_key_label(%s, %s)", (b64(key), bad))
+        with pytest.raises(psycopg.errors.NoDataFound):
+            c.execute("select * from sci.set_key_label(%s, 'x')", (b64(keys.generate_private_key()),))
+
+        def add(name, signer, sci):
+            folder, _ = signed_folder(tmp_path, signer, name=name, sci={"title": name, **sci})
+            docs = pub.verify_folder(folder)
+            return insert_publication(c, docs=docs, upload_id=None, state="accepted",
+                                      accepted_at=datetime.now(timezone.utc),
+                                      object_prefix=f"publications/{docs.manifest.uuid}/")["uuid"]
+
+        neural = add("Neural coding of choice", key, {"abstract": "Spikes predict choice.", "keywords": ["spike timing"]})
+        cortex = add("Cortex maps", other, {"abstract": "Neuroscience of vision.", "categories": ["q-bio.NC"]})
+        tables = add("Transformers for tables", other, {"abstract": "Attention on tabular data.", "categories": ["cs.LG"]})
+
+        c.execute("set role anon")
+
+        def search(q, subjects=(), authors=()):
+            rows = c.execute("select uuid, author_name from catalog_v1.search_publications(%s, %s, %s)",
+                             (q, list(subjects), list(authors))).fetchall()
+            return {str(r["uuid"]) for r in rows}
+
+        assert search("neuro") == {str(neural), str(cortex)}              # prefix, stemmed
+        assert search("NEURO cod") == {str(neural)}                       # every word must match
+        assert search("transformer table") == {str(tables)}
+        assert search("oya") == {str(neural)}                             # author display name
+        assert search("lxc") == {str(cortex), str(tables)}
+        assert search("hidden") == set()
+        assert search("zzz", subjects=["cs.LG"]) == {str(tables)}         # label-matched subjects
+        assert search("zzz", authors=[keys.fingerprint(key.public_key())]) == {str(neural)}
+        assert search("") == search("the") == search("'&|!:*()") == set()
+        assert c.execute("select count(*) as n from catalog_v1.search_publications('neuro') where categories && '{q-bio.NC}'").fetchone()["n"] == 1
+        with pytest.raises(psycopg.errors.InvalidParameterValue):
+            search("x" * 301)
+
+        names = {str(r["uuid"]): r["author_name"] for r in c.execute("select uuid, author_name from catalog_v1.publications")}
+        assert names == {str(neural): "oya", str(cortex): "lxc-01", str(tables): "lxc-01"}
+        # Only labels of keys with accepted publications are public, never key material.
+        assert {r["name"] for r in c.execute("select name from catalog_v1.authors")} == {"oya", "lxc-01"}
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            c.execute("select public_key from sci.identities")
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            c.execute("select * from sci.set_key_label(%s, 'x')", (b64(key),))
+        c.execute("reset role")
+
+        c.execute("select * from sci.set_key_label(%s, null)", (b64(key),))
+        assert c.execute("select author_name from catalog_v1.publications where uuid = %s", (neural,)).fetchone() == {"author_name": None}

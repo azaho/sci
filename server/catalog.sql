@@ -46,7 +46,8 @@ select
   p.citing_publications,
   p.citing_publications_24h,
   p.citing_publications_48h,
-  p.citing_publications_7d
+  p.citing_publications_7d,
+  (select i.label from sci.identities i where i.fingerprint = p.author_fingerprint) as author_name
 from sci.publications p
 where p.state = 'accepted';
 
@@ -56,6 +57,8 @@ comment on column catalog_v1.publications.search_document is
   'tsvector over title, keywords (weight A) and abstract (weight B), configuration english. Filter with search_document=wfts(english).<words>.';
 comment on column catalog_v1.publications.objects is
   'Map from file name to its original archive URL. Verify with sci pull; the acceptance record is not included.';
+comment on column catalog_v1.publications.author_name is
+  'Display name the instance administrator gave the publishing key (for example the agent or machine), or null. Not part of the signed publication.';
 comment on column catalog_v1.publications.created_at is 'Author-claimed creation time from the signed manifest.';
 comment on column catalog_v1.publications.accepted_at is 'Time this instance accepted the publication.';
 comment on column catalog_v1.publications.citing_publications is
@@ -107,6 +110,62 @@ group by c.target_key;
 comment on view catalog_v1.citation_counts is
   'Distinct accepted citing publications per target_key. No row means zero.';
 
+create or replace view catalog_v1.authors
+with (security_invoker = true)
+as select i.fingerprint, i.label as name from sci.identities i where i.label is not null;
+
+comment on view catalog_v1.authors is
+  'Display names of publishing keys with at least one accepted publication. Filter publications with author_fingerprint.';
+
+-- Forgiving search for people and agents. Every word of q is a prefix match
+-- ("neuro" finds neural, neurons, neuroscience) against the title, keywords
+-- and abstract, or against an author display name. Publications in any of
+-- the given subjects, or by any of the given fingerprints, also match: the
+-- website passes the category codes whose labels match q. Filter, order, and
+-- page the result like publications, but select every column you filter or
+-- order by: PostgREST reads only selected columns from an RPC result.
+create or replace function catalog_v1.search_publications(q text, subjects text[] default '{}', authors text[] default '{}')
+returns setof catalog_v1.publications
+language plpgsql stable
+set search_path = pg_catalog
+as $$
+declare
+  words text[];
+  text_query tsquery;
+  name_query tsquery;
+  fingerprints text[] := coalesce(authors, '{}');
+begin
+  if length(q) > 300 then
+    raise exception 'search text is limited to 300 characters' using errcode = '22023';
+  end if;
+  if cardinality(subjects) > 200 or cardinality(authors) > 50 then
+    raise exception 'at most 200 subjects and 50 author fingerprints' using errcode = '22023';
+  end if;
+  words := array(
+    select w from regexp_split_to_table(lower(coalesce(q, '')), '[^[:alnum:]]+') with ordinality t(w, n)
+    where w <> '' order by n limit 16);
+  if cardinality(words) > 0 then
+    -- A combining-form vowel is dropped too: neuro -> neur:* also finds neural.
+    text_query := to_tsquery('english'::regconfig, array_to_string(array(
+      select case when length(w) >= 5 and w ~ '[aeiouy]$'
+                  then '(' || w || ':* | ' || left(w, -1) || ':*)' else w || ':*' end
+      from unnest(words) w), ' & '));
+    name_query := to_tsquery('simple'::regconfig, array_to_string(array(select w || ':*' from unnest(words) w), ' & '));
+    fingerprints := fingerprints || array(
+      select i.fingerprint from sci.identities i
+      where i.label is not null and to_tsvector('simple'::regconfig, i.label) @@ name_query);
+  end if;
+  return query
+  select p.* from catalog_v1.publications p
+  where (text_query is not null and p.search_document @@ text_query)
+     or p.categories && coalesce(subjects, '{}')
+     or p.author_fingerprint = any (fingerprints);
+end
+$$;
+
+comment on function catalog_v1.search_publications(text, text[], text[]) is
+  'Prefix search over title, keywords, abstract and author names, optionally widened by subject codes and fingerprints. Select every column you filter or order by. Example: /rpc/search_publications?q=neuro&subjects={q-bio.NC}&select=uuid,title,accepted_at&order=accepted_at.desc,uuid.desc.';
+
 create or replace function catalog_v1.normalize_citation_target(target text)
 returns text
 language sql immutable strict parallel safe
@@ -131,7 +190,7 @@ begin
   return query
   select p.uuid, p.manifest_sha256, p.title, p.abstract, p.categories, p.keywords,
     p.headline_figure_caption, p.author_public_key, p.author_fingerprint, p.created_at,
-    p.accepted_at, p.files_tree, p.files, p.objects, p.search_document, c.n, c.n24, c.n48, c.n7
+    p.accepted_at, p.files_tree, p.files, p.objects, p.search_document, c.n, c.n24, c.n48, c.n7, p.author_name
   from (
     select substr(c.target_key, 5)::uuid as uuid, count(distinct c.source_uuid) as n,
       count(distinct c.source_uuid) filter (where s.accepted_at > now() - interval '24 hours' and s.accepted_at <= now()) as n24,
@@ -151,8 +210,9 @@ comment on function catalog_v1.cited_by_publishers(text[]) is
 
 revoke all on all tables in schema catalog_v1 from public, anon, authenticated;
 revoke all on all functions in schema catalog_v1 from public;
-grant select on catalog_v1.publications, catalog_v1.citations, catalog_v1.citation_counts, catalog_v1.totals to anon, authenticated;
-grant execute on function catalog_v1.normalize_citation_target(text), catalog_v1.cited_by_publishers(text[]) to anon, authenticated;
+grant select on catalog_v1.publications, catalog_v1.citations, catalog_v1.citation_counts, catalog_v1.totals, catalog_v1.authors to anon, authenticated;
+grant execute on function catalog_v1.normalize_citation_target(text), catalog_v1.cited_by_publishers(text[]),
+  catalog_v1.search_publications(text, text[], text[]) to anon, authenticated;
 do $$
 begin
   if exists (select 1 from pg_roles where rolname = 'service_role') then
