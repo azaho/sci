@@ -1,4 +1,4 @@
-"""The ``sci`` command: server, keygen, sign, verify, push, pull."""
+"""The ``sci`` command: server, keygen, profile, sign, verify, push, pull."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from . import __version__, keys
+from . import __version__, actions, keys
 from . import publication as pub
 
 MAIN_HELP = """\
@@ -28,6 +28,7 @@ Citations link publications, so later work can build on earlier work.
 COMMANDS
   sci server [URL]     Show or set the default server for push and pull.
   sci keygen           Create your signing key pair (~/.sci/key.pem).
+  sci profile          Show or set your key's name and bio on the server.
   sci sign FOLDER      Validate, package, and sign a publication folder.
   sci verify FOLDER    Check a signed folder (signature, license, every file).
   sci push FOLDER      Upload a signed folder to the server.
@@ -419,6 +420,50 @@ def cmd_keygen(args, out: Out) -> int:
     return 0
 
 
+def fetch_profile(d: dict, fingerprint: str) -> dict | None:
+    """Read a key's current profile from the public catalog."""
+    query = urllib.parse.urlencode({"fingerprint": f"eq.{fingerprint}", "select": "name,bio,revision"})
+    headers = {"Accept-Profile": d.get("catalog_schema", "catalog_v1"), "Accept": "application/json"}
+    if d.get("supabase_publishable_key"):
+        headers["apikey"] = d["supabase_publishable_key"]
+    r = http("GET", pub.join_url(d["catalog_url"], "profiles") + "?" + query, headers=headers, limit=65_536)
+    rows = r.json()
+    if r.status != 200 or not isinstance(rows, list):
+        raise CliError(f"cannot read the profile from the catalog (HTTP {r.status})", "catalog_error")
+    return rows[0] if rows else None
+
+
+def cmd_profile(args, out: Out) -> int:
+    key = keys.load_private_key(Path(args.key).expanduser() if args.key else default_key_path())
+    fp = keys.fingerprint(key.public_key())
+    server = resolve_server(args)
+    d = fetch_descriptor(server)
+    current = fetch_profile(d, fp) or {"revision": 0}
+    if args.field is None:
+        out.result(
+            f"Fingerprint: {fp}\nName: {current.get('name') or '(not set)'}\nBio:  {current.get('bio') or '(not set)'}",
+            {"fingerprint": fp, "server": server, **current},
+        )
+        return 0
+    name, bio = current.get("name"), current.get("bio")
+    if args.field == "name":
+        name = args.value
+    else:
+        bio = args.value
+    if not name:
+        raise CliError("set a name first: sci profile set name NAME", "name_required")
+    payload = actions.profile_payload(signer=fp, audience=server, expected_revision=current["revision"], name=name, bio=bio)
+    body = actions.sign(key, payload)
+    r = http_retrying("POST", pub.join_url(d["publishing_api_url"], "actions"), data=json.dumps(body).encode(),
+                      headers={"Content-Type": "application/json"}, out=out)
+    if r.status not in (200, 201):
+        code, msg = api_error_message(r)
+        raise CliError(f"server rejected the profile update (HTTP {r.status}, {code}): {msg}", code)
+    result = {**r.json(), "name": name, "bio": bio, "server": server}
+    out.result(f"Profile updated (revision {result['revision']}) for {fp}", result)
+    return 0
+
+
 def _check_key_location(key_path: Path, folder: Path) -> None:
     try:
         key_real = key_path.resolve()
@@ -666,6 +711,22 @@ def build_parser() -> argparse.ArgumentParser:
     k.add_argument("--key", metavar="PATH", help="private key path")
     k.set_defaults(func=cmd_keygen)
 
+    pr = sub.add_parser(
+        "profile", parents=[common], formatter_class=raw,
+        help="show or set your name and bio",
+        description="Show the profile of your key on the server, or set its name or bio. Setting a field signs\n"
+        "the whole new profile with your key and submits it at once. Names and bios are\n"
+        "self-reported; the full fingerprint stays the identity.\n\n"
+        f"Limits: name {actions.MAX_NAME} characters, bio {actions.MAX_BIO} characters. An empty bio removes it.\n\n"
+        "Examples:\n  sci profile\n  sci profile set name \"Ada Lovelace\"\n  sci profile set bio \"Computational neuroscience.\"",
+    )
+    pr.add_argument("verb", nargs="?", choices=["set"], help="set a field")
+    pr.add_argument("field", nargs="?", choices=["name", "bio"])
+    pr.add_argument("value", nargs="?")
+    pr.add_argument("--key", metavar="PATH", help="private key (default ~/.sci/key.pem)")
+    pr.add_argument("--server", metavar="URL", help="use this server for this command only")
+    pr.set_defaults(func=cmd_profile)
+
     g = sub.add_parser("sign", parents=[common], formatter_class=raw, help="validate and sign a publication folder", description=SIGN_HELP)
     g.add_argument("folder", help="publication folder, for example ./result")
     g.add_argument("--key", metavar="PATH", help="private key (default ~/.sci/key.pem)")
@@ -701,6 +762,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv=None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if getattr(args, "command", None) == "profile" and args.verb and (args.field is None or args.value is None):
+        parser.error("usage: sci profile set {name,bio} VALUE")
     if not getattr(args, "command", None):
         parser.print_help()
         return 2

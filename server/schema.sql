@@ -293,6 +293,29 @@ create table if not exists sci.uploads (
 create unique index if not exists uploads_one_active_idx on sci.uploads (publication_uuid) where state = 'pending';
 create index if not exists uploads_cleanup_idx on sci.uploads (state, deadline) where temp_cleaned_at is null;
 
+-- Signed action records (DESIGN.md "Signed action records"): the original
+-- payload bytes and signature of every accepted action. Never updated.
+create table if not exists sci.actions (
+  id uuid primary key,
+  type text not null check (type in ('profile')),
+  signer_fingerprint text not null references sci.identities (fingerprint),
+  public_key text not null,
+  payload bytea not null,
+  signature bytea not null check (octet_length(signature) = 64),
+  accepted_at timestamptz not null default now()
+);
+create index if not exists actions_signer_idx on sci.actions (signer_fingerprint, accepted_at);
+
+-- Current profile per key, derived from its latest accepted profile action.
+create table if not exists sci.profiles (
+  fingerprint text primary key references sci.identities (fingerprint),
+  name text not null,
+  bio text,
+  revision integer not null check (revision > 0),
+  action_id uuid not null references sci.actions (id),
+  updated_at timestamptz not null default now()
+);
+
 -- Advisory lock keys shared by the service, recovery workers, and admin helpers.
 create or replace function sci.lock_key(kind text, id text)
 returns bigint
@@ -328,6 +351,8 @@ alter table sci.identities enable row level security;
 alter table sci.publications enable row level security;
 alter table sci.citations enable row level security;
 alter table sci.uploads enable row level security;
+alter table sci.actions enable row level security;
+alter table sci.profiles enable row level security;
 alter table sci.schema_migrations enable row level security;
 
 drop policy if exists catalog_totals_public_read on sci.catalog_totals;
@@ -344,6 +369,9 @@ drop policy if exists citations_public_read on sci.citations;
 create policy citations_public_read on sci.citations for select to anon, authenticated
   using (exists (select 1 from sci.publications p where p.uuid = source_uuid and p.state = 'accepted'));
 
+drop policy if exists profiles_public_read on sci.profiles;
+create policy profiles_public_read on sci.profiles for select to anon, authenticated using (true);
+
 drop policy if exists settings_publisher on sci.settings;
 create policy settings_publisher on sci.settings for all to sci_publisher using (true) with check (true);
 drop policy if exists identities_publisher_read on sci.identities;
@@ -354,6 +382,10 @@ drop policy if exists citations_publisher on sci.citations;
 create policy citations_publisher on sci.citations for all to sci_publisher using (true) with check (true);
 drop policy if exists uploads_publisher on sci.uploads;
 create policy uploads_publisher on sci.uploads for all to sci_publisher using (true) with check (true);
+drop policy if exists actions_publisher on sci.actions;
+create policy actions_publisher on sci.actions for all to sci_publisher using (true) with check (true);
+drop policy if exists profiles_publisher on sci.profiles;
+create policy profiles_publisher on sci.profiles for all to sci_publisher using (true) with check (true);
 
 -- Grants. Public roles get only the columns the catalog views need.
 revoke all on all tables in schema sci from public, anon, authenticated;
@@ -376,10 +408,13 @@ grant select (uuid, manifest_sha256, state, author_fingerprint, author_public_ke
               citing_publications_24h, citing_publications_48h, citing_publications_7d)
   on sci.publications to anon, authenticated;
 grant select (source_uuid, position, target, target_key, relation, reason) on sci.citations to anon, authenticated;
+grant select (fingerprint, name, bio, revision, updated_at) on sci.profiles to anon, authenticated;
 
 grant select, insert, update on sci.settings to sci_publisher;
 grant select on sci.identities to sci_publisher;
 grant select, insert, update on sci.publications, sci.citations, sci.uploads to sci_publisher;
+grant select, insert on sci.actions to sci_publisher;
+grant select, insert, update on sci.profiles to sci_publisher;
 
 grant execute on function sci.search_document(text, text, text[]) to anon, authenticated, sci_publisher;
 grant execute on function sci.citation_target_key(text) to anon, authenticated, sci_publisher;

@@ -104,6 +104,7 @@ figcaption{margin-top:12px;font-size:13px;color:var(--muted);white-space:pre-wra
 dl{margin:16px 0}
 dt{color:var(--muted);font-size:12px;margin:16px 0 4px}
 dd{margin:0}
+#publisher-bio{display:block;white-space:pre-line}
 .verified{color:var(--green)}
 .downloads a{display:block;padding:4px 0}
 #file-list{background:none;padding:0}
