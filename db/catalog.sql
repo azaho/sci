@@ -1,7 +1,7 @@
 -- SCI public catalog contract: schema catalog_v1.
 --
 -- PostgREST exposes only this schema. Views are security_invoker, so the
--- row policies and column grants in schema.sql apply to anonymous readers.
+-- row policies and column grants in base.sql, publications.sql, and citations.sql apply to anonymous readers.
 -- Preserve these names and meanings; breaking changes need catalog_v2.
 
 create schema if not exists catalog_v1;

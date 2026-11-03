@@ -13,7 +13,7 @@ import pytest
 
 from sci import keys
 from sci import publication as pub
-from sci.cli import encode_multipart
+from sci.net import encode_multipart
 from server import app as appmod
 from server.storage import StorageError
 
@@ -518,7 +518,7 @@ def test_conflicting_destination_is_never_overwritten(stack, tmp_path, key, monk
 def test_rebuild_catalog_after_sql_loss(stack, tmp_path, key, pg_cluster):
     import psycopg
 
-    from server.database import migrate
+    from db.migrate import migrate
 
     from .conftest import PUBLISHER_PASSWORD, admin_dsn
 

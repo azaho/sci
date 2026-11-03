@@ -67,7 +67,7 @@ services:
       context: ..
       dockerfile: server/Dockerfile
     image: sci-publisher:local
-    command: ["python", "-m", "server.database", "migrate"]
+    command: ["python", "-m", "db", "migrate"]
     environment:
       SCI_ADMIN_DATABASE_URL: postgresql://sci_admin:${SCI_ADMIN_DB_PASSWORD:-local-admin}@db:5432/sci
       SCI_PUBLISHER_DB_PASSWORD: ${SCI_PUBLISHER_DB_PASSWORD:-local-publisher}

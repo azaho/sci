@@ -121,7 +121,7 @@ def test_mirror_between_instances_without_private_key(database, rustfs, tmp_path
     import psycopg
 
     from .conftest import PUBLISHER_PASSWORD, admin_dsn, publisher_dsn
-    from server.database import migrate
+    from db.migrate import migrate
 
     lab, stop_lab = start_stack(database, rustfs, tmp_path / "lab")
     cluster = database["cluster"]

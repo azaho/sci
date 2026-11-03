@@ -195,7 +195,7 @@ def publisher_dsn(cluster, db: str) -> str:
 def database(pg_cluster):
     import psycopg
 
-    from server.database import migrate
+    from db.migrate import migrate
 
     name = "t_" + _uuid.uuid4().hex[:12]
     with psycopg.connect(admin_dsn(pg_cluster), autocommit=True) as c:
