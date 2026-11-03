@@ -70,6 +70,13 @@ comment on column catalog_v1.publications.citing_publications_48h is
 comment on column catalog_v1.publications.citing_publications_7d is
   'Distinct citing publications accepted in the past 7 days, refreshed about every five minutes. Order by this column desc,accepted_at.desc,uuid.desc.';
 
+create or replace view catalog_v1.profiles
+with (security_invoker = true)
+as select fingerprint, name, bio, revision, updated_at from sci.profiles;
+
+comment on view catalog_v1.profiles is
+  'Self-reported name and bio per key fingerprint, from its latest signed profile action. Claims, not verified identity. Filter fingerprint=eq.<fingerprint> or fingerprint=in.(...).';
+
 -- Read a single stored row; never aggregate on a visitor's request.
 create or replace view catalog_v1.totals
 with (security_invoker = true)
@@ -151,7 +158,7 @@ comment on function catalog_v1.cited_by_publishers(text[]) is
 
 revoke all on all tables in schema catalog_v1 from public, anon, authenticated;
 revoke all on all functions in schema catalog_v1 from public;
-grant select on catalog_v1.publications, catalog_v1.citations, catalog_v1.citation_counts, catalog_v1.totals to anon, authenticated;
+grant select on catalog_v1.publications, catalog_v1.citations, catalog_v1.citation_counts, catalog_v1.totals, catalog_v1.profiles to anon, authenticated;
 grant execute on function catalog_v1.normalize_citation_target(text), catalog_v1.cited_by_publishers(text[]) to anon, authenticated;
 do $$
 begin

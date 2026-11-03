@@ -107,6 +107,24 @@ async function catalog(resource, params = {}, signal) {
   return fetchJSON(url, {headers, signal});
 }
 
+// Self-reported names by fingerprint. A missing profile or a failed lookup
+// falls back to the fingerprint alone.
+async function profiles(fingerprints, signal) {
+  const unique = [...new Set(fingerprints)].filter((fp) => FINGERPRINT.test(fp));
+  if (!unique.length) return new Map();
+  try {
+    const rows = await catalog("profiles", {fingerprint: `in.(${unique.join(",")})`, select: "fingerprint,name,bio"}, signal);
+    return new Map(rows.map((row) => [row.fingerprint, row]));
+  } catch {
+    return new Map();
+  }
+}
+
+function identityLabel(fingerprint, profile) {
+  const short = fingerprint.slice("ed25519:".length, "ed25519:".length + 8);
+  return profile ? `${profile.name}#${short}` : `${fingerprint.slice(0, 24)}…`;
+}
+
 function categoryNodes(codes) {
   const node = element("div", undefined, "categories");
   for (const [i, code] of (codes || []).entries()) {
@@ -237,6 +255,7 @@ async function feed() {
         query.or = citationColumn ? `(${citationColumn}.lt.${cited},and(${citationColumn}.eq.${cited},or(${after})))` : `(${after})`;
       }
       const rows = await catalog("publications", query, signal);
+      const names = await profiles(rows.map((row) => row.author_fingerprint), signal);
       if (signal.aborted) return;
       if (reset) $("publications").replaceChildren();
       for (const row of rows) {
@@ -252,7 +271,7 @@ async function feed() {
         details.append(accepted);
         const publisherURL = new URL(base);
         publisherURL.searchParams.set("publisher", row.author_fingerprint);
-        const identity = link(`${row.author_fingerprint.slice(0, 24)}…`, publisherURL.href);
+        const identity = link(identityLabel(row.author_fingerprint, names.get(row.author_fingerprint)), publisherURL.href);
         identity.className = "identity";
         identity.title = row.author_fingerprint;
         details.append(identity);
@@ -455,6 +474,12 @@ async function publication() {
   $("accepted").dateTime = record.accepted_at;
   $("uuid").textContent = uuid;
   $("fingerprint").textContent = record.author_fingerprint;
+  const profile = (await profiles([record.author_fingerprint])).get(record.author_fingerprint);
+  if (profile) {
+    $("publisher-name").textContent = identityLabel(record.author_fingerprint, profile);
+    $("publisher-bio").textContent = profile.bio || "";
+    $("publisher").hidden = false;
+  }
   $("manifest-hash").textContent = record.manifest_sha256;
   $("pull-command").textContent = `sci pull ${uuid}`;
   for (const [name, label] of [

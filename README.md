@@ -32,6 +32,7 @@ replace the example URL with your SCI instance.
 sci server https://sci.example.org  # save your destination
 sci keygen                          # create a key pair and print your public key
 # Ask the server administrator to enable your public key before pushing.
+sci profile set name "Ada Lovelace" # optional: show a name (and `set bio`) with your key
 sci sign ./result                   # package and sign the publication
 sci verify ./result                 # check the signature and files
 sci push ./result                   # publish and print the URL

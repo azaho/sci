@@ -150,6 +150,7 @@ Start with six commands. `sign` prepares a publication locally; `verify` checks 
 | --- | --- |
 | `sci server [URL]` | With no URL, show the saved default server. With a URL, validate and save it as the default for both `push` and `pull`, then print it. |
 | `sci keygen` | Create the default local Ed25519 key pair as `key.pem` and `key.pub.pem`. Never overwrite either existing file. |
+| `sci profile [set name\|bio VALUE]` | Show the selected key's profile on the selected server, or set one field. Setting signs the complete new profile (name, optional bio) as a `profile` action with the current revision and submits it. The key must be enabled. |
 | `sci sign ./result` | Validate the supplied folder, generate the fixed `LICENSE`, package supporting files, generate a UUIDv4 and `manifest.json`, and write `manifest.json.sig` in that folder. Print the UUID. No network access. |
 | `sci verify ./result` | Verify the manifest signature, both document schemas, the approved `LICENSE`, and every declared file's exact hash and size. Print the UUID and signing-key fingerprint. No private key or network access required. Missing or changed files cause failure. |
 | `sci push ./result` | Verify the folder’s existing signed publication and upload it to the selected server. The author’s key must be enabled on that server’s whitelist. No private key is required. Print the accepted publication URL. |
@@ -456,12 +457,13 @@ The `supabase_publishable_key` is public configuration. It is not a user credent
 
 CLI and website discover services through this descriptor. Document it for agents, including `Accept-Profile: catalog_v1` for catalog GET requests. `pull` constructs archive URLs from `archive_url`, the canonical UUID, and the permitted filenames. It needs no SQL query, Supabase key, or Python publishing service. The manifest hash remains verification and conflict-detection data; it is not part of the path.
 
-The Python service has two publication endpoints:
+The Python service has two publication endpoints and one action endpoint:
 
 | Endpoint | Purpose |
 | --- | --- |
 | `POST /publications` | Submit original JSON files and publication signature. Check the author key’s whitelist status and publication limits. Return the upload attempt and destinations, or the identical accepted result. |
 | `POST /publications/{uuid}/complete` | Submit the upload attempt ID and manifest hash. Verify and accept that pending upload. Safe to retry. |
+| `POST /actions` | Submit `{"payload": <base64url JSON bytes>, "signatures": [{"public_key", "signature"}]}`. The signature covers `SCI-ACTION\0v1\0` followed by the payload bytes. Only `profile` exists: `version`, `type`, `id`, `audience`, `signer`, `expected_revision`, `name` (64 characters), optional `bio` (500). Keep the original bytes in `sci.actions` and the current profile in `sci.profiles` (public as `catalog_v1.profiles`). The same ID and bytes return the existing result. |
 
 The publishing endpoints require no separate upload credential. Use HTTPS. Use multipart form data for `POST /publications`:
 

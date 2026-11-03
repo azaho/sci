@@ -3,6 +3,7 @@
 Endpoints:
     POST /publications                  submit sci.json, manifest.json, signature
     POST /publications/{uuid}/complete  verify uploaded files and accept
+    POST /actions                       accept a signed action (profile updates)
     GET  /health                        readiness (database and storage)
 
 Commands:
@@ -37,7 +38,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 
-from sci import __version__, keys
+from sci import __version__, actions, keys
 from sci import publication as pub
 
 from . import database as dbm
@@ -49,6 +50,7 @@ log = logging.getLogger("sci.server")
 # Multipart overhead allowance on top of the 64 KiB JSON limit and signature.
 MAX_SUBMISSION_BODY = pub.MAX_JSON_BYTES + keys.SIGNATURE_BYTES + 16_384
 MAX_COMPLETE_BODY = 4_096
+MAX_ACTION_BODY = 2 * actions.MAX_ACTION_BYTES + 1_024  # base64url payload plus one signature
 FINALIZE_LOCK_WAIT = 0.0  # busy: answer 503 at once; clients retry
 # About $200 per month of R2 Standard storage at $0.015 per GB-month.
 DEFAULT_MAX_STORAGE_BYTES = 13_000_000_000_000
@@ -579,6 +581,47 @@ class Publisher:
 
     # -- background maintenance ---------------------------------------------------
 
+    # -- signed actions --------------------------------------------------------
+
+    def apply_action(self, body: bytes) -> tuple[int, dict]:
+        """Verify a signed action and update the derived state in one transaction."""
+        try:
+            action = actions.verify(pub.parse_strict_json(body, "request"))
+        except pub.PublicationError as exc:
+            raise from_publication_error(exc) from exc
+        if not actions.same_audience(action.payload["audience"], self.settings.instance_url):
+            raise ApiError(400, "wrong_audience", f"This action is for {action.payload['audience']}, not this instance ({self.settings.instance_url}).")
+        result = {"id": action.id, "type": action.type, "signer": action.signer, "revision": action.payload["expected_revision"] + 1}
+        with self.db.transaction() as conn:
+            Database.xact_lock(conn, "action", action.id)
+            Database.xact_lock(conn, "identity", action.signer, shared=True)
+            Database.xact_lock(conn, "profile", action.signer)
+            prior = conn.execute("select payload from sci.actions where id = %s", (action.id,)).fetchone()
+            if prior is not None:
+                if bytes(prior["payload"]) != action.payload_bytes:
+                    raise ApiError(409, "action_conflict", "A different action with this ID was already accepted.")
+                return 200, result
+            ident = dbm.get_identity(conn, action.signer)
+            if ident is None or not ident["enabled"] or ident["public_key"] != action.public_key_b64:
+                raise ApiError(403, "key_not_enabled", f"The signing key {action.signer} is not enabled on this server's whitelist.")
+            row = conn.execute("select revision from sci.profiles where fingerprint = %s", (action.signer,)).fetchone()
+            current = row["revision"] if row else 0
+            if action.payload["expected_revision"] != current:
+                raise ApiError(409, "revision_conflict", f"The profile changed (current revision {current}). Fetch it and try again.")
+            conn.execute(
+                "insert into sci.actions (id, type, signer_fingerprint, public_key, payload, signature) values (%s, %s, %s, %s, %s, %s)",
+                (action.id, action.type, action.signer, action.public_key_b64, action.payload_bytes, action.signature),
+            )
+            conn.execute(
+                """
+                insert into sci.profiles (fingerprint, name, bio, revision, action_id) values (%s, %s, %s, %s, %s)
+                on conflict (fingerprint) do update set name = excluded.name, bio = excluded.bio,
+                  revision = excluded.revision, action_id = excluded.action_id, updated_at = now()
+                """,
+                (action.signer, action.payload["name"], action.payload.get("bio"), result["revision"], action.id),
+            )
+        return 201, result
+
     def run_maintenance_once(self) -> dict:
         stats = {"resumed": 0, "expired": 0, "cleaned": 0, "recounted": 0}
         with self.db.session_lock("worker", "maintenance", 0) as (acquired, _conn):
@@ -809,6 +852,15 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True) -
         except ApiError as exc:
             return exc.response()
 
+    async def submit_action(request: Request):
+        try:
+            guard(request)
+            body = await read_capped(request, MAX_ACTION_BODY)
+            status, result = await run_in_threadpool(publisher().apply_action, body)
+            return json_response(result, status)
+        except ApiError as exc:
+            return exc.response()
+
     async def health(request: Request):
         """200 while the process and database work. Storage status is reported
         per bucket but does not fail the check, so an R2 problem cannot cause
@@ -878,6 +930,7 @@ def create_app(settings: Settings | None = None, *, start_worker: bool = True) -
             Route("/health", health, methods=["GET"]),
             Route("/publications", submit, methods=["POST"]),
             Route("/publications/{uuid}/complete", complete, methods=["POST"]),
+            Route("/actions", submit_action, methods=["POST"]),
         ],
         exception_handlers={404: not_found, 405: method_not_allowed, 500: server_error},
         lifespan=lifespan,
