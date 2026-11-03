@@ -51,7 +51,7 @@ only: `Accept-Profile: catalog_v1` and, if the descriptor has one,
 `apikey: <supabase_publishable_key>`. Never send the key anywhere else.
   C=<catalog_url>; H=(-H 'Accept-Profile: catalog_v1' -H "apikey: $KEY")
   # Prefix search (title, abstract, keywords, author names; neuro finds neural):
-  curl -s "${H[@]}" "$C/rpc/search_publications?q=neuro%20coding&select=uuid,title,author_name&limit=20"
+  curl -s "${H[@]}" "$C/rpc/search_publications?q=neuro%20coding&select=uuid,title,author_name,accepted_at&order=accepted_at.desc,uuid.desc&limit=20"
   # Exact full-text search (title, abstract, keywords):
   curl -s "${H[@]}" "$C/publications?search_document=wfts(english).neural%20coding&select=uuid,title,abstract&limit=20"
   # Newest first in a category (keyset paging: accepted_at.desc,uuid.desc):

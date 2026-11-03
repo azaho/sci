@@ -122,7 +122,8 @@ comment on view catalog_v1.authors is
 -- and abstract, or against an author display name. Publications in any of
 -- the given subjects, or by any of the given fingerprints, also match: the
 -- website passes the category codes whose labels match q. Filter, order, and
--- page the result like publications.
+-- page the result like publications, but select every column you filter or
+-- order by: PostgREST reads only selected columns from an RPC result.
 create or replace function catalog_v1.search_publications(q text, subjects text[] default '{}', authors text[] default '{}')
 returns setof catalog_v1.publications
 language plpgsql stable
@@ -163,7 +164,7 @@ end
 $$;
 
 comment on function catalog_v1.search_publications(text, text[], text[]) is
-  'Prefix search over title, keywords, abstract and author names, optionally widened by subject codes and fingerprints. Example: /rpc/search_publications?q=neuro&subjects={q-bio.NC}.';
+  'Prefix search over title, keywords, abstract and author names, optionally widened by subject codes and fingerprints. Select every column you filter or order by. Example: /rpc/search_publications?q=neuro&subjects={q-bio.NC}&select=uuid,title,accepted_at&order=accepted_at.desc,uuid.desc.';
 
 create or replace function catalog_v1.normalize_citation_target(target text)
 returns text

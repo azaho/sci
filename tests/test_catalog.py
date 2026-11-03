@@ -60,12 +60,14 @@ def test_anonymous_catalog_queries(catalog_stack, tmp_path, key):
     q = urllib.parse.quote("neural")
     status, rows, _ = get(s, f"/publications?search_document=wfts(english).{q}&select=uuid&order=accepted_at.desc,uuid.desc")
     assert {r["uuid"] for r in rows} == {uids[0], uids[2]}
-    status, rows, _ = get(s, "/rpc/search_publications?q=neur&select=uuid,author_name&order=accepted_at.desc,uuid.desc")
+    status, rows, _ = get(s, "/rpc/search_publications?q=neur&select=uuid,author_name,accepted_at&order=accepted_at.desc,uuid.desc")
     assert status == 200 and {r["uuid"] for r in rows} == {uids[0], uids[2]} and rows[0]["author_name"] is None
     status, rows, _ = get(s, "/rpc/search_publications?q=zzz&subjects=%7Bstat.ML%7D&select=uuid")
     assert [r["uuid"] for r in rows] == [uids[1]]
-    status, rows, _ = get(s, "/rpc/search_publications?q=neur&categories=cs.%7Bq-bio.NC%7D&select=uuid")
-    assert [r["uuid"] for r in rows] == [uids[0]]
+    status, rows, _ = get(s, "/rpc/search_publications?q=neur&categories=cs.%7Bq-bio.NC%7D&select=uuid,categories")
+    assert status == 200 and [r["uuid"] for r in rows] == [uids[0]]
+    # PostgREST only filters and orders an RPC result by selected columns.
+    assert get(s, "/rpc/search_publications?q=neur&select=uuid&order=accepted_at.desc")[0] == 400
     status, rows, _ = get(s, "/publications?categories=cs.%7Bstat.ML%7D&select=uuid")
     assert [r["uuid"] for r in rows] == [uids[1]]
     fp = s.admin("select author_fingerprint from sci.publications limit 1")[0]["author_fingerprint"]
