@@ -1,25 +1,16 @@
 """PostgreSQL access for the publishing service and administrative commands.
 
-The service connects as ``sci_publisher``. Migrations run as the database
-administrator:
-
-    SCI_ADMIN_DATABASE_URL=postgresql://... python -m server.database migrate
-
-Migrations apply schema.sql, catalog.sql, and admin.sql in one transaction.
-The files are idempotent and never drop data.
+The service connects as ``sci_publisher``. The schema lives in ``db/``; apply
+it with ``python -m db migrate``.
 """
 
 from __future__ import annotations
 
-import argparse
 import contextlib
-import hashlib
 import json
 import logging
-import os
 import sys
 import time
-from pathlib import Path
 
 import psycopg
 from psycopg import sql
@@ -27,9 +18,6 @@ from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 
 log = logging.getLogger("sci.database")
-
-SQL_DIR = Path(__file__).resolve().parent
-MIGRATION_FILES = ("schema.sql", "catalog.sql", "admin.sql")
 
 
 class Database:
@@ -177,85 +165,9 @@ def insert_publication(conn, *, docs, upload_id: str | None, state: str, accepte
     return row
 
 
-# -- migrations ------------------------------------------------------------------
-
-
-def migrate(
-    admin_dsn: str,
-    *,
-    publisher_password: str | None = None,
-    authenticator_password: str | None = None,
-    instance_url: str | None = None,
-    archive_url: str | None = None,
-) -> list[str]:
-    """Apply the idempotent SQL files; return the names that changed."""
-    changed = []
-    with psycopg.connect(admin_dsn, autocommit=True) as conn:
-        with conn.transaction():
-            # Serialize concurrent migration runs.
-            conn.execute("select pg_advisory_xact_lock(7271390001)")
-            for name in MIGRATION_FILES:
-                text = (SQL_DIR / name).read_text(encoding="utf-8")
-                digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
-                conn.execute(text)
-                prev = conn.execute("select sha256 from sci.schema_migrations where name = %s", (name,)).fetchone()
-                if prev is None or prev[0] != digest:
-                    changed.append(name)
-                    conn.execute(
-                        """
-                        insert into sci.schema_migrations (name, sha256) values (%s, %s)
-                        on conflict (name) do update set sha256 = excluded.sha256, applied_at = now()
-                        """,
-                        (name, digest),
-                    )
-            if publisher_password:
-                conn.execute(
-                    sql.SQL("alter role sci_publisher login password {}").format(sql.Literal(publisher_password))
-                )
-            if authenticator_password:
-                # Local PostgREST only; Supabase provides its own authenticator.
-                exists = conn.execute("select 1 from pg_roles where rolname = 'authenticator'").fetchone()
-                if not exists:
-                    conn.execute("create role authenticator noinherit login")
-                conn.execute(
-                    sql.SQL("alter role authenticator login password {}").format(sql.Literal(authenticator_password))
-                )
-                conn.execute("grant anon to authenticator")
-                conn.execute("alter role anon set statement_timeout = '5s'")
-            if instance_url and archive_url:
-                conn.execute(
-                    """
-                    insert into sci.settings (id, instance_url, archive_url) values (true, %s, %s)
-                    on conflict (id) do update set instance_url = excluded.instance_url,
-                      archive_url = excluded.archive_url, updated_at = now()
-                    """,
-                    (instance_url, archive_url),
-                )
-            conn.execute("notify pgrst, 'reload schema'")
-    return changed
-
-
-def _main(argv=None) -> int:
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
-    ap = argparse.ArgumentParser(prog="python -m server.database", description="SCI database administration")
-    sub = ap.add_subparsers(dest="cmd", required=True)
-    m = sub.add_parser("migrate", help="apply schema.sql, catalog.sql, and admin.sql (idempotent)")
-    m.add_argument("--database-url", default=os.environ.get("SCI_ADMIN_DATABASE_URL"))
-    args = ap.parse_args(argv)
-    if args.cmd == "migrate":
-        if not args.database_url:
-            print("error: set SCI_ADMIN_DATABASE_URL or pass --database-url", file=sys.stderr)
-            return 2
-        changed = migrate(
-            args.database_url,
-            publisher_password=os.environ.get("SCI_PUBLISHER_DB_PASSWORD") or None,
-            authenticator_password=os.environ.get("SCI_AUTHENTICATOR_PASSWORD") or None,
-            instance_url=os.environ.get("SCI_INSTANCE_URL") or None,
-            archive_url=os.environ.get("SCI_ARCHIVE_URL") or None,
-        )
-        print("migrations applied" + (f"; changed: {', '.join(changed)}" if changed else "; no changes"))
-    return 0
-
-
 if __name__ == "__main__":
-    sys.exit(_main())
+    # Deprecated entry point, kept for deployments that still run
+    # `python -m server.database migrate`. Use `python -m db migrate`.
+    from db.migrate import main
+
+    sys.exit(main())

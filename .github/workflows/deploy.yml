@@ -660,7 +660,7 @@ jobs:
           else:
               print("PUBLISHER_DATABASE_URL is not set; the sci_publisher login password is left unchanged.")
 
-          result = subprocess.run([sys.executable, "-m", "server.database", "migrate"], env=env, check=False)
+          result = subprocess.run([sys.executable, "-m", "db", "migrate"], env=env, check=False)
           sys.exit(result.returncode)
           PY
 

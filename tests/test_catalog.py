@@ -316,7 +316,7 @@ def test_sql_and_python_normalizers_agree(database):
 
 
 def test_migrations_are_idempotent_and_preserve_data(database, key):
-    from server.database import migrate
+    from db.migrate import migrate
 
     from .conftest import PUBLISHER_PASSWORD
 

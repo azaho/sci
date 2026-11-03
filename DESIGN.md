@@ -684,7 +684,7 @@ A durable acceptance record permits recovery of the catalog entry and timestamp.
 
 ## Whitelist administration
 
-Administrators manage the hosted whitelist through saved queries in the Supabase SQL editor. Locally, run the same queries against local PostgreSQL with administrator access. Provide private SQL helpers in `server/admin.sql`; document copyable queries in `README.md`. No public administration API or SCI admin website is required.
+Administrators manage the hosted whitelist through saved queries in the Supabase SQL editor. Locally, run the same queries against local PostgreSQL with administrator access. Provide private SQL helpers in `db/admin.sql`; document copyable queries in `README.md`. No public administration API or SCI admin website is required.
 
 | Helper | Input and behavior |
 | --- | --- |
@@ -860,19 +860,32 @@ Terraform state is an infrastructure record, not a backup of publication bytes o
 sci/
 ├── sci/
 │   ├── __init__.py
-│   ├── cli.py
+│   ├── cli.py              # Top-level help, parser, and dispatch
+│   ├── commands/           # One module per command: run() and register()
+│   ├── config.py           # ~/.sci/config.json, default server and key
+│   ├── net.py              # HTTP, retries, and the instance descriptor
+│   ├── output.py           # CliError and result output
 │   ├── publication.py
 │   ├── publication_LICENSE.txt  # Fixed license bundled for publication signing
 │   ├── categories.json
 │   └── keys.py
 ├── server/
-│   ├── app.py
-│   ├── database.py
+│   ├── app.py              # Routes, create_app, and service commands
+│   ├── publications.py     # Admission, finalization, and maintenance
+│   ├── recovery.py         # rebuild-catalog from the archive
+│   ├── request_io.py       # Body limits, multipart parsing, rate limiting
+│   ├── settings.py
+│   ├── errors.py
+│   ├── database.py         # Connection pool, locks, and row helpers
 │   ├── storage.py
-│   ├── schema.sql          # Internal tables, indexes, and row policies
-│   ├── catalog.sql         # Public views, permitted functions, and grants
-│   ├── admin.sql           # Private whitelist helpers and permissions
 │   └── Dockerfile
+├── db/                     # Shared by the service, PostgREST, and administrators
+│   ├── migrate.py          # Ordered file list and runner: python -m db migrate
+│   ├── base.sql            # Schema, roles, settings, whitelist, and lock helpers
+│   ├── publications.sql    # Publications, search, and uploads
+│   ├── citations.sql       # Citations, stored counts, and catalog totals
+│   ├── catalog.sql         # Public views, permitted functions, and grants
+│   └── admin.sql           # Private whitelist helpers and permissions
 ├── web/
 │   ├── index.html
 │   ├── publication/

@@ -12,6 +12,7 @@ COPY pyproject.toml README.md LICENSE ./
 COPY sci ./sci
 RUN pip install ".[server]"
 COPY server ./server
+COPY db ./db
 
 RUN useradd --system --uid 10001 --no-create-home sci
 USER sci
