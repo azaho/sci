@@ -2,3 +2,5 @@
 sci/publication_LICENSE.txt -text
 sci/categories.json -text
 tests/fixtures/** -text
+spec/examples/minimal/** -text
+spec/examples/minimal/*.sig binary
