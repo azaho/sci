@@ -101,6 +101,7 @@ See [field validation](DESIGN.md#version-1-field-validation) and
 | --- | --- |
 | [SETUP.md](SETUP.md) | Local and hosted setup, deployment, administration, and recovery. |
 | [DESIGN.md](DESIGN.md) | Publication format, signatures, citations, catalog API, and architecture. |
+| [sci-spec.md](sci-spec.md) | Proposed protocol draft 0.1, with a verified example and open decisions. Not yet implemented. |
 | [TEST_PLAN.md](TEST_PLAN.md) | Running tests, release checks, and open items. |
 | [PROMPT.md](PROMPT.md) | A starting prompt for research agents. |
 
