@@ -2,9 +2,6 @@ name: edge-verification-benchmark
 
 # This branch-only experiment never runs on PRs or deploys the publishing service.
 on:
-  push:
-    branches: [bench/supabase-verification]
-    paths: ['benchmarks/edge/**', '.github/workflows/edge-benchmark.yml']
   workflow_dispatch:
 
 permissions:

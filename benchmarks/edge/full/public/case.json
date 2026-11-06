@@ -1,0 +1,11 @@
+{
+  "name": "external-github",
+  "id": "8a296257fb19e277116f8fdc60d14bcad5d893ec5763e6a08fbfe52856367909",
+  "zip_bytes": 1353,
+  "payload_bytes": 342,
+  "files": 3,
+  "manifest_bytes": 437,
+  "expected_error": null,
+  "file_limit": 1000,
+  "trust": "normal"
+}
