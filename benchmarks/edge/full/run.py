@@ -18,6 +18,7 @@ class FullBench(module.Bench):
   for name in ['unicode18.ts','metadata.ts','timestamp.ts','verify.ts','index.ts','vendor/pkijs.js']:
    s=(folder/name).read_text()
    if name=='index.ts':s=s.replace("/* FULL_CONFIG */ { auth_sha256:'', source_prefix:'', github_url:'', trust:{} as any, cases:[] as any[] }",json.dumps(config))
+   if hasattr(self,'transform_source'):s=self.transform_source(name,s)
    sources.append(('file',(name,s,'application/typescript' if name.endswith('.ts') else 'application/javascript')))
   self.function_created=True
   try:

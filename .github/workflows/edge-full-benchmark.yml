@@ -2,9 +2,6 @@ name: edge-full-verification-benchmark
 
 # This branch-only experiment never runs on PRs or deploys the publishing service.
 on:
-  push:
-    branches: [bench/supabase-verification]
-    paths: ['benchmarks/edge/full/*.ts', 'benchmarks/edge/full/*.py', '.github/workflows/edge-full-benchmark.yml']
   workflow_dispatch:
 
 permissions:
