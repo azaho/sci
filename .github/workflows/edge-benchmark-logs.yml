@@ -30,7 +30,7 @@ jobs:
           for wave in 0 1 2 3; do
             gh run download 42166947257 --repo azaho/sci --name "edge-soak-wave-$wave" --dir "$RUNNER_TEMP/soak-results/wave-$wave"
           done
-      - name: Read recorded benchmark runtime logs in bounded windows
+      - name: Read recorded benchmark runtime logs with bounded queries
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SCI_EDGE_BENCH_SUPABASE_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}

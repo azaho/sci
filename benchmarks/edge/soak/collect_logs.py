@@ -29,8 +29,8 @@ for path in deployments:
         for attempt in range(4):
             try:
                 response = bench.call('GET', bench.management + '/analytics/endpoints/logs', management=True,
-                    params={'sql': query, 'iso_timestamp_start': start.isoformat(),
-                            'iso_timestamp_end': end.isoformat()}).json()
+                    params={'sql': query, 'iso_timestamp_start': start.isoformat(timespec='milliseconds').replace('+00:00', 'Z'),
+                            'iso_timestamp_end': end.isoformat(timespec='milliseconds').replace('+00:00', 'Z')}).json()
                 break
             except Exception as error:
                 if getattr(error, 'status', None) != 429 or attempt == 3:
