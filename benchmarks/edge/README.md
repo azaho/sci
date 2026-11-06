@@ -58,8 +58,10 @@ fixtures are not the 50 MB performance experiment.
 
 ## Run on Supabase
 
-The branch-only `edge-verification-benchmark` workflow uses the existing repository
-secret `SUPABASE_ACCESS_TOKEN` and variable `SUPABASE_PROJECT_REF`. It creates one
+The branch-only `edge-verification-benchmark` workflow uses the repository secret
+`SCI_EDGE_BENCH_SUPABASE_TOKEN` (falling back to `SUPABASE_ACCESS_TOKEN`) and variable
+`SUPABASE_PROJECT_REF`. It checks function deployment access before uploading
+fixtures. It creates one
 uniquely named `sci-bench-*` private bucket and function, and removes them in a
 `finally` block. No existing function, database table, publication, project setting,
 or project secret is changed. The function requires the existing service-role key
