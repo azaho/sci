@@ -11,9 +11,10 @@ from run import Soak
 parser = argparse.ArgumentParser()
 parser.add_argument('results', type=Path)
 parser.add_argument('output', type=Path)
+parser.add_argument('--expected-deployments', type=int, default=4)
 args = parser.parse_args()
 deployments = sorted(args.results.glob('wave-*/deployment.json'))
-assert len(deployments) == 4, 'Need all four deployments'
+assert len(deployments) == args.expected_deployments, 'Missing deployment records'
 for path in deployments:
     record = json.loads(path.read_text())
     assert re.fullmatch(r'[0-9a-f-]{36}', record['id'])
