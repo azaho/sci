@@ -13,4 +13,5 @@ for(const c of fixtures) {
 }
 for(const s of ['{"a":1,"\\u0061":2}','{"x":"\\ud800"}','{"a":1} trailing']) {try{parseJson(new TextEncoder().encode(s));failed++;}catch{}}
 if(doiKey('doi:10.123/a%2Fb')!==doiKey('doi:10.123/A%2fB'))failed++;
+try{doiKey('doi:10.123%2Fwrong/suffix');failed++;}catch{}
 if(failed)throw new Error(`${failed} checks failed`);

@@ -4,6 +4,11 @@ Question: can one Supabase Edge Function download and verify a publication with
 50,000,000 bytes of listed file content? MB here is decimal, not MiB. Manifest,
 signature, and ZIP headers add to that payload; the measured ZIP size is reported.
 
+**Updated experiment:** [complete bundle checks and URL submissions](full/results/2026-11-06/REPORT.md)
+include the missing metadata, Unicode, and timestamp checks. The initial
+1,000-file recommendation held; the 5,000-file stress case hit a CPU limit.
+The partial benchmark below is retained for comparison.
+
 [Hosted results, 2026-11-06](results/2026-11-06/REPORT.md): all 31 requests behaved
 as expected; median verification took 191–712 ms for the 50 MB fixtures.
 

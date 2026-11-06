@@ -17,10 +17,11 @@ export function textField(s: unknown, max: number, lines = false): asserts s is 
 }
 export function doiKey(target: string): string {
   requireThat(/^doi:(?:[A-Za-z0-9._~!$&'()*+,;=:@-]|%[0-9A-Fa-f]{2})+\/(?:[A-Za-z0-9._~!$&'()*+,;=:@-]|%[0-9A-Fa-f]{2})+$/.test(target),'doi_syntax');
-  let decoded: string;
-  try { decoded=decodeURIComponent(target.slice(4)); } catch { throw new Error('doi_utf8'); }
-  const slash=decoded.indexOf('/');
-  requireThat(/^10\.[0-9]+(?:\.[0-9]+)*$/.test(decoded.slice(0,slash)) && slash<decoded.length-1,'doi_name');
+  let prefix: string, suffix: string;
+  const encoded=target.slice(4).split('/');
+  try { prefix=decodeURIComponent(encoded[0]); suffix=decodeURIComponent(encoded[1]); } catch { throw new Error('doi_utf8'); }
+  requireThat(/^10\.[0-9]+(?:\.[0-9]+)*$/.test(prefix) && suffix.length>0,'doi_name');
+  const decoded=prefix+'/'+suffix;
   for (const c of decoded) requireThat(graphicCharacter(c.codePointAt(0)!),'doi_character');
   // DOI Foundation equivalence: decode, then fold Basic Latin only; never normalize Unicode.
   return decoded.replace(/[A-Z]/g,c=>c.toLowerCase());
