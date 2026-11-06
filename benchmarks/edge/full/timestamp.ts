@@ -1,5 +1,6 @@
 import * as asn1js from 'npm:asn1js@3.0.6';
-import * as pkijs from 'npm:pkijs@3.3.3';
+// @deno-types="npm:pkijs@3.3.3"
+import * as pkijs from './vendor/pkijs.js';
 import { requireThat } from './metadata.ts';
 export type TimestampTrust = { roots: string[]; crls: string[]; now?: string };
 const oidTst='1.2.840.113549.1.9.16.1.4', oidSha256='2.16.840.1.101.3.4.2.1';

@@ -15,18 +15,24 @@ class FullBench(module.Bench):
   self.github_url=f'https://raw.githubusercontent.com/azaho/sci/{os.environ["GITHUB_SHA"]}/benchmarks/edge/full/public/baseline.zip'
   config={'auth_sha256':hashlib.sha256(self.invocation_token.encode()).hexdigest(),'source_prefix':self.base+f'/storage/v1/object/sign/{self.name}/','github_url':self.github_url,'trust':json.loads((fixtures/'trust.json').read_text()),'cases':cases}
   sources=[]
-  for name in ['unicode18.ts','metadata.ts','timestamp.ts','verify.ts','index.ts']:
-   s=(folder/name).read_text();s=re.sub(r'^import .*? from [\'\"]\./.*?;\n','',s,flags=re.M)
+  for name in ['unicode18.ts','metadata.ts','timestamp.ts','verify.ts','index.ts','vendor/pkijs.js']:
+   s=(folder/name).read_text()
    if name=='index.ts':s=s.replace("/* FULL_CONFIG */ { auth_sha256:'', source_prefix:'', github_url:'', trust:{} as any, cases:[] as any[] }",json.dumps(config))
-   sources.append(s)
+   sources.append(('file',(name,s,'application/typescript' if name.endswith('.ts') else 'application/javascript')))
   self.function_created=True
   try:
-   deploy=self.call('POST',self.management+f'/functions/deploy?slug={self.name}',management=True,files={'metadata':(None,json.dumps({'name':self.name,'entrypoint_path':'index.ts','verify_jwt':True}),'application/json'),'file':('index.ts','\n'.join(sources),'application/typescript')}).json()
+   deploy=self.call('POST',self.management+f'/functions/deploy?slug={self.name}',management=True,files=[('metadata',(None,json.dumps({'name':self.name,'entrypoint_path':'index.ts','verify_jwt':True}),'application/json')),*sources]).json()
   except module.ApiError as e:
    if e.status in (401,403):self.function_created=False
    raise
   self.function_id=deploy['id']
   self.output.joinpath('deployment.json').write_text(json.dumps({'name':self.name,'id':self.function_id,'started':self.started.isoformat(),'git_sha':os.environ['GITHUB_SHA']},indent=2)+'\n')
+  for attempt in range(5):
+   smoke=requests.post(self.base+f'/functions/v1/{self.name}',headers={'Authorization':f'Bearer {self.key}','apikey':self.key,'x-sci-benchmark-token':self.invocation_token},json={'id':'sha256:'+'0'*64,'url':'https://127.0.0.1/'},timeout=30)
+   if smoke.status_code==200 and smoke.json().get('error')=='source_policy':break
+   time.sleep(2)
+  else:
+   self.logs();raise RuntimeError(f'Function preflight failed: HTTP {smoke.status_code}')
   self.call('POST',self.base+'/storage/v1/bucket',json={'id':self.name,'name':self.name,'public':False,'file_size_limit':52_428_800})
   self.bucket_created=True;self.urls={}
   for case in cases:
