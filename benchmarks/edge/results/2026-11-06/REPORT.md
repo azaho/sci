@@ -87,3 +87,17 @@ using UTC `Z` timestamps retrieved the logs above; it did not rerun the workload
 objects, and bucket. The benchmark did not change existing publications, tables,
 functions, or project settings. The seven-day benchmark token and GitHub secret
 remain available for follow-up work.
+
+## Second run
+
+The telemetry fix also triggered [run 42163151620](https://github.com/azaho/sci/actions/runs/42163151620).
+All 31 cases again behaved as expected, and cleanup completed. Median verification
+wall times were 173 ms (3 files), 250 ms (1,002 files), 522 ms (5,002 files), and
+208 ms (1 MiB manifest). The first-run table above is retained rather than replaced
+by the faster measurements. This variation reinforces that these are samples,
+not latency guarantees.
+
+Raw evidence is under `repeat/`. Its telemetry snapshot contains all 31 request
+messages and eight `EarlyDrop` shutdowns for nine workers; the last worker's
+shutdown was not yet recorded when logs were fetched. No limit failure appears
+in the collected events. The first run has complete shutdown coverage.
