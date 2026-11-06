@@ -64,8 +64,9 @@ The branch-only `edge-verification-benchmark` workflow uses the repository secre
 fixtures. It creates one
 uniquely named `sci-bench-*` private bucket and function, and removes them in a
 `finally` block. No existing function, database table, publication, project setting,
-or project secret is changed. The function requires the existing service-role key
-in addition to gateway JWT verification. It accepts only generated fixture names,
+or project secret is changed. The function requires a fresh random per-run token
+in addition to gateway JWT verification; only its SHA-256 is embedded in the
+temporary deployment. It accepts only generated fixture names,
 not arbitrary URLs or uploaded data. Secrets are not stored in artifacts.
 
 The benchmark token needs Edge Functions read/write and log read permissions.

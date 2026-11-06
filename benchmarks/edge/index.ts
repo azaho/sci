@@ -1,12 +1,15 @@
 import { LIMITS, verifyZip } from "./verify.ts";
 
 // Replaced in the deployed copy, not in the repository.
-const fixtureConfig = /* FIXTURE_CONFIG */ { bucket: "", cases: [] as any[] };
+const fixtureConfig = /* FIXTURE_CONFIG */ { bucket: "", auth_sha256: "", cases: [] as any[] };
 let active = 0;
 Deno.serve(async (request) => {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!serviceKey || request.headers.get("authorization") !== `Bearer ${serviceKey}`) {
-    return new Response("Unauthorized", { status: 401 });
+  const auth = request.headers.get("x-sci-benchmark-token") || "";
+  const authHash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(auth))),
+    x => x.toString(16).padStart(2, "0")).join("");
+  if (!serviceKey || auth.length !== 64 || authHash !== fixtureConfig.auth_sha256) {
+    return Response.json({ error: "benchmark_auth" }, { status: 401 });
   }
   if (request.method !== "POST") return new Response("POST required", { status: 405 });
   const requestBody = await request.text();

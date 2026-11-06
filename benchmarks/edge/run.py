@@ -5,9 +5,11 @@ Secrets stay in process memory. No production database or existing functions are
 import argparse
 from datetime import datetime, timezone, timedelta
 import json
+import hashlib
 import os
 from pathlib import Path
 import re
+import secrets
 import time
 import uuid
 
@@ -31,6 +33,7 @@ class Bench:
         self.management = f"https://api.supabase.com/v1/projects/{self.ref}"
         self.base = f"https://{self.ref}.supabase.co"
         self.name = "sci-bench-" + uuid.uuid4().hex[:16]
+        self.invocation_token = secrets.token_hex(32)
         self.key = None
         self.bucket_created = False
         self.function_created = False
@@ -48,9 +51,9 @@ class Bench:
         if not r.ok:
             detail = ""
             # Only retain an error message, never key responses or arbitrary HTML.
-            if "/functions" in url:
+            if "/functions" in url or "/analytics/" in url:
                 try:
-                    message = r.json().get("message", "")
+                    message = r.json().get("message", r.json().get("error", ""))
                     if isinstance(message, str):
                         detail = message.replace(self.token, "[redacted]").replace(self.key_read_token, "[redacted]")
                         if self.key:
@@ -75,8 +78,9 @@ class Bench:
         source = Path(__file__).with_name("verify.ts").read_text()
         handler = Path(__file__).with_name("index.ts").read_text()
         handler = handler.replace('import { LIMITS, verifyZip } from "./verify.ts";\n', '')
-        handler = handler.replace('/* FIXTURE_CONFIG */ { bucket: "", cases: [] as any[] }',
-                                  json.dumps({"bucket": self.name, "cases": cases}))
+        handler = handler.replace('/* FIXTURE_CONFIG */ { bucket: "", auth_sha256: "", cases: [] as any[] }',
+                                  json.dumps({"bucket": self.name, "cases": cases,
+                                              "auth_sha256": hashlib.sha256(self.invocation_token.encode()).hexdigest()}))
         # The Management API bundles a single entrypoint and its pinned npm dependency.
         self.function_created = True  # Also attempt cleanup if deployment partially fails.
         try:
@@ -115,7 +119,8 @@ class Bench:
                 start = time.monotonic()
                 try:
                     response = requests.post(self.base + f"/functions/v1/{self.name}",
-                        headers={"Authorization": f"Bearer {self.key}", "apikey": self.key},
+                        headers={"Authorization": f"Bearer {self.key}", "apikey": self.key,
+                                 "x-sci-benchmark-token": self.invocation_token},
                         json={"case": case["name"], "run": repeat}, timeout=145)
                     try:
                         result = response.json()
