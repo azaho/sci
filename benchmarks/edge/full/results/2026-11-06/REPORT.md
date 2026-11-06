@@ -1,5 +1,9 @@
 # Complete bundle checks on Supabase Edge
 
+Follow-up: [1,000-attempt reliability experiment](../../../soak/results/2026-11-06/REPORT.md)
+tests the DOI-prefix fix, varied bundles, and concurrent submissions. The results
+below remain the original small sequential experiment.
+
 **Use an initial limit of 1,000 listed files and 50,000,000 listed-content bytes.**
 The ordinary and demanding 1,000-file fixtures each passed five hosted requests.
 The 5,000-file diagnostic failed once with Supabase's CPU resource limit. Keep the

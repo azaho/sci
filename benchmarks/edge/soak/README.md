@@ -1,5 +1,7 @@
 # 1,000-file soak protocol
 
+[Hosted results and full distributions](results/2026-11-06/REPORT.md).
+
 Test the candidate 1,000-listed-file, 50,000,000-byte policy with 1,000 first
 attempts. This measures the existing complete-bundle verifier; it does not change
 its verification rules or implement the rest of the indexer.

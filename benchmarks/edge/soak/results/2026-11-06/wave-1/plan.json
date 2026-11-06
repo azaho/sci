@@ -1,0 +1,21 @@
+{
+  "wave": 1,
+  "region": "us-east-1",
+  "planned": 250,
+  "phases": [
+    {
+      "concurrency": 1,
+      "count": 125
+    },
+    {
+      "concurrency": 2,
+      "count": 63
+    },
+    {
+      "concurrency": 4,
+      "count": 62
+    }
+  ],
+  "retries": 0,
+  "first_call_definition": "request_index == 1; not a guarantee of infrastructure cold start"
+}

@@ -4,6 +4,11 @@ Question: can one Supabase Edge Function download and verify a publication with
 50,000,000 bytes of listed file content? MB here is decimal, not MiB. Manifest,
 signature, and ZIP headers add to that payload; the measured ZIP size is reported.
 
+**Reliability follow-up:** [1,000 attempts with 20 distinct 1,000-file bundles](soak/results/2026-11-06/REPORT.md).
+All 500 sequential requests passed. Concurrent requests exposed the handler's
+per-worker busy guard: 118 of 500 concurrent attempts returned HTTP 429; the rest
+passed. There were no observed verifier or platform resource-limit failures.
+
 **Updated experiment:** [complete bundle checks and URL submissions](full/results/2026-11-06/REPORT.md)
 include the missing metadata, Unicode, and timestamp checks. The initial
 1,000-file recommendation held; the 5,000-file stress case hit a CPU limit.
