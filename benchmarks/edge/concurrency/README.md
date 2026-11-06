@@ -1,5 +1,7 @@
 # Per-worker concurrency comparison
 
+[Hosted results and failure diagnosis](results/2026-11-06/REPORT.md).
+
 Compare the existing rejection guard with the same handler accepting overlapping
 requests. Verification rules, input caps, fixture bytes, region, and request
 schedule remain the same. Both modes add identical activity instrumentation.
@@ -27,3 +29,16 @@ success counts before interpreting latency percentiles: timeouts or worker death
 must not disappear into a successful-request timing distribution. Only workload
 attempts are included in the denominator; deployment preflights are identified
 separately in runtime telemetry.
+
+To reproduce the analysis, place the two result artifacts under `<results>/wave-0`
+and `<results>/wave-1`, then copy the telemetry artifact's matching folders over them.
+With `matplotlib==3.10.7` installed, run:
+
+```sh
+python benchmarks/edge/concurrency/analyze.py <results>
+```
+
+The script writes a CSV of all attempts, a JSON summary with failure-to-worker
+links, and PNG/SVG outcome charts. Successful-request quantiles use linear
+interpolation between ordered observations (type 7). The benchmark workflow is
+manual-only after the recorded run.

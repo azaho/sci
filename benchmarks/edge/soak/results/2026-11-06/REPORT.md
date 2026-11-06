@@ -1,5 +1,9 @@
 # 1,000-file reliability experiment on Supabase Edge
 
+Subsequent [guarded-versus-unguarded comparison](../../../concurrency/results/2026-11-06/REPORT.md)
+found real CPU and memory failures after removing the guard. The measurements
+below remain the original guarded soak.
+
 **Keep the proposed limit of 1,000 listed files and 50 MB, with the separate metadata and parser limits.** This experiment found no verification or platform resource-limit failures. It did find substantial HTTP 429 refusals from the benchmark handler’s one-active-verification-per-worker guard. That guard needs reconsideration before shipping a concurrent submission endpoint.
 
 [Hosted run](https://github.com/azaho/sci/actions/runs/42166947257), measured commit `c07045d`. Four temporary deployments in `us-east-1`, 20 distinct synthetic bundles, 1,000 first attempts, no retries. Each bundle has exactly 1,000 listed files and 50,000,000 listed-content bytes. See the [test protocol](../../README.md) and [verifier coverage](../../../full/COVERAGE.md).

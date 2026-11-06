@@ -1,9 +1,6 @@
 name: edge-concurrency-benchmark
 
 on:
-  push:
-    branches: [bench/supabase-verification]
-    paths: ['benchmarks/edge/concurrency/*.py', '.github/workflows/edge-concurrency-benchmark.yml']
   workflow_dispatch:
 
 permissions:

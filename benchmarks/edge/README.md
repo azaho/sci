@@ -4,6 +4,12 @@ Question: can one Supabase Edge Function download and verify a publication with
 50,000,000 bytes of listed file content? MB here is decimal, not MiB. Manifest,
 signature, and ZIP headers add to that payload; the measured ZIP size is reported.
 
+**Concurrency follow-up:** [guarded versus unguarded handlers](concurrency/results/2026-11-06/REPORT.md).
+Removing the guard accepted 191/200 requests, but lost nine requests to two CPU-limit
+shutdowns and one memory-limit shutdown. The guarded control accepted 152/200,
+returned 47 busy responses, and had one client timeout. A file-size cap alone is
+not sufficient for concurrent buffered verification.
+
 **Reliability follow-up:** [1,000 attempts with 20 distinct 1,000-file bundles](soak/results/2026-11-06/REPORT.md).
 All 500 sequential requests passed. Concurrent requests exposed the handler's
 per-worker busy guard: 118 of 500 concurrent attempts returned HTTP 429; the rest
