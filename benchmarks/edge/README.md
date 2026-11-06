@@ -4,6 +4,9 @@ Question: can one Supabase Edge Function download and verify a publication with
 50,000,000 bytes of listed file content? MB here is decimal, not MiB. Manifest,
 signature, and ZIP headers add to that payload; the measured ZIP size is reported.
 
+[Hosted results, 2026-11-06](results/2026-11-06/REPORT.md): all 31 requests behaved
+as expected; median verification took 191–712 ms for the 50 MB fixtures.
+
 This is a benchmark of the proposed `sci-publication/0.18` verification workload.
 It does not replace the repository's current Python verifier. The draft is still
 being edited on `docs/sci-spec`; this experiment changes neither format nor service.
