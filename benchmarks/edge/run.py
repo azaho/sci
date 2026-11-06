@@ -27,6 +27,7 @@ class Bench:
         self.ref = os.environ["SUPABASE_PROJECT_REF"]
         assert re.fullmatch(r"[a-z]{20}", self.ref)
         self.token = os.environ["SUPABASE_ACCESS_TOKEN"]
+        self.key_read_token = os.environ.get("SUPABASE_KEY_READ_TOKEN") or self.token
         self.management = f"https://api.supabase.com/v1/projects/{self.ref}"
         self.base = f"https://{self.ref}.supabase.co"
         self.name = "sci-bench-" + uuid.uuid4().hex[:16]
@@ -37,9 +38,10 @@ class Bench:
         self.started = datetime.now(timezone.utc)
         self.results = []
 
-    def call(self, method, url, *, management=False, **kwargs):
+    def call(self, method, url, *, management=False, key_lookup=False, **kwargs):
         headers = kwargs.pop("headers", {})
-        headers["Authorization"] = f"Bearer {self.token if management else self.key}"
+        credential = self.key_read_token if key_lookup else (self.token if management else self.key)
+        headers["Authorization"] = f"Bearer {credential}"
         if not management:
             headers["apikey"] = self.key
         r = requests.request(method, url, headers=headers, timeout=150, **kwargs)
@@ -50,7 +52,7 @@ class Bench:
                 try:
                     message = r.json().get("message", "")
                     if isinstance(message, str):
-                        detail = message.replace(self.token, "[redacted]")
+                        detail = message.replace(self.token, "[redacted]").replace(self.key_read_token, "[redacted]")
                         if self.key:
                             detail = detail.replace(self.key, "[redacted]")
                         detail = ": " + detail[:500]
@@ -60,7 +62,7 @@ class Bench:
         return r
 
     def prepare(self, fixtures):
-        keys = self.call("GET", self.management + "/api-keys?reveal=true", management=True).json()
+        keys = self.call("GET", self.management + "/api-keys?reveal=true", management=True, key_lookup=True).json()
         self.key = next((k["api_key"] for k in keys if k.get("name") == "service_role"), None)
         if not self.key:
             raise RuntimeError("This benchmark requires an existing enabled legacy service_role key; no keys were changed.")

@@ -68,8 +68,10 @@ or project secret is changed. The function requires the existing service-role ke
 in addition to gateway JWT verification. It accepts only generated fixture names,
 not arbitrary URLs or uploaded data. Secrets are not stored in artifacts.
 
-The management token must permit reading existing API keys, deploying/deleting
-functions, and optionally reading logs. An enabled existing legacy service-role
+The benchmark token needs Edge Functions read/write and log read permissions.
+The existing deployment token is passed separately as `SUPABASE_KEY_READ_TOKEN`
+only for reading the existing project API key; the new token needs no API-key
+secret permission. An enabled existing legacy service-role
 key is needed for this harness; it does not enable or rotate keys. Generated
 publication keys are disposable and never reused as publisher credentials.
 
