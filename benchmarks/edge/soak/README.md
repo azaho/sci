@@ -48,3 +48,26 @@ failure proportion describes this workload and period; it does not establish a
 universal production failure probability. This is a bounded load experiment, not
 a test of arbitrary hosts, regional outages, hours of sustained load, or malicious
 inputs beyond the prior conformance fixtures.
+
+## Reproduce the analysis
+
+Download the four `edge-soak-wave-*` artifacts from the recorded workflow run into
+`<results>/wave-0` through `<results>/wave-3`. Put any later log collection beside
+the original files as `runtime-logs-final.json`; the analysis prefers it when present.
+
+```sh
+python -m pip install matplotlib==3.10.7
+python benchmarks/edge/soak/analyze.py <results>
+```
+
+This writes `requests.csv`, `summary.json`, and the PNG/SVG latency distributions.
+Quantiles use linear interpolation between ordered samples (type 7). CPU samples
+labelled single-request include only workers with one measured request, invocation
+counter 1, a successful result, and an `EarlyDrop` shutdown. Other worker CPU totals
+can include multiple requests. Memory samples and shutdown values are not guaranteed
+peak measurements.
+
+The hosted soak workflow is manual-only after the recorded run. Running it again
+incurs the storage and network use described above. The read-only collector
+`collect_logs.py <results> <output>` needs only the project reference and a token
+with runtime-log read access; it does not retrieve API keys or deploy resources.

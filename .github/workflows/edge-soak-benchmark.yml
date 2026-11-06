@@ -1,9 +1,6 @@
 name: edge-soak-benchmark
 
 on:
-  push:
-    branches: [bench/supabase-verification]
-    paths: ['benchmarks/edge/soak/*.py', '.github/workflows/edge-soak-benchmark.yml']
   workflow_dispatch:
 
 permissions:
