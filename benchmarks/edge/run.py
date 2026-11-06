@@ -148,13 +148,13 @@ class Bench:
             return
         # Limit retrieval to this temporary function. Log access is optional.
         query = ("select timestamp, source, event_message, log_attributes from logs "
-                 "where source in ('function_edge_logs', 'function_logs') "
+                 "where source = 'function_logs' "
                  f"and position(toString(log_attributes), '{self.function_id}') > 0 "
                  "order by timestamp asc limit 1000")
         try:
             response = self.call("GET", self.management + "/analytics/endpoints/logs", management=True,
-                params={"sql": query, "iso_timestamp_start": (self.started - timedelta(minutes=1)).isoformat(),
-                        "iso_timestamp_end": datetime.now(timezone.utc).isoformat()}).json()
+                params={"sql": query, "iso_timestamp_start": (self.started - timedelta(minutes=1)).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+                        "iso_timestamp_end": datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")}).json()
             self.output.joinpath("runtime-logs.json").write_text(json.dumps(response, indent=2) + "\n")
             print("Saved log API response; inspect query errors and event coverage before using it.", flush=True)
         except Exception as error:
