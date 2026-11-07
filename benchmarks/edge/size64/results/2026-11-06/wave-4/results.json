@@ -1,0 +1,59 @@
+[
+  {
+    "request_id": "ordinary-1",
+    "execution_id": "dd829b8a-e961-4410-a07d-d848e93f395b",
+    "region": "us-east-1",
+    "runtime": {
+      "deno": "supabase-edge-runtime-1.77.9 (compatible with Deno v2.1.4)",
+      "v8": "11.6.189.12",
+      "typescript": "5.1.6"
+    },
+    "verification_call": 1,
+    "download_bytes": 67108864,
+    "download_ms": 3656.702804,
+    "verification": {
+      "files": 1000,
+      "payload_bytes": 66883644,
+      "manifest_bytes": 112982,
+      "times": {
+        "zip_structure_ms": 3.7914200000000164,
+        "manifest_ms": 11.322434000000158,
+        "signature_ms": 5.949643999999807,
+        "files_ms": 390.72341700000015,
+        "hash_ms": 169.01722699999254,
+        "crc_ms": 201.22765799999252,
+        "metadata_ms": 1.3770809999996345,
+        "timestamp_ms": 0.0246290000004592
+      },
+      "timestamp": null
+    },
+    "verify_wall_ms": 413.90817800000013,
+    "accepted": true,
+    "total_wall_ms": 4070.626643,
+    "memory_sampled_max": {
+      "rss": 0,
+      "heapTotal": 15646720,
+      "heapUsed": 13380296,
+      "external": 89640652
+    },
+    "http_status": 200,
+    "case": "ordinary",
+    "trial": 1,
+    "client_wall_ms": 4388.74741099994,
+    "fixture": {
+      "name": "ordinary",
+      "id": "18c17b3209a07f068b2c46cc1b5b93f0ad4b48f934c9fee079e76020b6382b2e",
+      "zip_bytes": 67108864,
+      "payload_bytes": 66883644,
+      "manifest_bytes": 112982,
+      "metadata_bytes": 653,
+      "readme_bytes": 27,
+      "largest_file_bytes": 16964083,
+      "files": 1000,
+      "file_limit": 1000,
+      "expected_error": null,
+      "trust": "normal"
+    },
+    "passed": true
+  }
+]

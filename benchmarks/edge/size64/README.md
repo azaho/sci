@@ -1,5 +1,7 @@
 # Exact 64 MiB single-verification smoke test
 
+[Hosted results and direct CPU measurements](results/2026-11-06/REPORT.md).
+
 Read against [sci-spec commit ca1f76b](https://github.com/azaho/sci-spec/blob/ca1f76b6820922683cc1b42e2000d0deb3373e25/sci-spec.md), preserved in `spec-snapshot.md`.
 That spec has no baseline size or mandatory minimum acceptance rule. For this test,
 64 MiB means the **entire canonical ZIP**, exactly 67,108,864 bytes, including the
@@ -37,3 +39,9 @@ private bucket, and fixture object is removed in a `finally` block. No existing
 project settings or production data change. Credentials and signed URLs are not
 logged or saved as artifacts. Shutdown logs, including CPU or memory failures,
 are preserved for every deployment and matched to its single verification start.
+
+To reproduce the analysis, download `edge-size64-all` into a results directory,
+then overlay the matching `wave-*` folders from `edge-size64-telemetry`. Run
+`python benchmarks/edge/size64/analyze.py <results>` to regenerate the CSV and JSON
+summary. Each CPU value is joined to the worker that logged that request's single
+verification start, including requests terminated before a response was returned.

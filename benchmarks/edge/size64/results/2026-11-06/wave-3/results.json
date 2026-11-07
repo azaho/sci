@@ -1,0 +1,25 @@
+[
+  {
+    "error": "WORKER_RESOURCE_LIMIT",
+    "http_status": 546,
+    "case": "large-readme",
+    "trial": 0,
+    "request_id": "large-readme-0",
+    "client_wall_ms": 6499.810986000057,
+    "fixture": {
+      "name": "large-readme",
+      "id": "97a7ff2120029ab304f9563c31a7ed4b536a81285b60eeaa5874bb2b5f1f33e2",
+      "zip_bytes": 67108864,
+      "payload_bytes": 66887511,
+      "manifest_bytes": 109115,
+      "metadata_bytes": 653,
+      "readme_bytes": 66886834,
+      "largest_file_bytes": 66886834,
+      "files": 1000,
+      "file_limit": 1000,
+      "expected_error": null,
+      "trust": "normal"
+    },
+    "passed": false
+  }
+]

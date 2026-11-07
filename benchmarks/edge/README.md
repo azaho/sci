@@ -4,6 +4,12 @@ Question: can one Supabase Edge Function download and verify a publication with
 50,000,000 bytes of listed file content? MB here is decimal, not MiB. Manifest,
 signature, and ZIP headers add to that payload; the measured ZIP size is reported.
 
+**Exact-size follow-up:** [64 MiB with isolated worker CPU measurements](size64/results/2026-11-06/REPORT.md).
+Eight fresh deployments tested fixtures compatible with the current spec. Ordinary
+and demanding metadata cases used 587–967 ms of worker CPU; a large supporting
+file used 1,112–1,150 ms. A large README failed twice with CPU-limit shutdowns.
+The total byte limit alone does not bound all current-spec text workloads.
+
 **Concurrency follow-up:** [guarded versus unguarded handlers](concurrency/results/2026-11-06/REPORT.md).
 Removing the guard accepted 191/200 requests, but lost nine requests to two CPU-limit
 shutdowns and one memory-limit shutdown. The guarded control accepted 152/200,

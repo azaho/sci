@@ -1,8 +1,5 @@
 name: edge-size64-benchmark
 on:
-  push:
-    branches: [bench/supabase-verification]
-    paths: ['benchmarks/edge/size64/*.py', 'benchmarks/edge/size64/*.ts', '.github/workflows/edge-size64-benchmark.yml']
   workflow_dispatch:
 permissions:
   contents: read
