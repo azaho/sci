@@ -1,0 +1,263 @@
+{
+  "measurements": [
+    {
+      "case": "ordinary",
+      "trial": 0,
+      "request_id": "ordinary-0",
+      "passed": true,
+      "http_status": 200,
+      "error": null,
+      "verify_wall_ms": 309.6688860000013,
+      "download_ms": 3363.953330999999,
+      "client_wall_ms": 4126.120690999869,
+      "worker": "3d22edf9-391b-4bb1-a414-d677ac689787",
+      "worker_cpu_ms": 587.0,
+      "shutdown_reason": "EarlyDrop",
+      "shutdown_memory_bytes": 14773769,
+      "verification_starts": 1,
+      "zip_bytes": 67108864,
+      "payload_bytes": 66883644,
+      "manifest_bytes": 112982,
+      "metadata_bytes": 653,
+      "readme_bytes": 27,
+      "largest_file_bytes": 16964083,
+      "files": 1000
+    },
+    {
+      "case": "heavy",
+      "trial": 0,
+      "request_id": "heavy-0",
+      "passed": true,
+      "http_status": 200,
+      "error": null,
+      "verify_wall_ms": 682.0842060000004,
+      "download_ms": 3856.903139,
+      "client_wall_ms": 4807.316699000012,
+      "worker": "b9faf18e-9430-463a-b924-274e0a8fecde",
+      "worker_cpu_ms": 967.0,
+      "shutdown_reason": "EarlyDrop",
+      "shutdown_memory_bytes": 15099009,
+      "verification_starts": 1,
+      "zip_bytes": 67108864,
+      "payload_bytes": 65948050,
+      "manifest_bytes": 1048576,
+      "metadata_bytes": 4000000,
+      "readme_bytes": 1000000,
+      "largest_file_bytes": 15986029,
+      "files": 1000
+    },
+    {
+      "case": "single-large-file",
+      "trial": 0,
+      "request_id": "single-large-file-0",
+      "passed": true,
+      "http_status": 200,
+      "error": null,
+      "verify_wall_ms": 743.0365870000005,
+      "download_ms": 3485.237224999999,
+      "client_wall_ms": 4417.299035999804,
+      "worker": "248f0f2b-2349-4bf3-b32a-e29ea6039011",
+      "worker_cpu_ms": 1150.0,
+      "shutdown_reason": "EarlyDrop",
+      "shutdown_memory_bytes": 149548844,
+      "verification_starts": 1,
+      "zip_bytes": 67108864,
+      "payload_bytes": 66887510,
+      "manifest_bytes": 109116,
+      "metadata_bytes": 653,
+      "readme_bytes": 27,
+      "largest_file_bytes": 66886806,
+      "files": 1000
+    },
+    {
+      "case": "large-readme",
+      "trial": 0,
+      "request_id": "large-readme-0",
+      "passed": false,
+      "http_status": 546,
+      "error": "WORKER_RESOURCE_LIMIT",
+      "verify_wall_ms": null,
+      "download_ms": null,
+      "client_wall_ms": 6499.810986000057,
+      "worker": "02bedbaa-7b17-4fd6-b7ce-47c480454130",
+      "worker_cpu_ms": 2993.0,
+      "shutdown_reason": "CPUTime",
+      "shutdown_memory_bytes": 149856247,
+      "verification_starts": 1,
+      "zip_bytes": 67108864,
+      "payload_bytes": 66887511,
+      "manifest_bytes": 109115,
+      "metadata_bytes": 653,
+      "readme_bytes": 66886834,
+      "largest_file_bytes": 66886834,
+      "files": 1000
+    },
+    {
+      "case": "ordinary",
+      "trial": 1,
+      "request_id": "ordinary-1",
+      "passed": true,
+      "http_status": 200,
+      "error": null,
+      "verify_wall_ms": 413.90817800000013,
+      "download_ms": 3656.702804,
+      "client_wall_ms": 4388.74741099994,
+      "worker": "dd829b8a-e961-4410-a07d-d848e93f395b",
+      "worker_cpu_ms": 639.0,
+      "shutdown_reason": "EarlyDrop",
+      "shutdown_memory_bytes": 15094601,
+      "verification_starts": 1,
+      "zip_bytes": 67108864,
+      "payload_bytes": 66883644,
+      "manifest_bytes": 112982,
+      "metadata_bytes": 653,
+      "readme_bytes": 27,
+      "largest_file_bytes": 16964083,
+      "files": 1000
+    },
+    {
+      "case": "heavy",
+      "trial": 1,
+      "request_id": "heavy-1",
+      "passed": true,
+      "http_status": 200,
+      "error": null,
+      "verify_wall_ms": 568.4980919999998,
+      "download_ms": 3212.6117139999988,
+      "client_wall_ms": 3983.235200000081,
+      "worker": "b8c4054e-cc19-4455-b7ad-932edacf459d",
+      "worker_cpu_ms": 954.0,
+      "shutdown_reason": "EarlyDrop",
+      "shutdown_memory_bytes": 14770753,
+      "verification_starts": 1,
+      "zip_bytes": 67108864,
+      "payload_bytes": 65948050,
+      "manifest_bytes": 1048576,
+      "metadata_bytes": 4000000,
+      "readme_bytes": 1000000,
+      "largest_file_bytes": 15986029,
+      "files": 1000
+    },
+    {
+      "case": "single-large-file",
+      "trial": 1,
+      "request_id": "single-large-file-1",
+      "passed": true,
+      "http_status": 200,
+      "error": null,
+      "verify_wall_ms": 743.6868680000007,
+      "download_ms": 3114.9563580000013,
+      "client_wall_ms": 4038.783104999993,
+      "worker": "482043c9-b30e-4b3f-89c5-50473583bc2a",
+      "worker_cpu_ms": 1112.0,
+      "shutdown_reason": "EarlyDrop",
+      "shutdown_memory_bytes": 149561860,
+      "verification_starts": 1,
+      "zip_bytes": 67108864,
+      "payload_bytes": 66887510,
+      "manifest_bytes": 109116,
+      "metadata_bytes": 653,
+      "readme_bytes": 27,
+      "largest_file_bytes": 66886806,
+      "files": 1000
+    },
+    {
+      "case": "large-readme",
+      "trial": 1,
+      "request_id": "large-readme-1",
+      "passed": false,
+      "http_status": 546,
+      "error": "WORKER_RESOURCE_LIMIT",
+      "verify_wall_ms": null,
+      "download_ms": null,
+      "client_wall_ms": 5760.488055999986,
+      "worker": "4a659520-b468-4735-a6c9-7048ce98469a",
+      "worker_cpu_ms": 3007.0,
+      "shutdown_reason": "CPUTime",
+      "shutdown_memory_bytes": 149477866,
+      "verification_starts": 1,
+      "zip_bytes": 67108864,
+      "payload_bytes": 66887511,
+      "manifest_bytes": 109115,
+      "metadata_bytes": 653,
+      "readme_bytes": 66886834,
+      "largest_file_bytes": 66886834,
+      "files": 1000
+    }
+  ],
+  "boot_workers": 10,
+  "shutdown_workers": 10,
+  "missing_shutdowns": [],
+  "collection_errors": {
+    "wave-0": [],
+    "wave-1": [],
+    "wave-2": [],
+    "wave-3": [],
+    "wave-4": [],
+    "wave-5": [],
+    "wave-6": [],
+    "wave-7": []
+  },
+  "by_case": {
+    "heavy": {
+      "attempts": 2,
+      "accepted": 2,
+      "worker_cpu_ms": [
+        967.0,
+        954.0
+      ],
+      "verify_wall_ms": [
+        682.0842060000004,
+        568.4980919999998
+      ],
+      "shutdown_reasons": {
+        "EarlyDrop": 2
+      }
+    },
+    "large-readme": {
+      "attempts": 2,
+      "accepted": 0,
+      "worker_cpu_ms": [
+        2993.0,
+        3007.0
+      ],
+      "verify_wall_ms": [
+        null,
+        null
+      ],
+      "shutdown_reasons": {
+        "CPUTime": 2
+      }
+    },
+    "ordinary": {
+      "attempts": 2,
+      "accepted": 2,
+      "worker_cpu_ms": [
+        587.0,
+        639.0
+      ],
+      "verify_wall_ms": [
+        309.6688860000013,
+        413.90817800000013
+      ],
+      "shutdown_reasons": {
+        "EarlyDrop": 2
+      }
+    },
+    "single-large-file": {
+      "attempts": 2,
+      "accepted": 2,
+      "worker_cpu_ms": [
+        1150.0,
+        1112.0
+      ],
+      "verify_wall_ms": [
+        743.0365870000005,
+        743.6868680000007
+      ],
+      "shutdown_reasons": {
+        "EarlyDrop": 2
+      }
+    }
+  }
+}

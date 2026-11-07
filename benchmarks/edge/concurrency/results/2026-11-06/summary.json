@@ -1,0 +1,1928 @@
+{
+  "by_mode": {
+    "guarded": {
+      "attempts": 200,
+      "accepted": 152,
+      "outcomes": {
+        "accepted": 152,
+        "busy": 47,
+        "transport_failure": 1
+      },
+      "workers": 112,
+      "workers_with_shutdown": 112,
+      "worker_shutdown_reasons": {
+        "EarlyDrop": 111,
+        "WallClockTime": 1
+      },
+      "failed_request_shutdown_reasons": {
+        "EarlyDrop": 47,
+        "null": 1
+      },
+      "logged_max_active": 1,
+      "successful_peak_active": 1,
+      "sampled_memory_max_bytes": {
+        "heapUsed": 25878984,
+        "external": 150791934
+      },
+      "verify_wall_ms": {
+        "n": 152,
+        "min": 244.9472079999996,
+        "p50": 397.41976600000004,
+        "p95": 615.88185095,
+        "p99": 679.71283133,
+        "max": 705.3885799999999,
+        "mean": 413.1794269276316
+      },
+      "download_ms": {
+        "n": 152,
+        "min": 138.0983879999999,
+        "p50": 340.2311294999999,
+        "p95": 1883.3227741499993,
+        "p99": 2192.3721083900014,
+        "max": 2302.164405,
+        "mean": 528.0856254078947
+      },
+      "total_wall_ms": {
+        "n": 152,
+        "min": 424.221456,
+        "p50": 755.0852649999999,
+        "p95": 2268.3336797499996,
+        "p99": 2512.97834229,
+        "max": 2704.9583860000002,
+        "mean": 941.2907385
+      },
+      "client_wall_ms": {
+        "n": 152,
+        "min": 538.3749019999868,
+        "p50": 1001.3984650000083,
+        "p95": 2494.1505097999925,
+        "p99": 2710.2498820699966,
+        "max": 2934.526833999996,
+        "mean": 1161.7703959736853
+      },
+      "shutdown_cpu_ms": {
+        "n": 112,
+        "min": 331.0,
+        "p50": 632.0,
+        "p95": 1279.2999999999997,
+        "p99": 1431.23,
+        "max": 1643.0,
+        "mean": 704.1696428571429
+      },
+      "shutdown_memory_bytes": {
+        "n": 112,
+        "min": 14947505.0,
+        "p50": 15609121.0,
+        "p95": 73166795.25,
+        "p99": 108441333.79000002,
+        "max": 112511206.0,
+        "mean": 26615522.0
+      }
+    },
+    "unguarded": {
+      "attempts": 200,
+      "accepted": 191,
+      "outcomes": {
+        "accepted": 191,
+        "resource_limit": 9
+      },
+      "workers": 132,
+      "workers_with_shutdown": 132,
+      "worker_shutdown_reasons": {
+        "EarlyDrop": 129,
+        "CPUTime": 2,
+        "Memory": 1
+      },
+      "failed_request_shutdown_reasons": {
+        "CPUTime": 5,
+        "Memory": 4
+      },
+      "logged_max_active": 4,
+      "successful_peak_active": 3,
+      "sampled_memory_max_bytes": {
+        "heapUsed": 33522576,
+        "external": 209028253
+      },
+      "verify_wall_ms": {
+        "n": 191,
+        "min": 253.199945,
+        "p50": 516.0814929999997,
+        "p95": 921.1390624999999,
+        "p99": 1196.1357168999998,
+        "max": 1406.3019590000001,
+        "mean": 536.7176551623037
+      },
+      "download_ms": {
+        "n": 191,
+        "min": 195.58728999999994,
+        "p50": 318.916222,
+        "p95": 1775.2427115,
+        "p99": 2168.4161277999992,
+        "max": 3115.6993509999998,
+        "mean": 479.16618865445025
+      },
+      "total_wall_ms": {
+        "n": 191,
+        "min": 457.272034,
+        "p50": 820.400614,
+        "p95": 2265.6529465000003,
+        "p99": 2754.8736551999978,
+        "max": 3440.6037619999997,
+        "mean": 1015.9107638272251
+      },
+      "client_wall_ms": {
+        "n": 191,
+        "min": 637.5802050000061,
+        "p50": 1047.0063700000196,
+        "p95": 2493.0042005000246,
+        "p99": 2999.2051526999694,
+        "max": 3692.8383430000054,
+        "mean": 1229.28519057068
+      },
+      "shutdown_cpu_ms": {
+        "n": 132,
+        "min": 336.0,
+        "p50": 642.5,
+        "p95": 1667.1,
+        "p99": 1972.4099999999999,
+        "max": 2029.0,
+        "mean": 842.439393939394
+      },
+      "shutdown_memory_bytes": {
+        "n": 132,
+        "min": 14730401.0,
+        "p50": 15609253.0,
+        "p95": 132945528.0999999,
+        "p99": 178043052.37,
+        "max": 269626282.0,
+        "mean": 39857155.765151516
+      }
+    }
+  },
+  "by_mode_concurrency": {
+    "guarded": {
+      "1": {
+        "attempts": 20,
+        "accepted": 20,
+        "outcomes": {
+          "accepted": 20
+        },
+        "workers": 14,
+        "workers_with_shutdown": 14,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 14
+        },
+        "failed_request_shutdown_reasons": {},
+        "logged_max_active": 1,
+        "successful_peak_active": 1,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 23755688,
+          "external": 105877124
+        },
+        "verify_wall_ms": {
+          "n": 20,
+          "min": 245.46158699999978,
+          "p50": 397.8863879999999,
+          "p95": 533.8707572,
+          "p99": 547.4066338399999,
+          "max": 550.7906029999999,
+          "mean": 378.70260564999995
+        },
+        "download_ms": {
+          "n": 20,
+          "min": 1399.891081,
+          "p50": 1794.60261,
+          "p95": 2272.5900395500003,
+          "p99": 2296.24953191,
+          "max": 2302.164405,
+          "mean": 1816.6429317
+        },
+        "total_wall_ms": {
+          "n": 20,
+          "min": 1677.291362,
+          "p50": 2196.264027,
+          "p95": 2535.6220811,
+          "p99": 2671.0911250199997,
+          "max": 2704.9583860000002,
+          "mean": 2195.3688057
+        },
+        "client_wall_ms": {
+          "n": 20,
+          "min": 1842.482063999995,
+          "p50": 2400.6465019999937,
+          "p95": 2753.864300399997,
+          "p99": 2898.394327279996,
+          "max": 2934.526833999996,
+          "mean": 2405.513088099998
+        }
+      },
+      "2": {
+        "attempts": 60,
+        "accepted": 58,
+        "outcomes": {
+          "accepted": 58,
+          "busy": 1,
+          "transport_failure": 1
+        },
+        "workers": 40,
+        "workers_with_shutdown": 40,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 39,
+          "WallClockTime": 1
+        },
+        "failed_request_shutdown_reasons": {
+          "EarlyDrop": 1,
+          "null": 1
+        },
+        "logged_max_active": 1,
+        "successful_peak_active": 1,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 25444536,
+          "external": 107107902
+        },
+        "verify_wall_ms": {
+          "n": 58,
+          "min": 244.9472079999996,
+          "p50": 392.0812544999999,
+          "p95": 545.43157135,
+          "p99": 608.4979853899999,
+          "max": 677.8427449999999,
+          "mean": 399.73849020689653
+        },
+        "download_ms": {
+          "n": 58,
+          "min": 138.0983879999999,
+          "p50": 303.03382450000004,
+          "p95": 426.03238954999995,
+          "p99": 653.0780059999998,
+          "max": 733.746914,
+          "mean": 313.09705256896547
+        },
+        "total_wall_ms": {
+          "n": 58,
+          "min": 441.93415300000004,
+          "p50": 695.3134040000001,
+          "p95": 968.0674977499998,
+          "p99": 1122.2593517599998,
+          "max": 1140.911651,
+          "mean": 712.8610363103448
+        },
+        "client_wall_ms": {
+          "n": 58,
+          "min": 595.0229430000036,
+          "p50": 923.4656744999796,
+          "p95": 1316.2240537499981,
+          "p99": 1387.135940630013,
+          "max": 1387.927010000027,
+          "mean": 924.9466467241396
+        }
+      },
+      "4": {
+        "attempts": 60,
+        "accepted": 38,
+        "outcomes": {
+          "busy": 22,
+          "accepted": 38
+        },
+        "workers": 29,
+        "workers_with_shutdown": 29,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 29
+        },
+        "failed_request_shutdown_reasons": {
+          "EarlyDrop": 22
+        },
+        "logged_max_active": 1,
+        "successful_peak_active": 1,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 25878984,
+          "external": 100151220
+        },
+        "verify_wall_ms": {
+          "n": 38,
+          "min": 251.34623200000001,
+          "p50": 400.6556015,
+          "p95": 678.9495935499999,
+          "p99": 696.3121499599999,
+          "max": 705.3885799999999,
+          "mean": 438.6553845263158
+        },
+        "download_ms": {
+          "n": 38,
+          "min": 166.81590600000004,
+          "p50": 363.6867945,
+          "p95": 536.9127522499999,
+          "p99": 722.7165468800008,
+          "max": 830.1020450000001,
+          "mean": 359.2692717894737
+        },
+        "total_wall_ms": {
+          "n": 38,
+          "min": 424.221456,
+          "p50": 775.8657894999999,
+          "p95": 1134.06565635,
+          "p99": 1409.9754458000007,
+          "max": 1508.741936,
+          "mean": 797.9507681052631
+        },
+        "client_wall_ms": {
+          "n": 38,
+          "min": 538.3749019999868,
+          "p50": 1028.6933184999896,
+          "p95": 1456.8709467500182,
+          "p99": 1678.3418658300286,
+          "max": 1767.5551710000263,
+          "mean": 1024.8700513684257
+        }
+      },
+      "8": {
+        "attempts": 60,
+        "accepted": 36,
+        "outcomes": {
+          "busy": 24,
+          "accepted": 36
+        },
+        "workers": 33,
+        "workers_with_shutdown": 33,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 33
+        },
+        "failed_request_shutdown_reasons": {
+          "EarlyDrop": 24
+        },
+        "logged_max_active": 1,
+        "successful_peak_active": 1,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 25350288,
+          "external": 150791934
+        },
+        "verify_wall_ms": {
+          "n": 36,
+          "min": 261.010316,
+          "p50": 398.590533,
+          "p95": 609.2427995,
+          "p99": 633.4893003999998,
+          "max": 640.2655649999997,
+          "mean": 427.0967704444444
+        },
+        "download_ms": {
+          "n": 36,
+          "min": 190.143231,
+          "p50": 339.3102475,
+          "p95": 525.3520092499999,
+          "p99": 555.0306326499999,
+          "max": 570.275961,
+          "mean": 336.7859736388889
+        },
+        "total_wall_ms": {
+          "n": 36,
+          "min": 472.459601,
+          "p50": 735.0774905000001,
+          "p95": 1004.16590925,
+          "p99": 1083.1750731499997,
+          "max": 1097.8115589999998,
+          "mean": 763.9096345555556
+        },
+        "client_wall_ms": {
+          "n": 36,
+          "min": 569.1821129999539,
+          "p50": 991.669308000013,
+          "p95": 1210.5324474999861,
+          "p99": 1263.5423531000015,
+          "max": 1285.1535839999997,
+          "mean": 996.8575267777753
+        }
+      }
+    },
+    "unguarded": {
+      "1": {
+        "attempts": 20,
+        "accepted": 20,
+        "outcomes": {
+          "accepted": 20
+        },
+        "workers": 17,
+        "workers_with_shutdown": 17,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 17
+        },
+        "failed_request_shutdown_reasons": {},
+        "logged_max_active": 1,
+        "successful_peak_active": 1,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 24727136,
+          "external": 105944669
+        },
+        "verify_wall_ms": {
+          "n": 20,
+          "min": 318.111498,
+          "p50": 510.4152149999999,
+          "p95": 656.8702359000001,
+          "p99": 786.7162343799996,
+          "max": 819.1777339999999,
+          "mean": 483.21313055
+        },
+        "download_ms": {
+          "n": 20,
+          "min": 1480.108683,
+          "p50": 1775.2427115,
+          "p95": 2322.697327600001,
+          "p99": 2957.0989463199985,
+          "max": 3115.6993509999998,
+          "mean": 1876.49047455
+        },
+        "total_wall_ms": {
+          "n": 20,
+          "min": 1859.312814,
+          "p50": 2265.6529465000003,
+          "p95": 3117.1850419,
+          "p99": 3375.920017979999,
+          "max": 3440.6037619999997,
+          "mean": 2359.7300039
+        },
+        "client_wall_ms": {
+          "n": 20,
+          "min": 2115.2007979999894,
+          "p50": 2493.0042005000246,
+          "p95": 3360.877053799979,
+          "p99": 3626.4460851599997,
+          "max": 3692.8383430000054,
+          "mean": 2601.6273219499935
+        }
+      },
+      "2": {
+        "attempts": 60,
+        "accepted": 60,
+        "outcomes": {
+          "accepted": 60
+        },
+        "workers": 43,
+        "workers_with_shutdown": 43,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 42,
+          "CPUTime": 1
+        },
+        "failed_request_shutdown_reasons": {},
+        "logged_max_active": 2,
+        "successful_peak_active": 2,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 25916944,
+          "external": 181197310
+        },
+        "verify_wall_ms": {
+          "n": 60,
+          "min": 295.21782,
+          "p50": 518.4818609999998,
+          "p95": 898.67788085,
+          "p99": 1065.1476537299998,
+          "max": 1085.107798,
+          "mean": 535.3793343666666
+        },
+        "download_ms": {
+          "n": 60,
+          "min": 197.26616,
+          "p50": 310.81242399999996,
+          "p95": 512.8971034999998,
+          "p99": 590.7881699999998,
+          "max": 624.074967,
+          "mean": 323.1665218333333
+        },
+        "total_wall_ms": {
+          "n": 60,
+          "min": 549.557741,
+          "p50": 792.6381695,
+          "p95": 1310.7799294999995,
+          "p99": 1502.7397879299997,
+          "max": 1547.912886,
+          "mean": 858.5730836333333
+        },
+        "client_wall_ms": {
+          "n": 60,
+          "min": 720.8086499999808,
+          "p50": 1036.494568500018,
+          "p95": 1452.7788228500322,
+          "p99": 1683.5942280499933,
+          "max": 1683.8850419999858,
+          "mean": 1068.4223850999995
+        }
+      },
+      "4": {
+        "attempts": 60,
+        "accepted": 55,
+        "outcomes": {
+          "accepted": 55,
+          "resource_limit": 5
+        },
+        "workers": 42,
+        "workers_with_shutdown": 42,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 40,
+          "CPUTime": 2
+        },
+        "failed_request_shutdown_reasons": {
+          "CPUTime": 5
+        },
+        "logged_max_active": 3,
+        "successful_peak_active": 3,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 31350592,
+          "external": 209028253
+        },
+        "verify_wall_ms": {
+          "n": 55,
+          "min": 281.845512,
+          "p50": 517.392533,
+          "p95": 832.8558420999999,
+          "p99": 1137.2151956600003,
+          "max": 1406.3019590000001,
+          "mean": 530.4126393454546
+        },
+        "download_ms": {
+          "n": 55,
+          "min": 198.70475,
+          "p50": 289.47470200000004,
+          "p95": 449.17898859999934,
+          "p99": 556.8603298400001,
+          "max": 576.218468,
+          "mean": 302.92353683636367
+        },
+        "total_wall_ms": {
+          "n": 55,
+          "min": 483.060306,
+          "p50": 769.554383,
+          "p95": 1225.1243932,
+          "p99": 1516.6194488400004,
+          "max": 1784.826948,
+          "mean": 833.3626217090907
+        },
+        "client_wall_ms": {
+          "n": 55,
+          "min": 680.0063559999785,
+          "p50": 1002.9317400000082,
+          "p95": 1456.5323289000162,
+          "p99": 1857.6653640399857,
+          "max": 1959.698565999986,
+          "mean": 1049.8719005636376
+        }
+      },
+      "8": {
+        "attempts": 60,
+        "accepted": 56,
+        "outcomes": {
+          "accepted": 56,
+          "resource_limit": 4
+        },
+        "workers": 40,
+        "workers_with_shutdown": 40,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 39,
+          "Memory": 1
+        },
+        "failed_request_shutdown_reasons": {
+          "Memory": 4
+        },
+        "logged_max_active": 4,
+        "successful_peak_active": 3,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 33522576,
+          "external": 205715170
+        },
+        "verify_wall_ms": {
+          "n": 56,
+          "min": 253.199945,
+          "p50": 512.6479645,
+          "p95": 1162.56211175,
+          "p99": 1196.2382735499998,
+          "max": 1196.399434,
+          "mean": 563.4527553392857
+        },
+        "download_ms": {
+          "n": 56,
+          "min": 195.58728999999994,
+          "p50": 318.47751400000004,
+          "p95": 474.6414165,
+          "p99": 615.4978294500003,
+          "max": 684.224158,
+          "mean": 320.35976260714284
+        },
+        "total_wall_ms": {
+          "n": 56,
+          "min": 457.272034,
+          "p50": 809.3313485,
+          "p95": 1452.24828725,
+          "p99": 1566.70025505,
+          "max": 1574.0797969999999,
+          "mean": 883.8397607321428
+        },
+        "client_wall_ms": {
+          "n": 56,
+          "min": 637.5802050000061,
+          "p50": 1035.033377000019,
+          "p95": 1610.0867780000244,
+          "p99": 1762.282408349978,
+          "max": 1773.9633869999807,
+          "mean": 1087.725487910714
+        }
+      }
+    }
+  },
+  "by_mode_profile": {
+    "guarded": {
+      "ascii": {
+        "attempts": 40,
+        "accepted": 30,
+        "outcomes": {
+          "accepted": 30,
+          "transport_failure": 1,
+          "busy": 9
+        },
+        "workers": 30,
+        "workers_with_shutdown": 30,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 30
+        },
+        "failed_request_shutdown_reasons": {
+          "null": 1,
+          "EarlyDrop": 9
+        },
+        "logged_max_active": 1,
+        "successful_peak_active": 1,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 25006488,
+          "external": 99515442
+        },
+        "verify_wall_ms": {
+          "n": 30,
+          "min": 376.65693599999986,
+          "p50": 526.3261275,
+          "p95": 679.84752035,
+          "p99": 698.2746213199999,
+          "max": 705.3885799999999,
+          "mean": 500.03138506666664
+        },
+        "download_ms": {
+          "n": 30,
+          "min": 189.69081,
+          "p50": 371.03376499999985,
+          "p95": 1766.4806534,
+          "p99": 1979.7288797000003,
+          "max": 2063.140991,
+          "mean": 562.3322429
+        },
+        "total_wall_ms": {
+          "n": 30,
+          "min": 612.177316,
+          "p50": 921.1069035,
+          "p95": 2236.6962372999997,
+          "p99": 2428.83681106,
+          "max": 2486.17552,
+          "mean": 1062.3906753333333
+        },
+        "client_wall_ms": {
+          "n": 30,
+          "min": 760.7694140000092,
+          "p50": 1088.1532689999885,
+          "p95": 2475.9752794499964,
+          "p99": 2593.892749880008,
+          "max": 2620.58522800001,
+          "mean": 1280.0981871999993
+        }
+      },
+      "longpaths": {
+        "attempts": 40,
+        "accepted": 29,
+        "outcomes": {
+          "accepted": 29,
+          "busy": 11
+        },
+        "workers": 30,
+        "workers_with_shutdown": 30,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 30
+        },
+        "failed_request_shutdown_reasons": {
+          "EarlyDrop": 11
+        },
+        "logged_max_active": 1,
+        "successful_peak_active": 1,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 25878984,
+          "external": 82681750
+        },
+        "verify_wall_ms": {
+          "n": 29,
+          "min": 394.36140700000004,
+          "p50": 420.61844999999994,
+          "p95": 595.7163257999999,
+          "p99": 644.4922272399999,
+          "max": 659.71208,
+          "mean": 472.8124473448276
+        },
+        "download_ms": {
+          "n": 29,
+          "min": 166.81590600000004,
+          "p50": 326.91801,
+          "p95": 1693.6976689999995,
+          "p99": 1882.27275916,
+          "max": 1908.9429770000002,
+          "mean": 504.3193602068966
+        },
+        "total_wall_ms": {
+          "n": 29,
+          "min": 566.354955,
+          "p50": 813.463756,
+          "p95": 2126.2410917999996,
+          "p99": 2291.24870908,
+          "max": 2306.562613,
+          "mean": 977.1552098275862
+        },
+        "client_wall_ms": {
+          "n": 29,
+          "min": 708.6518540000384,
+          "p50": 1051.8221840000024,
+          "p95": 2348.271025599998,
+          "p99": 2503.929535759999,
+          "max": 2513.8960190000007,
+          "mean": 1203.9211929655257
+        }
+      },
+      "ordinary": {
+        "attempts": 40,
+        "accepted": 32,
+        "outcomes": {
+          "accepted": 32,
+          "busy": 8
+        },
+        "workers": 34,
+        "workers_with_shutdown": 34,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 34
+        },
+        "failed_request_shutdown_reasons": {
+          "EarlyDrop": 8
+        },
+        "logged_max_active": 1,
+        "successful_peak_active": 1,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 25444536,
+          "external": 105813312
+        },
+        "verify_wall_ms": {
+          "n": 32,
+          "min": 245.46158699999978,
+          "p50": 336.359295,
+          "p95": 418.6619055500001,
+          "p99": 464.2731750300001,
+          "max": 478.51047900000003,
+          "mean": 325.17184215624997
+        },
+        "download_ms": {
+          "n": 32,
+          "min": 172.856618,
+          "p50": 341.926165,
+          "p95": 1912.4217082499995,
+          "p99": 2025.5887058299998,
+          "max": 2048.942682,
+          "mean": 513.261238875
+        },
+        "total_wall_ms": {
+          "n": 32,
+          "min": 424.221456,
+          "p50": 686.3797585,
+          "p95": 2170.41688885,
+          "p99": 2282.28002552,
+          "max": 2310.668154,
+          "mean": 838.45990903125
+        },
+        "client_wall_ms": {
+          "n": 32,
+          "min": 538.3749019999868,
+          "p50": 955.8509345000061,
+          "p95": 2332.181004149997,
+          "p99": 2470.9174168099926,
+          "max": 2513.52159999999,
+          "mean": 1064.515737937501
+        }
+      },
+      "skewed": {
+        "attempts": 40,
+        "accepted": 31,
+        "outcomes": {
+          "accepted": 31,
+          "busy": 9
+        },
+        "workers": 31,
+        "workers_with_shutdown": 31,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 30,
+          "WallClockTime": 1
+        },
+        "failed_request_shutdown_reasons": {
+          "EarlyDrop": 9
+        },
+        "logged_max_active": 1,
+        "successful_peak_active": 1,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 25422056,
+          "external": 150791934
+        },
+        "verify_wall_ms": {
+          "n": 31,
+          "min": 244.9472079999996,
+          "p50": 303.86736999999994,
+          "p95": 428.33904200000006,
+          "p99": 443.57608369999997,
+          "max": 445.06852699999996,
+          "mean": 314.84892725806446
+        },
+        "download_ms": {
+          "n": 31,
+          "min": 175.856088,
+          "p50": 333.1798,
+          "p95": 1773.502461,
+          "p99": 2214.5172962,
+          "max": 2271.0334940000002,
+          "mean": 517.6430288709677
+        },
+        "total_wall_ms": {
+          "n": 31,
+          "min": 444.621686,
+          "p50": 670.5865130000001,
+          "p95": 2135.3718455,
+          "p99": 2478.5754350999996,
+          "max": 2526.7096439999996,
+          "mean": 832.5177897096775
+        },
+        "client_wall_ms": {
+          "n": 31,
+          "min": 595.0229430000036,
+          "p50": 928.4892009999908,
+          "p95": 2384.350572999999,
+          "p99": 2653.2697662999976,
+          "max": 2677.4815029999954,
+          "mean": 1053.6103509032228
+        }
+      },
+      "unicode": {
+        "attempts": 40,
+        "accepted": 30,
+        "outcomes": {
+          "accepted": 30,
+          "busy": 10
+        },
+        "workers": 30,
+        "workers_with_shutdown": 30,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 29,
+          "WallClockTime": 1
+        },
+        "failed_request_shutdown_reasons": {
+          "EarlyDrop": 10
+        },
+        "logged_max_active": 1,
+        "successful_peak_active": 1,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 25348328,
+          "external": 81532144
+        },
+        "verify_wall_ms": {
+          "n": 30,
+          "min": 349.6456639999999,
+          "p50": 458.02977899999996,
+          "p95": 616.79511605,
+          "p99": 639.8339415,
+          "max": 647.5655589999999,
+          "mean": 464.1651558
+        },
+        "download_ms": {
+          "n": 30,
+          "min": 138.0983879999999,
+          "p50": 347.8263914999999,
+          "p95": 1881.4600116999984,
+          "p99": 2248.40741762,
+          "max": 2302.164405,
+          "mean": 543.4164263333333
+        },
+        "total_wall_ms": {
+          "n": 30,
+          "min": 492.300166,
+          "p50": 814.7455534999999,
+          "p95": 2339.971638749999,
+          "p99": 2645.4582557300005,
+          "max": 2704.9583860000002,
+          "mean": 1007.6067445666666
+        },
+        "client_wall_ms": {
+          "n": 30,
+          "min": 602.2292499999935,
+          "p50": 1046.6457959999786,
+          "p95": 2584.700442649997,
+          "p99": 2879.3772184799964,
+          "max": 2934.526833999996,
+          "mean": 1218.2005161333327
+        }
+      }
+    },
+    "unguarded": {
+      "ascii": {
+        "attempts": 40,
+        "accepted": 36,
+        "outcomes": {
+          "accepted": 36,
+          "resource_limit": 4
+        },
+        "workers": 38,
+        "workers_with_shutdown": 38,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 35,
+          "CPUTime": 2,
+          "Memory": 1
+        },
+        "failed_request_shutdown_reasons": {
+          "CPUTime": 2,
+          "Memory": 2
+        },
+        "logged_max_active": 3,
+        "successful_peak_active": 3,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 25722744,
+          "external": 170129810
+        },
+        "verify_wall_ms": {
+          "n": 36,
+          "min": 400.098622,
+          "p50": 545.8388874999999,
+          "p95": 1097.0790379999999,
+          "p99": 1181.6345170499999,
+          "max": 1196.399434,
+          "mean": 637.4273904166666
+        },
+        "download_ms": {
+          "n": 36,
+          "min": 195.58728999999994,
+          "p50": 308.3951905,
+          "p95": 1983.11751375,
+          "p99": 2229.21433535,
+          "max": 2280.960379,
+          "mean": 487.8850402222222
+        },
+        "total_wall_ms": {
+          "n": 36,
+          "min": 683.788635,
+          "p50": 880.3260235,
+          "p95": 2574.22926475,
+          "p99": 2943.356164999999,
+          "max": 3100.163004,
+          "mean": 1125.3398629166666
+        },
+        "client_wall_ms": {
+          "n": 36,
+          "min": 846.9325140000024,
+          "p50": 1105.6865915000174,
+          "p95": 2793.744739750011,
+          "p99": 3176.067375649989,
+          "max": 3343.4054069999775,
+          "mean": 1331.5463038333364
+        }
+      },
+      "longpaths": {
+        "attempts": 40,
+        "accepted": 38,
+        "outcomes": {
+          "accepted": 38,
+          "resource_limit": 2
+        },
+        "workers": 35,
+        "workers_with_shutdown": 35,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 33,
+          "CPUTime": 1,
+          "Memory": 1
+        },
+        "failed_request_shutdown_reasons": {
+          "CPUTime": 1,
+          "Memory": 1
+        },
+        "logged_max_active": 3,
+        "successful_peak_active": 3,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 29983176,
+          "external": 209028253
+        },
+        "verify_wall_ms": {
+          "n": 38,
+          "min": 404.025341,
+          "p50": 541.316419,
+          "p95": 1071.7264746499998,
+          "p99": 1325.3846672900006,
+          "max": 1406.3019590000001,
+          "mean": 634.8891941052632
+        },
+        "download_ms": {
+          "n": 38,
+          "min": 197.26616,
+          "p50": 330.429449,
+          "p95": 1976.56646775,
+          "p99": 2109.5089278800006,
+          "max": 2155.911211,
+          "mean": 500.21859936842105
+        },
+        "total_wall_ms": {
+          "n": 38,
+          "min": 617.44178,
+          "p50": 904.9398729999997,
+          "p95": 2518.05335895,
+          "p99": 2662.81378273,
+          "max": 2716.508172,
+          "mean": 1135.134990605263
+        },
+        "client_wall_ms": {
+          "n": 38,
+          "min": 812.9308119999905,
+          "p50": 1067.9639210000005,
+          "p95": 2763.3986767499664,
+          "p99": 2907.2310341699936,
+          "max": 2960.960679999971,
+          "mean": 1333.6686372368426
+        }
+      },
+      "ordinary": {
+        "attempts": 40,
+        "accepted": 39,
+        "outcomes": {
+          "accepted": 39,
+          "resource_limit": 1
+        },
+        "workers": 37,
+        "workers_with_shutdown": 37,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 36,
+          "CPUTime": 1
+        },
+        "failed_request_shutdown_reasons": {
+          "CPUTime": 1
+        },
+        "logged_max_active": 3,
+        "successful_peak_active": 3,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 24988352,
+          "external": 208967353
+        },
+        "verify_wall_ms": {
+          "n": 39,
+          "min": 253.199945,
+          "p50": 382.269496,
+          "p95": 831.6183988,
+          "p99": 1082.290786059999,
+          "max": 1196.1064149999997,
+          "mean": 438.72775728205124
+        },
+        "download_ms": {
+          "n": 39,
+          "min": 203.57937600000002,
+          "p50": 339.853504,
+          "p95": 1647.2558566,
+          "p99": 1752.52953328,
+          "max": 1771.0122370000001,
+          "mean": 468.23938148717946
+        },
+        "total_wall_ms": {
+          "n": 39,
+          "min": 457.272034,
+          "p50": 725.079922,
+          "p95": 2036.9417569000002,
+          "p99": 2099.4863566999998,
+          "max": 2108.538027,
+          "mean": 906.9936814358974
+        },
+        "client_wall_ms": {
+          "n": 39,
+          "min": 637.5802050000061,
+          "p50": 979.4457159999865,
+          "p95": 2291.4082899999985,
+          "p99": 2342.8721939399734,
+          "max": 2344.896847999962,
+          "mean": 1124.0792530512767
+        }
+      },
+      "skewed": {
+        "attempts": 40,
+        "accepted": 39,
+        "outcomes": {
+          "accepted": 39,
+          "resource_limit": 1
+        },
+        "workers": 36,
+        "workers_with_shutdown": 36,
+        "worker_shutdown_reasons": {
+          "CPUTime": 1,
+          "EarlyDrop": 34,
+          "Memory": 1
+        },
+        "failed_request_shutdown_reasons": {
+          "Memory": 1
+        },
+        "logged_max_active": 4,
+        "successful_peak_active": 3,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 24973312,
+          "external": 205633407
+        },
+        "verify_wall_ms": {
+          "n": 39,
+          "min": 281.845512,
+          "p50": 348.52059399999996,
+          "p95": 632.3778998000001,
+          "p99": 758.1120624199997,
+          "max": 816.6693560000001,
+          "mean": 379.4104275897436
+        },
+        "download_ms": {
+          "n": 39,
+          "min": 201.19226799999998,
+          "p50": 294.90590499999996,
+          "p95": 1654.7184023999998,
+          "p99": 2568.8676675199963,
+          "max": 3115.6993509999998,
+          "mean": 481.7636025897436
+        },
+        "total_wall_ms": {
+          "n": 39,
+          "min": 483.060306,
+          "p50": 657.975589,
+          "p95": 2015.9391279000001,
+          "p99": 2901.7638987999962,
+          "max": 3440.6037619999997,
+          "mean": 861.1995370512819
+        },
+        "client_wall_ms": {
+          "n": 39,
+          "min": 680.0063559999785,
+          "p50": 861.1952269999961,
+          "p95": 2257.24657909999,
+          "p99": 3157.503988919995,
+          "max": 3692.8383430000054,
+          "mean": 1067.768793999995
+        }
+      },
+      "unicode": {
+        "attempts": 40,
+        "accepted": 39,
+        "outcomes": {
+          "accepted": 39,
+          "resource_limit": 1
+        },
+        "workers": 36,
+        "workers_with_shutdown": 36,
+        "worker_shutdown_reasons": {
+          "EarlyDrop": 35,
+          "CPUTime": 1
+        },
+        "failed_request_shutdown_reasons": {
+          "CPUTime": 1
+        },
+        "logged_max_active": 2,
+        "successful_peak_active": 3,
+        "sampled_memory_max_bytes": {
+          "heapUsed": 33522576,
+          "external": 166382652
+        },
+        "verify_wall_ms": {
+          "n": 39,
+          "min": 376.21614000000005,
+          "p50": 517.45434,
+          "p95": 899.3102661000003,
+          "p99": 1027.7951298199996,
+          "max": 1085.107798,
+          "mean": 603.3976280769231
+        },
+        "download_ms": {
+          "n": 39,
+          "min": 198.70475,
+          "p50": 310.825566,
+          "p95": 1756.8492569000002,
+          "p99": 1819.39058648,
+          "max": 1843.8560900000002,
+          "mean": 458.934805897436
+        },
+        "total_wall_ms": {
+          "n": 39,
+          "min": 642.490461,
+          "p50": 849.4118129999999,
+          "p95": 2251.5425573000007,
+          "p99": 2412.8222239399997,
+          "max": 2492.21237,
+          "mean": 1062.3604015897436
+        },
+        "client_wall_ms": {
+          "n": 39,
+          "min": 859.7660659999633,
+          "p50": 1086.2286520000453,
+          "p95": 2471.139496100011,
+          "p99": 2666.3244411999863,
+          "max": 2755.8017909999535,
+          "mean": 1299.9057028461577
+        }
+      }
+    }
+  },
+  "boot_workers": 246,
+  "shutdown_workers": 246,
+  "shutdown_reasons": {
+    "EarlyDrop": 242,
+    "WallClockTime": 1,
+    "CPUTime": 2,
+    "Memory": 1
+  },
+  "collection_errors": {
+    "wave-0": [],
+    "wave-1": []
+  },
+  "attempts_with_start_event": 352,
+  "failed_requests": [
+    {
+      "request_id": "w0-c2-0005",
+      "mode": "guarded",
+      "concurrency": 2,
+      "case": "longpaths-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "61c7c847-d6bd-4fa3-9075-6e196f30a9c5",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c2-0016",
+      "mode": "guarded",
+      "concurrency": 2,
+      "case": "ascii-0",
+      "outcome": "transport_failure",
+      "http_status": null,
+      "error": "ReadTimeout",
+      "resolved_worker": null,
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": null
+    },
+    {
+      "request_id": "w0-c4-0000",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "ordinary-0",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "75f9b6d8-0d5d-40db-9a8c-a9e43f61cef2",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0002",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "skewed-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "75f9b6d8-0d5d-40db-9a8c-a9e43f61cef2",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0004",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "ascii-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "75f9b6d8-0d5d-40db-9a8c-a9e43f61cef2",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0009",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "skewed-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "75f9b6d8-0d5d-40db-9a8c-a9e43f61cef2",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0010",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "unicode-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "75f9b6d8-0d5d-40db-9a8c-a9e43f61cef2",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0011",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "unicode-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "75f9b6d8-0d5d-40db-9a8c-a9e43f61cef2",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0012",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "ordinary-0",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "75f9b6d8-0d5d-40db-9a8c-a9e43f61cef2",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0022",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "longpaths-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "f0694755-34d3-48a1-9b53-866dd8ab2d3f",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0023",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "longpaths-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "f0694755-34d3-48a1-9b53-866dd8ab2d3f",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0024",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "ascii-0",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "f0694755-34d3-48a1-9b53-866dd8ab2d3f",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0025",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "longpaths-0",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "f0694755-34d3-48a1-9b53-866dd8ab2d3f",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0027",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "longpaths-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "f0694755-34d3-48a1-9b53-866dd8ab2d3f",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0028",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "unicode-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "f0694755-34d3-48a1-9b53-866dd8ab2d3f",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0031",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "unicode-0",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "f0694755-34d3-48a1-9b53-866dd8ab2d3f",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0032",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "ordinary-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "f0694755-34d3-48a1-9b53-866dd8ab2d3f",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0040",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "ordinary-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "be38fe0c-17e5-4d26-8b42-a53bd3eb5ea7",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0041",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "skewed-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "be38fe0c-17e5-4d26-8b42-a53bd3eb5ea7",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0047",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "unicode-0",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "be38fe0c-17e5-4d26-8b42-a53bd3eb5ea7",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0048",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "ascii-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "be38fe0c-17e5-4d26-8b42-a53bd3eb5ea7",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0050",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "skewed-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "be38fe0c-17e5-4d26-8b42-a53bd3eb5ea7",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0051",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "ordinary-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "be38fe0c-17e5-4d26-8b42-a53bd3eb5ea7",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c4-0054",
+      "mode": "guarded",
+      "concurrency": 4,
+      "case": "ascii-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "be38fe0c-17e5-4d26-8b42-a53bd3eb5ea7",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0003",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "skewed-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "1f5746de-68ad-4a66-b0d4-58b6d670eb16",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0006",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "ascii-0",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "1f5746de-68ad-4a66-b0d4-58b6d670eb16",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0007",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "ordinary-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "1f5746de-68ad-4a66-b0d4-58b6d670eb16",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0009",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "ordinary-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "1f5746de-68ad-4a66-b0d4-58b6d670eb16",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0015",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "longpaths-0",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0012",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "ascii-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0016",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "unicode-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0021",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "skewed-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0022",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "skewed-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0024",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "unicode-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0031",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "longpaths-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0030",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "unicode-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0033",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "longpaths-0",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0036",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "longpaths-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0037",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "unicode-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0039",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "longpaths-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0040",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "longpaths-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0042",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "ordinary-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "8e5a4a26-7533-4f39-add5-f30cf3843572",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0051",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "ascii-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "0927e38c-3713-4ab5-8d15-775a8f171908",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0052",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "skewed-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "0927e38c-3713-4ab5-8d15-775a8f171908",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0054",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "unicode-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "0927e38c-3713-4ab5-8d15-775a8f171908",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0055",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "ascii-1",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "0927e38c-3713-4ab5-8d15-775a8f171908",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0057",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "ascii-2",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "0927e38c-3713-4ab5-8d15-775a8f171908",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w0-c8-0059",
+      "mode": "guarded",
+      "concurrency": 8,
+      "case": "skewed-3",
+      "outcome": "busy",
+      "http_status": 429,
+      "error": "busy",
+      "resolved_worker": "0927e38c-3713-4ab5-8d15-775a8f171908",
+      "logged_active_at_start": null,
+      "worker_shutdown_reason": "EarlyDrop"
+    },
+    {
+      "request_id": "w1-c4-0004",
+      "mode": "unguarded",
+      "concurrency": 4,
+      "case": "ascii-3",
+      "outcome": "resource_limit",
+      "http_status": 546,
+      "error": "WORKER_RESOURCE_LIMIT",
+      "resolved_worker": "09915d08-8890-4da4-990f-d228669dacfa",
+      "logged_active_at_start": 1,
+      "worker_shutdown_reason": "CPUTime"
+    },
+    {
+      "request_id": "w1-c4-0006",
+      "mode": "unguarded",
+      "concurrency": 4,
+      "case": "ordinary-1",
+      "outcome": "resource_limit",
+      "http_status": 546,
+      "error": "WORKER_RESOURCE_LIMIT",
+      "resolved_worker": "09915d08-8890-4da4-990f-d228669dacfa",
+      "logged_active_at_start": 2,
+      "worker_shutdown_reason": "CPUTime"
+    },
+    {
+      "request_id": "w1-c4-0017",
+      "mode": "unguarded",
+      "concurrency": 4,
+      "case": "longpaths-2",
+      "outcome": "resource_limit",
+      "http_status": 546,
+      "error": "WORKER_RESOURCE_LIMIT",
+      "resolved_worker": "d4442776-897b-486d-a0ed-a0f2996e37e8",
+      "logged_active_at_start": 3,
+      "worker_shutdown_reason": "CPUTime"
+    },
+    {
+      "request_id": "w1-c4-0015",
+      "mode": "unguarded",
+      "concurrency": 4,
+      "case": "ascii-2",
+      "outcome": "resource_limit",
+      "http_status": 546,
+      "error": "WORKER_RESOURCE_LIMIT",
+      "resolved_worker": "d4442776-897b-486d-a0ed-a0f2996e37e8",
+      "logged_active_at_start": 2,
+      "worker_shutdown_reason": "CPUTime"
+    },
+    {
+      "request_id": "w1-c4-0014",
+      "mode": "unguarded",
+      "concurrency": 4,
+      "case": "unicode-0",
+      "outcome": "resource_limit",
+      "http_status": 546,
+      "error": "WORKER_RESOURCE_LIMIT",
+      "resolved_worker": "d4442776-897b-486d-a0ed-a0f2996e37e8",
+      "logged_active_at_start": 1,
+      "worker_shutdown_reason": "CPUTime"
+    },
+    {
+      "request_id": "w1-c8-0048",
+      "mode": "unguarded",
+      "concurrency": 8,
+      "case": "skewed-0",
+      "outcome": "resource_limit",
+      "http_status": 546,
+      "error": "WORKER_RESOURCE_LIMIT",
+      "resolved_worker": "a75e7ad0-090d-42ca-84ab-73ef9ab98350",
+      "logged_active_at_start": 4,
+      "worker_shutdown_reason": "Memory"
+    },
+    {
+      "request_id": "w1-c8-0044",
+      "mode": "unguarded",
+      "concurrency": 8,
+      "case": "longpaths-0",
+      "outcome": "resource_limit",
+      "http_status": 546,
+      "error": "WORKER_RESOURCE_LIMIT",
+      "resolved_worker": "a75e7ad0-090d-42ca-84ab-73ef9ab98350",
+      "logged_active_at_start": 2,
+      "worker_shutdown_reason": "Memory"
+    },
+    {
+      "request_id": "w1-c8-0046",
+      "mode": "unguarded",
+      "concurrency": 8,
+      "case": "ascii-0",
+      "outcome": "resource_limit",
+      "http_status": 546,
+      "error": "WORKER_RESOURCE_LIMIT",
+      "resolved_worker": "a75e7ad0-090d-42ca-84ab-73ef9ab98350",
+      "logged_active_at_start": 2,
+      "worker_shutdown_reason": "Memory"
+    },
+    {
+      "request_id": "w1-c8-0047",
+      "mode": "unguarded",
+      "concurrency": 8,
+      "case": "ascii-0",
+      "outcome": "resource_limit",
+      "http_status": 546,
+      "error": "WORKER_RESOURCE_LIMIT",
+      "resolved_worker": "a75e7ad0-090d-42ca-84ab-73ef9ab98350",
+      "logged_active_at_start": 3,
+      "worker_shutdown_reason": "Memory"
+    }
+  ]
+}

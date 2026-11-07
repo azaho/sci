@@ -1,0 +1,41 @@
+name: edge-benchmark-logs
+
+on:
+  push:
+    branches: [bench/supabase-verification]
+    paths: ['.github/workflows/edge-benchmark-logs.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  logs:
+    if: github.repository == 'azaho/sci' && github.ref == 'refs/heads/bench/supabase-verification'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests==2.32.5
+      - name: Download the completed soak measurements
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for wave in 0 1 2 3; do
+            gh run download 42166947257 --repo azaho/sci --name "edge-soak-wave-$wave" --dir "$RUNNER_TEMP/soak-results/wave-$wave"
+          done
+      - name: Read recorded benchmark runtime logs with bounded queries
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SCI_EDGE_BENCH_SUPABASE_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: python benchmarks/edge/soak/collect_logs.py "$RUNNER_TEMP/soak-results" "$RUNNER_TEMP/edge-logs"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edge-benchmark-logs
+          path: ${{ runner.temp }}/edge-logs/

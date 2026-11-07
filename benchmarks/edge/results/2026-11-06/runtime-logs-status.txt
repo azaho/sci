@@ -1,0 +1,1 @@
+GET https://api.supabase.com/v1/projects/yepdvbeeopylxknxomlo/analytics/endpoints/logs returned HTTP 400: iso_timestamp_start: Invalid ISO datetime,iso_timestamp_end: Invalid ISO datetime

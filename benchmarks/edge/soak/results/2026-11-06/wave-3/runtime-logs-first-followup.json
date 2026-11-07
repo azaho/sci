@@ -1,0 +1,12 @@
+{
+  "result": [],
+  "collection_errors": [
+    "GET https://api.supabase.com/v1/projects/yepdvbeeopylxknxomlo/analytics/endpoints/logs returned HTTP 429: ThrottlerException: Too Many Requests",
+    "GET https://api.supabase.com/v1/projects/yepdvbeeopylxknxomlo/analytics/endpoints/logs returned HTTP 429: ThrottlerException: Too Many Requests",
+    "GET https://api.supabase.com/v1/projects/yepdvbeeopylxknxomlo/analytics/endpoints/logs returned HTTP 429: ThrottlerException: Too Many Requests",
+    "GET https://api.supabase.com/v1/projects/yepdvbeeopylxknxomlo/analytics/endpoints/logs returned HTTP 429: ThrottlerException: Too Many Requests",
+    "GET https://api.supabase.com/v1/projects/yepdvbeeopylxknxomlo/analytics/endpoints/logs returned HTTP 429: ThrottlerException: Too Many Requests",
+    "GET https://api.supabase.com/v1/projects/yepdvbeeopylxknxomlo/analytics/endpoints/logs returned HTTP 429: ThrottlerException: Too Many Requests",
+    "GET https://api.supabase.com/v1/projects/yepdvbeeopylxknxomlo/analytics/endpoints/logs returned HTTP 429: ThrottlerException: Too Many Requests"
+  ]
+}

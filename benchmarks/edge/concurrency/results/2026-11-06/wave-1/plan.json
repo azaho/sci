@@ -1,0 +1,26 @@
+{
+  "mode": "unguarded",
+  "wave": 1,
+  "region": "us-east-1",
+  "planned": 200,
+  "phases": [
+    {
+      "concurrency": 1,
+      "count": 20
+    },
+    {
+      "concurrency": 2,
+      "count": 60
+    },
+    {
+      "concurrency": 4,
+      "count": 60
+    },
+    {
+      "concurrency": 8,
+      "count": 60
+    }
+  ],
+  "retries": 0,
+  "schedule_seed": 20261107
+}

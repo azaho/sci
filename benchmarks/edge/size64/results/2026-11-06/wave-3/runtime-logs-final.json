@@ -1,0 +1,116 @@
+{
+  "result": [
+    {
+      "event_message": "booted (time: 59ms)",
+      "id": "f0b03b59-75de-492d-a245-62ca1a8b93be",
+      "log_attributes": {
+        "boot_time": "59",
+        "deployment_id": "yepdvbeeopylxknxomlo_55aca80e-4a1d-4bb4-8c0e-3d60b28443dc_1",
+        "event_type": "Boot",
+        "execution_id": "02bedbaa-7b17-4fd6-b7ce-47c480454130",
+        "function_id": "55aca80e-4a1d-4bb4-8c0e-3d60b28443dc",
+        "level": "log",
+        "project": "yepdvbeeopylxknxomlo",
+        "project_ref": "yepdvbeeopylxknxomlo",
+        "region": "us-east-1",
+        "request_id": "01a1b4a5-b556-716b-90e0-2a299dc7eb8f",
+        "served_by": "supabase-edge-runtime-1.77.9 (compatible with Deno v2.1.4)",
+        "timestamp": "2026-11-07T06:15:21.346Z",
+        "version": "1"
+      },
+      "source": "function_logs",
+      "timestamp": "2026-11-07T06:15:21.346000"
+    },
+    {
+      "event_message": "{\"sci_request_start\":{\"request_id\":\"large-readme-0\",\"execution_id\":\"02bedbaa-7b17-4fd6-b7ce-47c480454130\",\"region\":\"us-east-1\",\"runtime\":{\"deno\":\"supabase-edge-runtime-1.77.9 (compatible with Deno v2.1.4)\",\"v8\":\"11.6.189.12\",\"typescript\":\"5.1.6\"},\"verification_call\":1}}\n",
+      "id": "a8fc94e2-5771-456b-92d0-41846d4827e1",
+      "log_attributes": {
+        "deployment_id": "yepdvbeeopylxknxomlo_55aca80e-4a1d-4bb4-8c0e-3d60b28443dc_1",
+        "event_type": "Log",
+        "execution_id": "02bedbaa-7b17-4fd6-b7ce-47c480454130",
+        "function_id": "55aca80e-4a1d-4bb4-8c0e-3d60b28443dc",
+        "level": "info",
+        "project": "yepdvbeeopylxknxomlo",
+        "project_ref": "yepdvbeeopylxknxomlo",
+        "region": "us-east-1",
+        "request_id": "01a1b4a5-b556-716b-90e0-2a299dc7eb8f",
+        "served_by": "supabase-edge-runtime-1.77.9 (compatible with Deno v2.1.4)",
+        "timestamp": "2026-11-07T06:15:30.245Z",
+        "version": "1"
+      },
+      "source": "function_logs",
+      "timestamp": "2026-11-07T06:15:30.245000"
+    },
+    {
+      "event_message": "{\"sci_benchmark\":{\"request_id\":\"large-readme-0\",\"execution_id\":\"02bedbaa-7b17-4fd6-b7ce-47c480454130\",\"region\":\"us-east-1\",\"runtime\":{\"deno\":\"supabase-edge-runtime-1.77.9 (compatible with Deno v2.1.4)\",\"v8\":\"11.6.189.12\",\"typescript\":\"5.1.6\"},\"verification_call\":1,\"download_bytes\":67108864,\"download_ms\":3702.828774999998,\"verification\":{\"files\":1000,\"payload_bytes\":66887511,\"manifest_bytes\":109115,\"times\":{\"zip_structure_ms\":5.165257999999085,\"manifest_ms\":14.682091000000582,\"signature_ms\":8.219060999999783,\"files_ms\":385.12316400000054,\"hash_ms\":160.6156139999821,\"crc_ms\":201.39966099994854,\"metadata_ms\":2150.575576000001,\"timestamp_ms\":0.026535999999396154},\"timestamp\":null},\"verify_wall_ms\":2564.460572,\"accepted\":true,\"total_wall_ms\":6267.3115499999985,\"memory_sampled_max\":{\"rss\":0,\"heapTotal\":80961536,\"heapUsed\":78497216,\"external\":138216393}}}\n",
+      "id": "dc91afaa-6a03-4078-87a3-235aef1d7b31",
+      "log_attributes": {
+        "deployment_id": "yepdvbeeopylxknxomlo_55aca80e-4a1d-4bb4-8c0e-3d60b28443dc_1",
+        "event_type": "Log",
+        "execution_id": "02bedbaa-7b17-4fd6-b7ce-47c480454130",
+        "function_id": "55aca80e-4a1d-4bb4-8c0e-3d60b28443dc",
+        "level": "info",
+        "project": "yepdvbeeopylxknxomlo",
+        "project_ref": "yepdvbeeopylxknxomlo",
+        "region": "us-east-1",
+        "request_id": "01a1b4a5-b556-716b-90e0-2a299dc7eb8f",
+        "served_by": "supabase-edge-runtime-1.77.9 (compatible with Deno v2.1.4)",
+        "timestamp": "2026-11-07T06:15:36.512Z",
+        "version": "1"
+      },
+      "source": "function_logs",
+      "timestamp": "2026-11-07T06:15:36.512000"
+    },
+    {
+      "event_message": "CPU Time exceeded",
+      "id": "e1b9e0ec-9aa3-498b-9131-e9d4dbc9ae0b",
+      "log_attributes": {
+        "cpu_time_used": "2993",
+        "deployment_id": "yepdvbeeopylxknxomlo_55aca80e-4a1d-4bb4-8c0e-3d60b28443dc_1",
+        "event_type": "Log",
+        "execution_id": "02bedbaa-7b17-4fd6-b7ce-47c480454130",
+        "function_id": "55aca80e-4a1d-4bb4-8c0e-3d60b28443dc",
+        "level": "error",
+        "memory_used.external": "71325783",
+        "memory_used.heap": "78530464",
+        "memory_used.total": "149856247",
+        "project": "yepdvbeeopylxknxomlo",
+        "project_ref": "yepdvbeeopylxknxomlo",
+        "region": "us-east-1",
+        "request_id": "01a1b4a5-b556-716b-90e0-2a299dc7eb8f",
+        "served_by": "supabase-edge-runtime-1.77.9 (compatible with Deno v2.1.4)",
+        "timestamp": "2026-11-07T06:15:36.523Z",
+        "version": "1"
+      },
+      "source": "function_logs",
+      "timestamp": "2026-11-07T06:15:36.523000"
+    },
+    {
+      "event_message": "shutdown",
+      "id": "51aed8e9-d691-4475-9765-c013283fdf1b",
+      "log_attributes": {
+        "cpu_time_used": "2993",
+        "deployment_id": "yepdvbeeopylxknxomlo_55aca80e-4a1d-4bb4-8c0e-3d60b28443dc_1",
+        "event_type": "Shutdown",
+        "execution_id": "02bedbaa-7b17-4fd6-b7ce-47c480454130",
+        "function_id": "55aca80e-4a1d-4bb4-8c0e-3d60b28443dc",
+        "level": "log",
+        "memory_used.external": "71325783",
+        "memory_used.heap": "78530464",
+        "memory_used.total": "149856247",
+        "project": "yepdvbeeopylxknxomlo",
+        "project_ref": "yepdvbeeopylxknxomlo",
+        "reason": "CPUTime",
+        "region": "us-east-1",
+        "request_id": "01a1b4a5-b556-716b-90e0-2a299dc7eb8f",
+        "served_by": "supabase-edge-runtime-1.77.9 (compatible with Deno v2.1.4)",
+        "timestamp": "2026-11-07T06:15:36.523Z",
+        "version": "1"
+      },
+      "source": "function_logs",
+      "timestamp": "2026-11-07T06:15:36.523000"
+    }
+  ],
+  "collection_errors": [],
+  "collection_retries": []
+}
