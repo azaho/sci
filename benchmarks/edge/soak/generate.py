@@ -10,7 +10,7 @@ from asn1crypto import cms,tsp,x509 as ax509
 
 enc=lambda x:json.dumps(x,separators=(',',':'),ensure_ascii=False).encode()
 b64=lambda x:base64.b64encode(x).decode()
-def generate(out,small=False):
+def generate(out,small=False,profiles=None,variants=range(4)):
  out.mkdir(parents=True,exist_ok=True)
  now=datetime.now(timezone.utc).replace(microsecond=0)
  ca_key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
@@ -41,8 +41,8 @@ def generate(out,small=False):
   sd=cms.SignedData({'version':'v3','digest_algorithms':[{'algorithm':'sha256'}],'encap_content_info':{'content_type':'tst_info','content':info},'certificates':[ac],'signer_infos':[signer]})
   return tsp.TimeStampResp({'status':{'status':'granted'},'time_stamp_token':{'content_type':'signed_data','content':sd}}).dump()
  cases=[]
- for profile in ['ordinary','unicode','ascii','longpaths','skewed']:
-  for variant in range(4):
+ for profile in (profiles or ['ordinary','unicode','ascii','longpaths','skewed']):
+  for variant in variants:
    name=f'{profile}-{variant}'
    rng=random.Random(name)
    key=ed25519.Ed25519PrivateKey.generate()

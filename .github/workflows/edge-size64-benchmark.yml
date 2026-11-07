@@ -1,0 +1,79 @@
+name: edge-size64-benchmark
+on:
+  push:
+    branches: [bench/supabase-verification]
+    paths: ['benchmarks/edge/size64/*.py', 'benchmarks/edge/size64/*.ts', '.github/workflows/edge-size64-benchmark.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sci-edge-size64-benchmark
+  cancel-in-progress: false
+jobs:
+  benchmark:
+    if: github.repository == 'azaho/sci' && github.ref == 'refs/heads/bench/supabase-verification'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.8
+      - run: python -m pip install cryptography==46.0.3 requests==2.32.5 asn1crypto==1.5.1
+      - name: Generate exact 64 MiB bundles and check locally
+        run: |
+          python benchmarks/edge/size64/generate.py "$RUNNER_TEMP/fixtures"
+          python benchmarks/edge/size64/prepare_local.py "$RUNNER_TEMP/check"
+          deno check "$RUNNER_TEMP/check/index.ts" "$RUNNER_TEMP/check/check.ts"
+          deno run --allow-read "$RUNNER_TEMP/check/check.ts" "$RUNNER_TEMP/fixtures"
+      - name: First isolated measurement of each profile
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SCI_EDGE_BENCH_SUPABASE_TOKEN }}
+          SUPABASE_KEY_READ_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: python benchmarks/edge/size64/run.py "$RUNNER_TEMP/fixtures" "$RUNNER_TEMP/results" --trial 0
+      - name: Preserve first measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: edge-size64-first
+          path: ${{ runner.temp }}/results/
+      - name: Second isolated measurement of each profile
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SCI_EDGE_BENCH_SUPABASE_TOKEN }}
+          SUPABASE_KEY_READ_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: python benchmarks/edge/size64/run.py "$RUNNER_TEMP/fixtures" "$RUNNER_TEMP/results" --trial 1
+      - name: Preserve all measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: edge-size64-all
+          path: ${{ runner.temp }}/results/
+      - name: Allow shutdown logs to settle
+        run: sleep 180
+      - name: Collect per-worker CPU and memory logs
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SCI_EDGE_BENCH_SUPABASE_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: python benchmarks/edge/soak/collect_logs.py "$RUNNER_TEMP/results" "$RUNNER_TEMP/telemetry" --expected-deployments 8
+      - name: Preserve CPU telemetry
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: edge-size64-telemetry
+          path: ${{ runner.temp }}/telemetry/
+      - name: Evaluate all first attempts
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          rs=[r for p in (Path(os.environ['RUNNER_TEMP'])/'results').glob('wave-*/results.json') for r in json.loads(p.read_text())]
+          assert len(rs)==8, 'Incomplete measurements'
+          assert all(r['passed'] for r in rs), 'Failures are preserved in the artifacts'
+          PY
