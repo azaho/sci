@@ -75,7 +75,10 @@ local campaign (offline):
   sci sign ./draft --no-timestamp --output ./campaign
   sci verify ./campaign/<digest>.zip           complete bundle checks
   sci search "neural decoding" --in ./campaign
+  sci search --in ./campaign --limit 50        list publications, then --cursor TOKEN
   sci read ./campaign/<digest>.zip             verified metadata and README
+  sci read ./campaign/<digest>.zip --file files/data.csv --output data.csv
+                                               reuse one verified file
   sci publish ./campaign --to ./mirror         copy verified ZIPs to a folder
 
 remote publishing:
@@ -106,6 +109,21 @@ class _UsageError(Exception):
     def __init__(self, parser: argparse.ArgumentParser, message: str) -> None:
         super().__init__(message)
         self.parser = parser
+
+
+def _deliver(write: Callable[[], object], out: TextIO, err: TextIO) -> None:
+    """Write output. A reader that has gone away (`sci ... | head`) does not change the result."""
+    try:
+        write()
+        out.flush()
+        err.flush()
+    except BrokenPipeError:
+        # Point the closed streams at /dev/null so interpreter shutdown cannot fail on them.
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        for stream in (out, err):
+            with contextlib.suppress(OSError, ValueError):
+                os.dup2(devnull, stream.fileno())
+        os.close(devnull)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -149,22 +167,37 @@ def main(
     parser = build_parser()
     wants_json = "--json" in args_list
     try:
-        with contextlib.redirect_stdout(out):
-            args = parser.parse_args(args_list)
+        parsed: list[argparse.Namespace] = []
+
+        def parse() -> None:
+            with contextlib.redirect_stdout(out):
+                parsed.append(parser.parse_args(args_list))
+
+        _deliver(parse, out, err)
+        if not parsed:  # --help or --version, and the reader closed the pipe
+            return 0
+        args = parsed[0]
     except _UsageError as exc:
         command = getattr(exc.parser, "prog", "sci").removeprefix("sci").strip() or "sci"
         if wants_json:
             result = Result(command, exit_code=Exit.USAGE)
             result.errors.append(CliError("usage", str(exc)).records[0])
-            render(result, as_json=True, stdout=out, stderr=err)
+            _deliver(lambda: render(result, as_json=True, stdout=out, stderr=err), out, err)
         else:
-            exc.parser.print_usage(err)
-            err.write(f"{exc.parser.prog}: error: {exc}\n")
+            usage_parser = exc.parser
+            message = f"{usage_parser.prog}: error: {exc}\n"
+
+            def report_usage() -> None:
+                usage_parser.print_usage(err)
+                err.write(message)
+
+            _deliver(report_usage, out, err)
         return int(Exit.USAGE)
     except SystemExit as exc:  # --help and --version
+        _deliver(lambda: None, out, err)
         return int(exc.code or 0) if isinstance(exc.code, int) else 0
     if args.command is None:
-        parser.print_help(out)
+        _deliver(lambda: parser.print_help(out), out, err)
         return int(Exit.USAGE)
     import time
 
@@ -188,7 +221,7 @@ def main(
         result.errors.append(
             CliError("interrupted", "interrupted; completed items were kept").records[0]
         )
-    render(result, as_json=args.json, stdout=out, stderr=err)
+    _deliver(lambda: render(result, as_json=args.json, stdout=out, stderr=err), out, err)
     return int(result.exit_code)
 
 

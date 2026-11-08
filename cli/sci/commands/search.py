@@ -109,8 +109,12 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
     limit: int = request["limit"]
     if limit < 1:
         raise CliError("invalid_arguments", "--limit must be positive")
-    if not query and not (request["category"] or request["key_x"] or request["domain"]):
-        raise CliError("missing_query", "supply QUERY or a filter (--category, --key-x, --domain)")
+    if origins and not (query or request["category"] or request["key_x"] or request["domain"]):
+        raise CliError(
+            "missing_query",
+            "searching an index needs QUERY or a filter (--category, --key-x, --domain); "
+            "only local folders can be listed without one",
+        )
     if request["domain"] and folders:
         raise CliError("invalid_arguments", "--domain requires remote-only scope (index sources)")
     if not folders and not origins:
@@ -332,7 +336,9 @@ Sources (repeat --in to combine; duplicates are merged):
   https://...  catalog discovered through that index's descriptor
   @local       known folders (see `sci folders`)
   @index       the configured index
-Without --in, the current folder is searched offline.
+Without --in, the current folder is searched offline. Without QUERY or a
+filter, local folders are listed; use --limit and --cursor to page through
+them. Index sources need QUERY or a filter.
 
 Local search verifies new or changed ZIPs completely (SCI protocol §6.4),
 caches their metadata and README text in catalog.sqlite (keyed by verified
@@ -345,7 +351,7 @@ An archive without a catalog is not searchable. If a source fails, available
 results are returned and marked partial.
 """,
     args=(
-        arg("query", metavar="QUERY", nargs="?", help="search terms (optional with a filter)"),
+        arg("query", metavar="QUERY", nargs="?", help="search terms (omit to list local folders)"),
         arg(
             "--in",
             dest="in_",

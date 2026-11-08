@@ -58,6 +58,7 @@ sci check ./draft                            # all problems at once, planned siz
 sci sign ./draft --no-timestamp --output ./campaign
 sci verify ./campaign/<digest>.zip           # complete bundle checks (§6.4)
 sci search "neural decoding" --in ./campaign # verified local search (catalog.sqlite cache)
+sci search --in ./campaign --limit 50        # list publications; continue with --cursor
 sci read ./campaign/<digest>.zip             # verified metadata and README
 sci read ./campaign/<digest>.zip --file files/results.csv
 sci publish ./campaign --to ./mirror         # copy verified ZIPs to another folder
