@@ -54,7 +54,7 @@ An optional `manifest.json.sig.tsr` sidecar contains timestamp proofs under [sec
 
 The baseline defines a shared compatibility guarantee. SCI indexers and archivers MUST NOT reject publications meeting its requirements because of per-publication resource limits or the approved license terms, while other admission policies remain applicable under [section 6.9](#69-service-policy). Publications outside the baseline remain valid if they satisfy the other format rules; services MAY decline them under their published policy.
 
-A valid publication is baseline if it satisfies every limit below and includes `LICENSE` with the exact bytes of one of the approved licenses in this table. Hashes are SHA-256 over the exact license file bytes.
+A valid publication is baseline if it satisfies every limit below, meets the [baseline display profile](#431-baseline-display-profile), and includes `LICENSE` with the exact bytes of one of the approved licenses in this table. Hashes are SHA-256 over the exact license file bytes.
 
 | Approved license | Short description | SHA-256 |
 | --- | --- | --- |
@@ -179,6 +179,23 @@ A nonblank string MUST contain at least one permitted character other than SPACE
 Each `display` item is an object with a required `path` and an optional `caption`. Only these fields are permitted.
 Each path MUST exactly match a distinct entry under `files/` in the signed manifest.
 A caption MUST be a nonblank string of at most 2,000 Unicode code points.
+
+#### 4.3.1 Baseline display profile
+
+Each display file in a baseline publication MUST meet this table. Supporting files not selected for display have no file-type restriction.
+
+| Extension | Maximum file size | Requirements |
+| --- | --- | --- |
+| `.png` | 2 MiB (2,097,152 bytes) | Valid static PNG; at most 8,000,000 pixels; width and height each at most 8,192 pixels. |
+
+Compare the extension without regard to ASCII case. Use the file's full byte count and the width and height in its `IHDR` chunk.
+The file MUST conform to [PNG, Third Edition](https://www.w3.org/TR/2025/REC-png-3-20250624/). The animation chunks `acTL`, `fcTL`, and `fdAT` MUST NOT occur, including in a single-frame image.
+
+Before rendering a PNG, readers MUST complete the [file checks](#62-file-checks) and validate the PNG contents. The extension and PNG signature alone are not sufficient. Readers MAY offer a download instead of rendering.
+
+A display file outside this profile does not make the publication invalid; it makes the publication non-baseline. An absent or empty `display` array meets this profile.
+
+Future protocol revisions MAY add formats or relax restrictions. They MUST NOT narrow the set of files allowed by this display profile.
 
 ### 4.4 Citations
 
