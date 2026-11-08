@@ -365,7 +365,7 @@ def main():
     args=parser.parse_args()
     OUT=args.output.resolve()
     OUT.mkdir(parents=True,exist_ok=True)
-    spec=(ROOT/'sci-spec.md').read_bytes()
+    spec=(ROOT/'README.md').read_bytes()
     if sha(spec)!=SPEC_SHA256:
         raise SystemExit('Spec differs from pinned revision; review expected outcomes and update the pin first.')
     CASES.clear()

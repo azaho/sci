@@ -1,6 +1,6 @@
 # SCI test vectors
 
-609 offline cases for [SCI protocol draft 0.1](../sci-spec.md), pinned to
+609 offline cases for [SCI protocol draft 0.1](../README.md), pinned to
 [commit ae6d5a362a7183762fc642cd2cac3dfbb9c7b1f5](https://github.com/azaho/sci-spec/blob/ae6d5a362a7183762fc642cd2cac3dfbb9c7b1f5/sci-spec.md).
 The catalog records the exact specification SHA-256. These fixtures combine
 both original corpora, update their expectations for the current draft, and add
@@ -110,14 +110,14 @@ duplicate, unknown, malformed, or incorrect results fail the run. Arrays retain
 their specified order. The process must exit successfully within the deadline.
 
 ```sh
-python3 test-vectors/tools/run_adapter.py -- /path/to/your-adapter
+python3 protocol/test-vectors/tools/run_adapter.py -- /path/to/your-adapter
 ```
 
 During implementation, select supported operation kinds explicitly. A subset
 pass must be reported as a subset pass, not whole-protocol conformance:
 
 ```sh
-python3 test-vectors/tools/run_adapter.py \
+python3 protocol/test-vectors/tools/run_adapter.py \
   --kind publication --kind claim --kind revocation -- /path/to/your-adapter
 ```
 
@@ -125,9 +125,9 @@ The runner itself uses only Python's standard library. An example adapter wraps
 the independent checker for those three kinds; it is not a production library:
 
 ```sh
-/tmp/sci-vectors-venv/bin/python test-vectors/tools/run_adapter.py \
+/tmp/sci-vectors-venv/bin/python protocol/test-vectors/tools/run_adapter.py \
   --kind publication --kind claim --kind revocation -- \
-  /tmp/sci-vectors-venv/bin/python test-vectors/tools/reference_adapter.py
+  /tmp/sci-vectors-venv/bin/python protocol/test-vectors/tools/reference_adapter.py
 ```
 
 ## Regenerate and audit
@@ -137,11 +137,11 @@ require Python 3.11+ and the pinned dependencies:
 
 ```sh
 python3 -m venv /tmp/sci-vectors-venv
-/tmp/sci-vectors-venv/bin/python -m pip install -r test-vectors/requirements.txt
-/tmp/sci-vectors-venv/bin/python test-vectors/tools/audit.py --openssl
-/tmp/sci-vectors-venv/bin/python test-vectors/tools/independent.py
-/tmp/sci-vectors-venv/bin/python test-vectors/tools/test_tools.py
-/tmp/sci-vectors-venv/bin/python test-vectors/tools/check_reproducible.py
+/tmp/sci-vectors-venv/bin/python -m pip install -r protocol/test-vectors/requirements.txt
+/tmp/sci-vectors-venv/bin/python protocol/test-vectors/tools/audit.py --openssl
+/tmp/sci-vectors-venv/bin/python protocol/test-vectors/tools/independent.py
+/tmp/sci-vectors-venv/bin/python protocol/test-vectors/tools/test_tools.py
+/tmp/sci-vectors-venv/bin/python protocol/test-vectors/tools/check_reproducible.py
 ```
 
 `--openssl` requires OpenSSL 3.x or 4.x. It independently verifies positive
@@ -166,7 +166,7 @@ on Ubuntu/Python 3.12; local validation also uses Python 3.14/OpenSSL 4.
 To regenerate intentionally after reviewing a draft change:
 
 ```sh
-/tmp/sci-vectors-venv/bin/python test-vectors/tools/generate.py
+/tmp/sci-vectors-venv/bin/python protocol/test-vectors/tools/generate.py
 ```
 
 Generation refuses a changed spec hash. Update the explicit commit/hash pins,

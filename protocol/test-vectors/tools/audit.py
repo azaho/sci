@@ -509,7 +509,7 @@ def main():
         require(not (out/name).is_symlink(),'symlink artifact')
         data=(out/name).read_bytes()
         require(len(data)==expected['bytes'] and hashlib.sha256(data).hexdigest()==expected['sha256'],'inventory mismatch '+name)
-    require(hashlib.sha256((ROOT/'sci-spec.md').read_bytes()).hexdigest()==catalog['spec_sha256'],'spec changed; review/update corpus pin')
+    require(hashlib.sha256((ROOT/'README.md').read_bytes()).hexdigest()==catalog['spec_sha256'],'spec changed; review/update corpus pin')
     ids=[c['id'] for c in catalog['cases']]
     require(len(ids)==len(set(ids)),'duplicate case IDs')
     for case in catalog['cases']:
