@@ -12,8 +12,8 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 ROOT = Path(__file__).resolve().parents[2]
-SPEC_COMMIT = '6f663a0987ea4cfa9a2ce183dddda039def9c2ac'
-SPEC_SHA256 = '652b33e715bea0edaa14a97fe5f41a71af9c10601699964a0d01941eaca8a2f8'
+SPEC_COMMIT = '2c01a6f9620774db311ac0bb2765703ab1627fae'
+SPEC_SHA256 = 'aecf46f9d4242724c67c79f0ecfa21853e28a22596734ab21a692e3a00ddc778'
 SEED = hashlib.sha256(b'SCI conformance fixtures: PUBLIC TEST KEY, NOT FOR PRODUCTION').digest()
 KEY = Ed25519PrivateKey.from_private_bytes(SEED)
 PUBLIC = KEY.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
