@@ -57,7 +57,7 @@ Store search data in `catalog.sqlite` in the CLI state directory. Key metadata a
 
 Scan selected folders before each query. Verify and index new or changed files; reuse unchanged rows without opening their ZIPs. Remove absent paths after a successful scan. An unavailable folder is not empty. Include only IDs present in the selected folders; discard metadata with no remaining paths.
 
-Use short SQLite write transactions after verification. Rebuild a missing or corrupt cache from bundles. File state is a change detector, not a content proof. Other commands verify their inputs independently of this cache.
+Use short SQLite write transactions after verification. Several processes on one machine may share the cache in WAL mode; WAL does not work across machines, so keep the state directory on a local disk. Do not take the write lock when nothing changed. Rebuild a missing or corrupt cache from bundles, but never treat a busy database as corrupt. File state is a change detector, not a content proof. Other commands verify their inputs independently of this cache.
 
 #### Remote search
 

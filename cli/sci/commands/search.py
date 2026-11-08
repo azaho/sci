@@ -6,6 +6,7 @@ import argparse
 import base64
 import binascii
 import json
+import sqlite3
 from pathlib import Path
 from typing import Any
 
@@ -15,7 +16,7 @@ from ..context import Context
 from ..errors import CliError, ErrorRecord, Exit
 from ..output import Result
 from ..spec import Command, arg
-from ..storage.catalog import SEARCHED_FIELDS, Catalog
+from ..storage.catalog import SEARCHED_FIELDS, Catalog, LocalHit, ScanReport, is_corrupt
 from ..storage.local_publish import remember_folder
 
 CURSOR_VERSION = 1
@@ -195,16 +196,36 @@ def _local(
     after: str | None,
     limit: int,
 ) -> tuple[dict[str, Any], str | None, bool, bool]:
-    catalog = Catalog(ctx.home / CATALOG_FILE)
-    try:
+    terms = query.casefold().split() if query else []
+    pair = (category[0], category[1]) if category else None
+
+    def scan_and_search(catalog: Catalog) -> tuple[ScanReport, list[LocalHit], bool]:
         scan = catalog.scan([Path(f) for f in folders])
-        terms = query.casefold().split() if query else []
-        pair = (category[0], category[1]) if category else None
         hits, more = catalog.search(
             scan.available, terms, category=pair, key_x=key_x, after=after, limit=limit
         )
-    finally:
-        catalog.close()
+        return scan, hits, more
+
+    try:
+        catalog = Catalog(ctx.home / CATALOG_FILE)
+        try:
+            try:
+                scan, hits, more = scan_and_search(catalog)
+            except sqlite3.DatabaseError as exc:
+                if not is_corrupt(exc):
+                    raise
+                catalog.reset()
+                scan, hits, more = scan_and_search(catalog)
+        finally:
+            catalog.close()
+    except sqlite3.Error as exc:
+        raise CliError(
+            "catalog_unavailable",
+            f"the local search cache could not be used: {exc}",
+            Exit.INCOMPLETE,
+            retryable=True,
+            file=str(ctx.home / CATALOG_FILE),
+        ) from exc
     group: dict[str, Any] = {
         "source": "local",
         "kind": "local",

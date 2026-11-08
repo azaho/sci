@@ -91,7 +91,8 @@ remote publishing:
 EPILOG = (
     "Run `sci COMMAND --help` for arguments, outputs, file changes, network use, exit codes,\n"
     "and an example. Add --json to any command for a machine-readable result object.\n"
-    "State lives in ~/.sci (override with SCI_HOME): config.json, key.pem, catalog.sqlite.\n\n"
+    "State lives in ~/.sci (override with SCI_HOME): config.json, key.pem, catalog.sqlite.\n"
+    "Jobs on one machine can share it; keep it on a local disk, not a network mount.\n\n"
     "exit codes:\n" + "\n".join(f"  {code}  {text}" for code, text in EXIT_MEANINGS.items())
 )
 
