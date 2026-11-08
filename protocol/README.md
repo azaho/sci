@@ -69,6 +69,14 @@ A valid publication is baseline if it satisfies every limit below and includes `
 | `sci.json` | 64 KiB (65,536 bytes) |
 | `README.md` | 1 MiB (1,048,576 bytes) |
 
+Display files in baseline publications MUST meet these requirements:
+
+| Extension | Maximum file size | Requirements |
+| --- | --- | --- |
+| `.png` | 2 MiB (2,097,152 bytes) | At most 8,000,000 pixels; width and height each from 1 to 8,192 pixels.<br><br>For baseline checks, use the signature, chunk layout, and `IHDR` dimensions defined in [PNG, Third Edition](https://www.w3.org/TR/2025/REC-png-3-20250624/). The file MUST start with the PNG signature, followed by one `IHDR` chunk with 13 data bytes. Complete chunks MUST account for all bytes after the signature and end with one empty `IEND` chunk. No other `IHDR` or `IEND` chunk may occur. The chunks `acTL`, `fcTL`, and `fdAT` MUST NOT occur. Baseline checks do not require CRC verification, image decoding, or other PNG conformance checks. |
+
+Compare the extension without regard to ASCII case.
+
 For a publication distributed as loose files, use the size of the exact ZIP defined in section 2.2. Tools MAY calculate this size without constructing the ZIP:
 ```text
 zip_bytes = 22 + sum(file_bytes + 76 + 2 * path_bytes)
@@ -372,6 +380,7 @@ Before using a file as part of a publication, readers, archivers, and indexers M
 - Check that the SHA-256 of the retrieved bytes equals that entry's `sha256` value.
 
 Complete these checks before decoding or rendering the file.
+Publishing tools SHOULD check that display images decode. Readers SHOULD limit memory and processing time when decoding display images.
 
 ### 6.3 Metadata checks
 

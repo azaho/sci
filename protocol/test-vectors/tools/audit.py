@@ -28,6 +28,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519, padding
 from cryptography.x509.oid import ExtendedKeyUsageOID
+from display_profile import baseline_png
 
 ROOT=Path(__file__).resolve().parents[2]
 NOW=datetime(2026,11,7,12,tzinfo=timezone.utc)
@@ -287,7 +288,8 @@ def check_publication(raw,context):
     if 'LICENSE' in files:text(files['LICENSE'].decode('utf-8'),blank=True,controls=True)
     baseline=(zip_bytes<=67108864 and len(listed)<=1000 and len(manifest_raw)<=262144 and
               len(files['sci.json'])<=65536 and len(files['README.md'])<=1048576 and
-              len(metadata.get('display',[]))<=3 and files.get('LICENSE')==(ROOT/'sci-baseline-LICENSE.txt').read_bytes())
+              len(metadata.get('display',[]))<=3 and files.get('LICENSE')==(ROOT/'sci-baseline-LICENSE.txt').read_bytes() and
+              all(baseline_png(d['path'], files[d['path']]) for d in metadata.get('display', [])))
     z=raw if isinstance(raw,bytes) else canonical_zip([('manifest.json',manifest_raw),('manifest.json.sig',sig)]+[(p,files[p]) for p in sorted(listed)])
     require(len(z)==zip_bytes,'ZIP size formula')
     return {'outcome':'valid','baseline':baseline,'zip_bytes':zip_bytes,'zip_sha256':hashlib.sha256(z).hexdigest()}
@@ -509,7 +511,7 @@ def main():
         require(not (out/name).is_symlink(),'symlink artifact')
         data=(out/name).read_bytes()
         require(len(data)==expected['bytes'] and hashlib.sha256(data).hexdigest()==expected['sha256'],'inventory mismatch '+name)
-    require(hashlib.sha256((ROOT/'sci-spec.md').read_bytes()).hexdigest()==catalog['spec_sha256'],'spec changed; review/update corpus pin')
+    require(hashlib.sha256((ROOT/'README.md').read_bytes()).hexdigest()==catalog['spec_sha256'],'spec changed; review/update corpus pin')
     ids=[c['id'] for c in catalog['cases']]
     require(len(ids)==len(set(ids)),'duplicate case IDs')
     for case in catalog['cases']:

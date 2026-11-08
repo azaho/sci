@@ -254,9 +254,9 @@ def gen_publications():
     # Valid publications
     publication("valid-minimal", "Smallest valid publication: sci.json and README.md, no LICENSE.",
                 "2, 3, 4", minimal(), expected="valid", baseline=False)
-    publication("valid-baseline", "Baseline publication with LICENSE, categories, display items, "
-                "citations, nested files, and an empty file.", "2.1", F, expected="valid",
-                baseline=True)
+    publication("valid-baseline", "Valid publication with LICENSE, categories, display items, "
+                "citations, nested files, and an empty file. SVG and CSV display items are non-baseline.", "2.1", F, expected="valid",
+                baseline=False)
     publication("valid-other-license", "Valid, but LICENSE differs from every approved license, so "
                 "not baseline.", "2.1", {**minimal(), "LICENSE": b"Public domain.\n"},
                 expected="valid", baseline=False)
@@ -288,11 +288,11 @@ def gen_publications():
                 "non-ASCII.", "4",
                 {"sci.json": sci(title="é" * 200, abstract="一" * 2500),
                  "README.md": README}, expected="valid", baseline=False)
-    publication("valid-display-3", "Exactly 3 display items: baseline.", "2.1, 4.3",
+    publication("valid-display-3", "Exactly 3 display items, but their types are non-baseline.", "2.1, 4.3",
                 {**F, "sci.json": sci(display=[{"path": "files/data/table.csv"},
                                                {"path": "files/empty.txt"},
                                                {"path": "files/code/run.py"}])},
-                expected="valid", baseline=True)
+                expected="valid", baseline=False)
 
     # Baseline boundaries (valid, not baseline)
     publication("nonbaseline-display-4", "4 display items: valid, not baseline.", "2.1",
@@ -651,7 +651,7 @@ def gen_zip():
                     scope="complete", inputs=[{"format": "zip", "path": name}],
                     publication_id="sha256:" + sha(m))
         if expected == "valid":
-            case["baseline"] = True
+            case["baseline"] = False  # full() selects SVG and CSV display files.
         add_case(**case)
 
     def one(idx, **changes):
