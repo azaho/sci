@@ -1,8 +1,8 @@
 {
   "schema": "sci-test-vectors/1",
   "protocol": "sci-publication/0.1",
-  "spec_commit": "ae6d5a362a7183762fc642cd2cac3dfbb9c7b1f5",
-  "spec_sha256": "39249ab5f0174e36fcd5e1f5d1fab4dd8f126c37f0164789e60482aae2566c86",
+  "spec_commit": "9d171cbfff3d4916b88e17f9d3c1c78e5053f822",
+  "spec_sha256": "ba25f7d9d2de715bfd59bc3c7bb342678638fed5728f25fc19ebc27fd4bfa5d5",
   "test_public_key": {
     "kty": "OKP",
     "crv": "Ed25519",
@@ -1832,15 +1832,16 @@
       "kind": "publication",
       "sections": [
         "2.1",
-        "4.3"
+        "4.3",
+        "4.3.1"
       ],
-      "description": "Display count is a baseline limit, not a format limit.",
+      "description": "Non-PNG display items remain valid but are not baseline.",
       "artifacts": {
         "bundle.zip": "publication/display-3/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": true
+        "baseline": false
       },
       "context": {
         "publication_id": "sha256:1207ff0c7940e78701c8e37bcf51fc4b74908626789a97596b152f2ef8488ef1"
@@ -1851,9 +1852,10 @@
       "kind": "publication",
       "sections": [
         "2.1",
-        "4.3"
+        "4.3",
+        "4.3.1"
       ],
-      "description": "Display count is a baseline limit, not a format limit.",
+      "description": "Non-PNG display items remain valid but are not baseline.",
       "artifacts": {
         "bundle.zip": "publication/display-4/bundle.zip"
       },
@@ -1977,15 +1979,16 @@
       "id": "display-caption-2000",
       "kind": "publication",
       "sections": [
-        "4.3"
+        "4.3",
+        "4.3.1"
       ],
-      "description": "Caption length exactly 2,000 code points.",
+      "description": "Caption length exactly 2,000 code points; the text display file is non-baseline.",
       "artifacts": {
         "bundle.zip": "publication/display-caption-2000/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": true
+        "baseline": false
       },
       "context": {
         "publication_id": "sha256:0933eca620edc7244b58afa9515b4707e890a23a750b872e81559f76f759cfdb"
@@ -3793,9 +3796,10 @@
       "id": "supplemental-valid-baseline-loose",
       "kind": "publication",
       "sections": [
-        "2.1"
+        "2.1",
+        "4.3.1"
       ],
-      "description": "Baseline publication with LICENSE, categories, display items, citations, nested files, and an empty file.",
+      "description": "Valid publication with LICENSE, categories, display items, citations, nested files, and an empty file. SVG and CSV display items are non-baseline.",
       "artifacts": {
         "LICENSE": "publication/supplemental-valid-baseline-loose/LICENSE",
         "README.md": "publication/supplemental-valid-baseline-loose/README.md",
@@ -3809,7 +3813,7 @@
       },
       "expected": {
         "outcome": "valid",
-        "baseline": true,
+        "baseline": false,
         "zip_bytes": 24886,
         "zip_sha256": "4b73a070a57abab3f1371e0125d2726ae0251d624740c2f83314e1b5bed028a9"
       },
@@ -3827,15 +3831,16 @@
       "id": "supplemental-valid-baseline-zip",
       "kind": "publication",
       "sections": [
-        "2.1"
+        "2.1",
+        "4.3.1"
       ],
-      "description": "Baseline publication with LICENSE, categories, display items, citations, nested files, and an empty file.",
+      "description": "Valid publication with LICENSE, categories, display items, citations, nested files, and an empty file. SVG and CSV display items are non-baseline.",
       "artifacts": {
         "bundle.zip": "publication/supplemental-valid-baseline-zip/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": true,
+        "baseline": false,
         "zip_bytes": 24886,
         "zip_sha256": "4b73a070a57abab3f1371e0125d2726ae0251d624740c2f83314e1b5bed028a9"
       },
@@ -4189,9 +4194,10 @@
       "kind": "publication",
       "sections": [
         "2.1",
-        "4.3"
+        "4.3",
+        "4.3.1"
       ],
-      "description": "Exactly 3 display items: baseline.",
+      "description": "Exactly 3 display items, but their types are non-baseline.",
       "artifacts": {
         "LICENSE": "publication/supplemental-valid-display-3-loose/LICENSE",
         "README.md": "publication/supplemental-valid-display-3-loose/README.md",
@@ -4205,7 +4211,7 @@
       },
       "expected": {
         "outcome": "valid",
-        "baseline": true,
+        "baseline": false,
         "zip_bytes": 24432,
         "zip_sha256": "42f0467b47005bdb42ba27fc13a568d642ec1a91d9666ff4ab70e10b472a21df"
       },
@@ -4224,15 +4230,16 @@
       "kind": "publication",
       "sections": [
         "2.1",
-        "4.3"
+        "4.3",
+        "4.3.1"
       ],
-      "description": "Exactly 3 display items: baseline.",
+      "description": "Exactly 3 display items, but their types are non-baseline.",
       "artifacts": {
         "bundle.zip": "publication/supplemental-valid-display-3-zip/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": true,
+        "baseline": false,
         "zip_bytes": 24432,
         "zip_sha256": "42f0467b47005bdb42ba27fc13a568d642ec1a91d9666ff4ab70e10b472a21df"
       },
@@ -7572,7 +7579,7 @@
       },
       "expected": {
         "outcome": "valid",
-        "baseline": true
+        "baseline": false
       },
       "context": {
         "format": "zip",
@@ -11253,7 +11260,7 @@
       },
       "expected": {
         "outcome": "valid",
-        "baseline": true
+        "baseline": false
       },
       "context": {
         "publication_id": "sha256:0b2d8e4f3d7ec61c9b6f0262e2e240ea540b50432c075b0bec2940ef27ec53fa"
@@ -12258,6 +12265,1070 @@
       "context": {
         "publication": "minimal-baseline",
         "key": "B0FOUbkEkRCSvkhN3_l43qNcIhewT-QlZq-BnxuvDPg"
+      }
+    },
+    {
+      "id": "display-png-static",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "A complete static PNG meets the display profile.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-static/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:2e790a1957d346aec0c9a8ae6ef789edfa8f25c25b684a9292ce8587840e33d3"
+      }
+    },
+    {
+      "id": "display-png-upper-extension",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Compare the extension without ASCII case.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-upper-extension/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:c92522a15f89a6b28d2c8c6b3655328e68385d94c53d1b063b56bd99d8d28621"
+      }
+    },
+    {
+      "id": "display-png-mixed-extension",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Mixed-case extension; exact manifest path still required.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-mixed-extension/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:e70fceed25322f2ad4530febb89578c062b49c6fb6ecbd9c28e916109c71a0e9"
+      }
+    },
+    {
+      "id": "display-png-color-0-depth-1",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-0-depth-1/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:374b1652655df7002ee25f728a2c0d3f3dcd6888d390b2972e16169fffa316e9"
+      }
+    },
+    {
+      "id": "display-png-color-0-depth-2",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-0-depth-2/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:db8e5679efe73a3a3f2c431781a98deb32b45a8a9c45d9dfefa68f1e478dc9c5"
+      }
+    },
+    {
+      "id": "display-png-color-0-depth-4",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-0-depth-4/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:bc1273b177992f60b2aa4a763eb3cc10ee5bca951f5a3c34eca0d9c5984d11ba"
+      }
+    },
+    {
+      "id": "display-png-color-0-depth-8",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-0-depth-8/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:1565d3e5e4412f4f57953f32256d05af655eb376952372e42e4057b007e3eb24"
+      }
+    },
+    {
+      "id": "display-png-color-0-depth-16",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-0-depth-16/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:afcb8bbf3ddfddfec8611473367b9fd1a4cd73d4063a538f7a30ad439908f3ee"
+      }
+    },
+    {
+      "id": "display-png-color-2-depth-8",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-2-depth-8/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:37febd1bea887cae95d17c9e050e5429d38542dee058283b255b3049fb323b32"
+      }
+    },
+    {
+      "id": "display-png-color-2-depth-16",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-2-depth-16/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:d8bcc76bfe6d89cdfdb0a93984a7043a08c46c6a463ea2401fd4a4b568ac236a"
+      }
+    },
+    {
+      "id": "display-png-color-3-depth-1",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-3-depth-1/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:5f532676e822cc7aee6068c046de92ea0a80e521d2b890bf81cb01448b28bc3a"
+      }
+    },
+    {
+      "id": "display-png-color-3-depth-2",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-3-depth-2/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:58e4af5bf021ed28e13623dd138a8b512721cb709364bbf89e4627d1d3d0566b"
+      }
+    },
+    {
+      "id": "display-png-color-3-depth-4",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-3-depth-4/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:20fc2fba1f0f0234bc262721bcc185d9bfa2fd33acf083faae3162ac2cc2b49f"
+      }
+    },
+    {
+      "id": "display-png-color-3-depth-8",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-3-depth-8/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:8d43836296f808a39172c772d314adeb24c0427392629d3e45419ee4b905cb19"
+      }
+    },
+    {
+      "id": "display-png-color-4-depth-8",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-4-depth-8/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:dd20a89c0b94d057b810b45cb46ec6cb838b54744578d9cf2bc377f03ba24a2e"
+      }
+    },
+    {
+      "id": "display-png-color-4-depth-16",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-4-depth-16/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:fc24148b02f33e380db10f245e91e9139d06655b7c045368068690e28b4a4106"
+      }
+    },
+    {
+      "id": "display-png-color-6-depth-8",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-6-depth-8/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:e972e0b8ea73aeaa10c2c61e43509fabf74bee21649b0aa21f11d1da673ccd07"
+      }
+    },
+    {
+      "id": "display-png-color-6-depth-16",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG color types and bit depths remain available within the profile limits.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-color-6-depth-16/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:bbbcb6d29a40e0d85bdcb05d78c40dd5175d4572eb5e9304f859e478de245a02"
+      }
+    },
+    {
+      "id": "display-png-interlaced",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Static Adam7 PNG is permitted.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-interlaced/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:8c2b4a73d34adc2ecc754905235cbdfcef4c050e8b31597ff815b8b7ae25b0e4"
+      }
+    },
+    {
+      "id": "display-png-pixels-limit",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Exactly 8,000,000 pixels.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-pixels-limit/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:cd19778c2410db74b674c34c5151422e65f2bedca47fd6cab5cf9c4b69d8b5dc"
+      }
+    },
+    {
+      "id": "display-png-pixels-over",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Pixel count exceeds the limit; each dimension is within its limit.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-pixels-over/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:c45ab02a37dd920815dc0112f1304fe39a14b4947d44da3f40e579e2af4b44d4"
+      }
+    },
+    {
+      "id": "display-png-width-8192",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Width at or one pixel above the limit; pixel count is within its limit.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-width-8192/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:3284b058440bd5af759c9bd3c592fc03b6c68224bd262737d888e06172838619"
+      }
+    },
+    {
+      "id": "display-png-width-8193",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Width at or one pixel above the limit; pixel count is within its limit.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-width-8193/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:c89bdbd3179d9e953b176509a5cbd30fa91c5695de36b3167acf8ce0e2250307"
+      }
+    },
+    {
+      "id": "display-png-height-8192",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Height at or one pixel above the limit; pixel count is within its limit.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-height-8192/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:9d21e99d509fa5eb5d1e2cf707908a2c4bc2040718789cae2d81742877e88f24"
+      }
+    },
+    {
+      "id": "display-png-height-8193",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Height at or one pixel above the limit; pixel count is within its limit.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-height-8193/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:7c5b94d644c20be9cf16844b3ecd80f5b6b14afb722482cb87af10a371bbd444"
+      }
+    },
+    {
+      "id": "display-png-bytes-2097152",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Whole file size at or one byte above 2 MiB; valid private ancillary chunk supplies padding.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-bytes-2097152/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:f67e852a911694b68873ba8345d04dd82f438398013dacfdbec10a940a5c3bd1"
+      }
+    },
+    {
+      "id": "display-png-bytes-2097153",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Whole file size at or one byte above 2 MiB; valid private ancillary chunk supplies padding.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-bytes-2097153/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:7f9e56971ddabf2d3b0be7602466c3d1aea85e5c9508db63c8ee2fa2da193651"
+      }
+    },
+    {
+      "id": "display-png-apng-single-frame",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Valid single-frame APNG is outside the static profile.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-apng-single-frame/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:82e29de3ee9a25bd3e941ac199aba00c828ffc6ece742ff331f9c54d7a5c0c7e"
+      }
+    },
+    {
+      "id": "display-png-apng-two-frames",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Valid two-frame APNG is outside the static profile.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-apng-two-frames/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:4c2ffcc9989ed4ef02d75427fdd22a763b28f542412b218de0dd9f7948811def"
+      }
+    },
+    {
+      "id": "display-png-chunk-acTL",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Each forbidden animation chunk excludes the file, even without other animation chunks.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-chunk-acTL/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:fc2d31a636854e1ace0366d032842c7637d7927fd81276aaed51ee1cff554793"
+      }
+    },
+    {
+      "id": "display-png-chunk-fcTL",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Each forbidden animation chunk excludes the file, even without other animation chunks.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-chunk-fcTL/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:f9c83d015371e0b38e7e261253e646557a4bd2c87bae5f48f4807b79b0722bff"
+      }
+    },
+    {
+      "id": "display-png-chunk-fdAT",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Each forbidden animation chunk excludes the file, even without other animation chunks.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-chunk-fdAT/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:61d989b6b413426ea9dd4dc91f95eeb9cf8aa7782fe11b0eb8939a7b48cea36a"
+      }
+    },
+    {
+      "id": "display-png-empty",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-empty/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:6309cfa7f74590db253219aad7feb4e3f2dc6cdc5d9b0e2eaa960913bb1fcbcf"
+      }
+    },
+    {
+      "id": "display-png-signature-only",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-signature-only/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:ef23eb251ef2ce1ff16f8f304230e90187db4e527a3813fa780c52ebedfb4429"
+      }
+    },
+    {
+      "id": "display-png-svg-disguised",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-svg-disguised/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:0700611f57d99ce4057f7bb9248011901857e45439ac215ad52acf330b2e8d5b"
+      }
+    },
+    {
+      "id": "display-png-bad-crc",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-bad-crc/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:37a93b0a5cfe53954038d6d0870440289e3d9ede53f8aff39fd2decac1c0f276"
+      }
+    },
+    {
+      "id": "display-png-truncated-chunk",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-truncated-chunk/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:1fc9552ab81035e6e07c3021c7db5e972ae675d66d84bae3f34230bf6e15c587"
+      }
+    },
+    {
+      "id": "display-png-trailing-bytes",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-trailing-bytes/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:f73dc73683b7e43e90a067a03a545183b018add65540f5825ee60972b0278494"
+      }
+    },
+    {
+      "id": "display-png-duplicate-header",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-duplicate-header/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:b0d1813f99a7265dd01f345ab1bb4ce1263d54f79c7caf2f9e7d3ebb66a85ef7"
+      }
+    },
+    {
+      "id": "display-png-missing-idat",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-missing-idat/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:05dfb4034bddf9127aaf1960ff620ea23594bb8f1fc44eed94e33c3d6612bded"
+      }
+    },
+    {
+      "id": "display-png-missing-iend",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-missing-iend/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:03c073823fd4b9bfc9b7867af3c3822fa41c7de29a601c25bf3ad6a4aa2d011c"
+      }
+    },
+    {
+      "id": "display-png-unknown-critical",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-unknown-critical/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:14a2ab7b5f1f88b421297abc8405707e7481e6c3145bcec9c79f54eb16a62f2e"
+      }
+    },
+    {
+      "id": "display-png-bad-zlib",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-bad-zlib/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:3302a8bc38d00ae740dd1a83b61a6b647966e5b8d69793535eeb2e3189b7cc93"
+      }
+    },
+    {
+      "id": "display-png-short-pixels",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-short-pixels/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:6ea607022bb6c62e99295906ba8d48e271365538e13cb254c7bf83d50fa0dc0a"
+      }
+    },
+    {
+      "id": "display-png-extra-pixels",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-extra-pixels/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:44ce8693f2a80d34777875f13531bc9f5e27f6c4a69b07dbf7da667b5e818ad8"
+      }
+    },
+    {
+      "id": "display-png-bad-filter",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-bad-filter/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:0846db77db29f454e296bd9f2d11aa360519dc42c2d85e236ac79d8675bd2d31"
+      }
+    },
+    {
+      "id": "display-png-extra-zlib",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-extra-zlib/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:e79ad25b3a7627a32c41f2e4b8fe270e2694124222902a20b5106a3542578e0b"
+      }
+    },
+    {
+      "id": "display-png-zero-width",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-zero-width/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:efa1625e4cec694ea630f6af0f53b70ce667c8751e73da0251612853c8e00b1c"
+      }
+    },
+    {
+      "id": "display-png-zero-height",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-zero-height/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:ef1fd6f162e4fa2c55ed65d82ed5fe51252478d0909f13087b9a7e3e39d8e64e"
+      }
+    },
+    {
+      "id": "display-png-wrong-extension",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "PNG contents require the .png extension for this profile.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-wrong-extension/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:d17342492ab0de445fd44df0708e387dcc07171ff4ce0e25a5c4348c036a41ad"
+      }
+    },
+    {
+      "id": "display-png-empty-array",
+      "kind": "publication",
+      "sections": [
+        "4.3.1"
+      ],
+      "description": "An empty display array meets the profile.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-empty-array/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:1d2e2934995e22fdb6982e1d0b97c04efb812b6a1bab60a0a638296385c80406"
+      }
+    },
+    {
+      "id": "display-png-supporting-files",
+      "kind": "publication",
+      "sections": [
+        "4.3.1"
+      ],
+      "description": "Unselected SVG and malformed PNG files stay opaque supporting files.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-supporting-files/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:5ab5416c80eca8656bbc8da829cd48c2b1af7b7714463bf461964eaeae696c96"
+      }
+    },
+    {
+      "id": "display-png-count-3",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Valid PNGs isolate the existing display-count limit.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-count-3/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:1927b814fbb26c4f6f3f7bce0aec38192657d4b8f6e708b68f50c77fe4d348c4"
+      }
+    },
+    {
+      "id": "display-png-count-4",
+      "kind": "publication",
+      "sections": [
+        "2.1",
+        "4.3.1"
+      ],
+      "description": "Valid PNGs isolate the existing display-count limit.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-count-4/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:a17ebceb770d3b0aa572c2acf618e0bc886999651c3b868fd6b8cb595d0314bf"
+      }
+    },
+    {
+      "id": "display-png-static-loose",
+      "kind": "publication",
+      "sections": [
+        "4.3.1"
+      ],
+      "description": "Loose-file form of the PNG profile case.",
+      "artifacts": {
+        "manifest.json": "publication/display-png-static-loose/manifest.json",
+        "manifest.json.sig": "publication/display-png-static-loose/manifest.json.sig",
+        "LICENSE": "publication/display-png-static-loose/LICENSE",
+        "README.md": "publication/display-png-static-loose/README.md",
+        "files/figure.png": "publication/display-png-static-loose/files/figure.png",
+        "sci.json": "publication/display-png-static-loose/sci.json"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      }
+    },
+    {
+      "id": "display-png-bad-crc-loose",
+      "kind": "publication",
+      "sections": [
+        "4.3.1"
+      ],
+      "description": "Loose-file form of the PNG profile case.",
+      "artifacts": {
+        "manifest.json": "publication/display-png-bad-crc-loose/manifest.json",
+        "manifest.json.sig": "publication/display-png-bad-crc-loose/manifest.json.sig",
+        "LICENSE": "publication/display-png-bad-crc-loose/LICENSE",
+        "README.md": "publication/display-png-bad-crc-loose/README.md",
+        "files/figure.png": "publication/display-png-bad-crc-loose/files/figure.png",
+        "sci.json": "publication/display-png-bad-crc-loose/sci.json"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
       }
     },
     {
