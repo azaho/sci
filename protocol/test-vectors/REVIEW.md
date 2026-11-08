@@ -1,7 +1,17 @@
 # Combined corpus review
 
-The target is protocol draft 0.1 at `ae6d5a362a7183762fc642cd2cac3dfbb9c7b1f5`.
-This PR changes fixtures and tooling, not protocol or service requirements.
+The original corpus targeted draft 0.1 at `ae6d5a362a7183762fc642cd2cac3dfbb9c7b1f5`.
+The current spec pin is in [README.md](README.md).
+
+## PNG display profile
+
+- Add 64 signed cases for §2.1, including exact limits and values above them.
+- Keep all original artifact bytes. Eight cases with non-PNG display files
+  become non-baseline. Their publication validity does not change.
+- Use one baseline display structure check for both audit tools. CRC checks
+  and decoding are not required. Nine existing display cases become baseline;
+  their signed bytes and publication validity results do not change.
+- Read the spec from `protocol/README.md`, its path in this repository.
 
 ## Sources
 

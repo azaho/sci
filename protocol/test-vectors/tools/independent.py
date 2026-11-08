@@ -1,7 +1,8 @@
 """Independent publication/record audit adapted from Claude's checker.
 
-Deliberately shares no parsing, text, ZIP, path, or Ed25519 validation code with
- audit.py. Both use cryptography for the final Ed25519 equation. Not a production
+Deliberately shares no JSON, text, ZIP, path, or Ed25519 validation code with
+ audit.py. Both use cryptography for the final Ed25519 equation and share the
+ PNG profile fixture check. Not a production
  verifier: URI, RFC 3339 leap-second, and external-account checks are bounded to
  the corpus. Timestamp proofs are independently cross-checked by OpenSSL.
 """
@@ -24,6 +25,7 @@ from pathlib import Path
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+from display_profile import baseline_png
 
 HERE = Path(__file__).resolve().parent
 ROOT = Path(__file__).resolve().parents[2]
@@ -452,7 +454,8 @@ def is_baseline(mb, m, sci, data):
             and zip_size(mb, m) <= 67108864 and len(m["files"]) <= 1000
             and len(sci.get("display", [])) <= 3 and len(mb) <= 262144
             and m["files"]["sci.json"]["bytes"] <= 65536
-            and m["files"]["README.md"]["bytes"] <= 1048576)
+            and m["files"]["README.md"]["bytes"] <= 1048576
+            and all(baseline_png(d["path"], data[d["path"]]) for d in sci.get("display", [])))
 
 
 # ------------------------------------------------------------ claims, revocations

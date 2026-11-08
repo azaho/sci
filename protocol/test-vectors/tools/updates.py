@@ -30,7 +30,7 @@ def generate_updates(pub, emit, bundle, key, jwk, encode):
             elif field=='display':m[field]=[{'path':'files/a','caption':'x'+char}]
             else:m[field]=[{'target':'https://example.org','reason':'x'+char}]
             pub(f'text-field-{field}-{valid}', '4.2', 'Apply Assignables to each decoded text field.',
-                outcome='valid' if valid else 'invalid', metadata=m, files={'files/a':b'x'})
+                outcome='valid' if valid else 'invalid', baseline=field!='display', metadata=m, files={'files/a':b'x'})
     pub('title-nbsp-only', '4.2', 'NBSP is permitted and is not SPACE/TAB/LF/CR.', metadata={**meta,'title':'\u00a0'})
     pub('readme-joiner-only', '2,4.2', 'Nonblank is the explicit code-point rule, not a visibility test.', readme='\u200d'.encode())
     pub('metadata-escaped-bidi', '4.2,7', 'JSON escape spelling does not change Assignables membership.',
