@@ -1,0 +1,6 @@
+SCI draft implementation
+
+Validation primitives in python/pysci/validation.py adapt the independent checker
+from azaho/sci-spec at 59afe3ed3605c52a70256d5932a2a63d94b820a1.
+Changes: typed APIs, bounded inputs, runtime hardening and package integration.
+The conformance corpus retains original provenance and embedded fixture licenses.

@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+[project]
+name = "sci-cli"
+version = "0.1.0a1"
+description = "Prepare, verify and distribute SCI publications"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+dependencies = ["pysci==0.1.0a1", "httpx==0.28.1", "huggingface-hub==1.1.0"]
+[project.scripts]
+sci = "sci.main:main"
+[tool.uv.sources]
+pysci = { workspace = true }
+[tool.hatch.build.targets.wheel]
+packages = ["sci"]

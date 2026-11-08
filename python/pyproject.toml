@@ -1,0 +1,13 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+[project]
+name = "pysci"
+version = "0.1.0a1"
+description = "Offline SCI publication verification and signing"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+dependencies = ["cryptography==46.0.3", "idna==3.11", "asn1crypto==1.5.1"]
+[tool.hatch.build.targets.wheel]
+packages = ["pysci"]

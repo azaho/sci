@@ -1,0 +1,31 @@
+{
+  "name": "@sci/protocol",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": "./dist/index.js",
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@noble/curves": "1.9.7",
+    "@noble/hashes": "1.8.0",
+    "asn1js": "3.0.6",
+    "pkijs": "3.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.12",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  }
+}

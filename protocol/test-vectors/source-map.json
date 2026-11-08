@@ -1,0 +1,3761 @@
+{
+  "source_commits": {
+    "codex": "397a038609acdf801bc3b9055b23a63f5d02e189",
+    "claude": "a9f733d9fdd33398d72e09e42feebe18fedfc68d"
+  },
+  "mapping": [
+    {
+      "source": "codex",
+      "source_id": "minimal-baseline",
+      "cases": [
+        "minimal-baseline"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "no-license",
+      "cases": [
+        "no-license"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "custom-license",
+      "cases": [
+        "custom-license"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "license-extra-newline",
+      "cases": [
+        "license-extra-newline"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "empty-readme",
+      "cases": [
+        "empty-readme"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "empty-supporting-file",
+      "cases": [
+        "empty-supporting-file"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "opaque-supporting-bytes",
+      "cases": [
+        "opaque-supporting-bytes"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "nested-archive-opaque",
+      "cases": [
+        "nested-archive-opaque"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "json-whitespace-identity",
+      "cases": [
+        "json-whitespace-identity"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-reordered",
+      "cases": [
+        "manifest-reordered"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "renamed-zip",
+      "cases": [
+        "renamed-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "unknown-schema",
+      "cases": [
+        "unknown-schema"
+      ],
+      "original_outcome": "unsupported",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "wrong-expected-id",
+      "cases": [
+        "wrong-expected-id"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "unavailable-input",
+      "cases": [
+        "unavailable-input"
+      ],
+      "original_outcome": "incomplete",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "local-budget-exceeded",
+      "cases": [
+        "local-budget-exceeded"
+      ],
+      "original_outcome": "incomplete",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-extra-field",
+      "cases": [
+        "manifest-extra-field"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-missing-readme",
+      "cases": [
+        "manifest-missing-readme"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-missing-metadata",
+      "cases": [
+        "manifest-missing-metadata"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-self-entry",
+      "cases": [
+        "manifest-self-entry"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-uppercase-hash",
+      "cases": [
+        "manifest-uppercase-hash"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-wrong-hash",
+      "cases": [
+        "manifest-wrong-hash"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-wrong-size",
+      "cases": [
+        "manifest-wrong-size"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-negative-size",
+      "cases": [
+        "manifest-negative-size"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-unsafe-integer",
+      "cases": [
+        "manifest-unsafe-integer"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-boolean-size",
+      "cases": [
+        "manifest-boolean-size"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "jwk-extra-field",
+      "cases": [
+        "jwk-extra-field"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "jwk-wrong-curve",
+      "cases": [
+        "jwk-wrong-curve"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "jwk-base64-padding",
+      "cases": [
+        "jwk-base64-padding"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "jwk-nonzero-pad-bits",
+      "cases": [
+        "jwk-nonzero-pad-bits"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-bom",
+      "cases": [
+        "manifest-bom"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-duplicate-key",
+      "cases": [
+        "manifest-duplicate-key"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-escaped-duplicate",
+      "cases": [
+        "manifest-escaped-duplicate"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-exponent-size",
+      "cases": [
+        "manifest-exponent-size"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-fraction-size",
+      "cases": [
+        "manifest-fraction-size"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-leading-zero-size",
+      "cases": [
+        "manifest-leading-zero-size"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "signature-flipped",
+      "cases": [
+        "signature-flipped"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "signature-short",
+      "cases": [
+        "signature-short"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "signature-long",
+      "cases": [
+        "signature-long"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "signature-noncanonical-scalar",
+      "cases": [
+        "signature-noncanonical-scalar"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "identity-public-key",
+      "cases": [
+        "identity-public-key"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "identity-signature-point",
+      "cases": [
+        "identity-signature-point"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "signature-stale-after-whitespace",
+      "cases": [
+        "signature-stale-after-whitespace"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "small-order-public-key",
+      "cases": [
+        "small-order-public-key"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "mixed-order-public-key",
+      "cases": [
+        "mixed-order-public-key"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-absolute",
+      "cases": [
+        "path-absolute"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-parent",
+      "cases": [
+        "path-parent"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-dot",
+      "cases": [
+        "path-dot"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-empty-component",
+      "cases": [
+        "path-empty-component"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-backslash",
+      "cases": [
+        "path-backslash"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-space",
+      "cases": [
+        "path-space"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-nonascii",
+      "cases": [
+        "path-nonascii"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-trailing-dot",
+      "cases": [
+        "path-trailing-dot"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-device",
+      "cases": [
+        "path-device"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-device-extension",
+      "cases": [
+        "path-device-extension"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-device-directory",
+      "cases": [
+        "path-device-directory"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-root-other",
+      "cases": [
+        "path-root-other"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-256",
+      "cases": [
+        "path-256"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-255",
+      "cases": [
+        "path-255"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-case-collision",
+      "cases": [
+        "path-case-collision"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-file-directory-collision",
+      "cases": [
+        "path-file-directory-collision"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "path-directory-case-collision",
+      "cases": [
+        "path-directory-case-collision"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "title-201",
+      "cases": [
+        "title-201"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "title-blank",
+      "cases": [
+        "title-blank"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "title-tab",
+      "cases": [
+        "title-tab"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "abstract-2501",
+      "cases": [
+        "abstract-2501"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "abstract-blank",
+      "cases": [
+        "abstract-blank"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "keywords-21",
+      "cases": [
+        "keywords-21"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "keyword-65",
+      "cases": [
+        "keyword-65"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "categories-4",
+      "cases": [
+        "categories-4"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "categories-duplicate",
+      "cases": [
+        "categories-duplicate"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "category-bad-scheme",
+      "cases": [
+        "category-bad-scheme"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "category-code-129",
+      "cases": [
+        "category-code-129"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "metadata-extra-field",
+      "cases": [
+        "metadata-extra-field"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "title-wrong-type",
+      "cases": [
+        "title-wrong-type"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "metadata-boundary-fields",
+      "cases": [
+        "metadata-boundary-fields"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "title-200-nonbmp",
+      "cases": [
+        "title-200-nonbmp"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "abstract-controls",
+      "cases": [
+        "abstract-controls"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "text-nbsp",
+      "cases": [
+        "text-nbsp"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "text-bom-character",
+      "cases": [
+        "text-bom-character"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "text-zero-width-space",
+      "cases": [
+        "text-zero-width-space"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "text-bidi-control",
+      "cases": [
+        "text-bidi-control"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "text-variation-selector",
+      "cases": [
+        "text-variation-selector"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "text-combining-grapheme-joiner",
+      "cases": [
+        "text-combining-grapheme-joiner"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "text-private-use",
+      "cases": [
+        "text-private-use"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "text-nul",
+      "cases": [
+        "text-nul"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "text-invalid-zwj",
+      "cases": [
+        "text-invalid-zwj"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "text-invalid-zwnj",
+      "cases": [
+        "text-invalid-zwnj"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "readme-invalid-utf8",
+      "cases": [
+        "readme-invalid-utf8"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "license-nbsp",
+      "cases": [
+        "license-nbsp"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "text-zwj-after-virama",
+      "cases": [
+        "text-zwj-after-virama"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "text-zwnj-after-virama",
+      "cases": [
+        "text-zwnj-after-virama"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "text-zwnj-arabic-context",
+      "cases": [
+        "text-zwnj-arabic-context"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "text-combining-mark",
+      "cases": [
+        "text-combining-mark"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "text-ordinary-symbols",
+      "cases": [
+        "text-ordinary-symbols"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "metadata-duplicate-key",
+      "cases": [
+        "metadata-duplicate-key"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "metadata-escaped-duplicate",
+      "cases": [
+        "metadata-escaped-duplicate"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "metadata-unpaired-surrogate",
+      "cases": [
+        "metadata-unpaired-surrogate"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "metadata-bom",
+      "cases": [
+        "metadata-bom"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "metadata-duplicate-nested-key",
+      "cases": [
+        "metadata-duplicate-nested-key"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "metadata-surrogate-pair",
+      "cases": [
+        "metadata-surrogate-pair"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "display-3",
+      "cases": [
+        "display-3"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "display-4",
+      "cases": [
+        "display-4"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "display-duplicate",
+      "cases": [
+        "display-duplicate"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "display-missing",
+      "cases": [
+        "display-missing"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "display-root",
+      "cases": [
+        "display-root"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "display-case",
+      "cases": [
+        "display-case"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "display-caption-2001",
+      "cases": [
+        "display-caption-2001"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "display-extra-field",
+      "cases": [
+        "display-extra-field"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "display-caption-2000",
+      "cases": [
+        "display-caption-2000"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "citation-targets",
+      "cases": [
+        "citation-targets"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "citation-invalid-sci-hash",
+      "cases": [
+        "citation-invalid-sci-hash"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "citation-invalid-scheme",
+      "cases": [
+        "citation-invalid-scheme"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "citation-duplicate-relations",
+      "cases": [
+        "citation-duplicate-relations"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "citation-unknown-relation",
+      "cases": [
+        "citation-unknown-relation"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "citation-reason-1001",
+      "cases": [
+        "citation-reason-1001"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "citation-extra-field",
+      "cases": [
+        "citation-extra-field"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "citations-1001",
+      "cases": [
+        "citations-1001"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "citations-1000",
+      "cases": [
+        "citations-1000"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "citation-reason-1000",
+      "cases": [
+        "citation-reason-1000"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "listed-files-1000",
+      "cases": [
+        "listed-files-1000"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "listed-files-1001",
+      "cases": [
+        "listed-files-1001"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "metadata-bytes-65536",
+      "cases": [
+        "metadata-bytes-65536"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "metadata-bytes-65537",
+      "cases": [
+        "metadata-bytes-65537"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-bytes-262144",
+      "cases": [
+        "manifest-bytes-262144"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "manifest-bytes-262145",
+      "cases": [
+        "manifest-bytes-262145"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "readme-bytes-1048576",
+      "cases": [
+        "readme-bytes-1048576"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "readme-bytes-1048577",
+      "cases": [
+        "readme-bytes-1048577"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-bytes-67108864",
+      "cases": [
+        "zip-bytes-67108864"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-bytes-67108865",
+      "cases": [
+        "zip-bytes-67108865"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-method",
+      "cases": [
+        "zip-method"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-flags",
+      "cases": [
+        "zip-flags"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-version-needed",
+      "cases": [
+        "zip-version-needed"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-version-made-by",
+      "cases": [
+        "zip-version-made-by"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-date",
+      "cases": [
+        "zip-date"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-time",
+      "cases": [
+        "zip-time"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-external-attributes",
+      "cases": [
+        "zip-external-attributes"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-internal-attributes",
+      "cases": [
+        "zip-internal-attributes"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-local-central-mismatch",
+      "cases": [
+        "zip-local-central-mismatch"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-central-offset",
+      "cases": [
+        "zip-central-offset"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-wrong-crc",
+      "cases": [
+        "zip-wrong-crc"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-disk-number",
+      "cases": [
+        "zip-disk-number"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-entry-count",
+      "cases": [
+        "zip-entry-count"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip64-sentinel",
+      "cases": [
+        "zip64-sentinel"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-prefix",
+      "cases": [
+        "zip-prefix"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-trailing-bytes",
+      "cases": [
+        "zip-trailing-bytes"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-truncated",
+      "cases": [
+        "zip-truncated"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-extra-entry",
+      "cases": [
+        "zip-extra-entry"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-missing-entry",
+      "cases": [
+        "zip-missing-entry"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-duplicate-entry",
+      "cases": [
+        "zip-duplicate-entry"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-directory-entry",
+      "cases": [
+        "zip-directory-entry"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-first-entry-order",
+      "cases": [
+        "zip-first-entry-order"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-listed-entry-order",
+      "cases": [
+        "zip-listed-entry-order"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-timestamp-entry",
+      "cases": [
+        "zip-timestamp-entry"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "zip-file-content-tamper",
+      "cases": [
+        "zip-file-content-tamper"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "revocation-valid",
+      "cases": [
+        "revocation-valid"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "revocation-extra-field",
+      "cases": [
+        "revocation-extra-field"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "revocation-bad-signature",
+      "cases": [
+        "revocation-bad-signature"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "revocation-wrong-key",
+      "cases": [
+        "revocation-wrong-key"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "revocation-unknown-schema",
+      "cases": [
+        "revocation-unknown-schema"
+      ],
+      "original_outcome": "unsupported",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "revocation-cross-type",
+      "cases": [
+        "revocation-cross-type"
+      ],
+      "original_outcome": "unsupported",
+      "outcome_changed": true
+    },
+    {
+      "source": "codex",
+      "source_id": "revocation-duplicate-key",
+      "cases": [
+        "revocation-duplicate-key"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-domain",
+      "cases": [
+        "claim-domain"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-expired",
+      "cases": [
+        "claim-expired"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-expiry-equality",
+      "cases": [
+        "claim-expiry-equality"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-wrong-account",
+      "cases": [
+        "claim-wrong-account"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-revoked",
+      "cases": [
+        "claim-revoked"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-wrong-key",
+      "cases": [
+        "claim-wrong-key"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-unhosted",
+      "cases": [
+        "claim-unhosted"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-uppercase-domain",
+      "cases": [
+        "claim-uppercase-domain"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-domain-ip",
+      "cases": [
+        "claim-domain-ip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-domain-trailing-dot",
+      "cases": [
+        "claim-domain-trailing-dot"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-bad-signature",
+      "cases": [
+        "claim-bad-signature"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-missing-source",
+      "cases": [
+        "claim-missing-source"
+      ],
+      "original_outcome": "incomplete",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-github",
+      "cases": [
+        "claim-github"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "claim-huggingface",
+      "cases": [
+        "claim-huggingface"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "revocation-before-admission",
+      "cases": [
+        "revocation-before-admission"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "revocation-after-admission",
+      "cases": [
+        "revocation-after-admission"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "revocation-source-disappears",
+      "cases": [
+        "revocation-source-disappears"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-before-revocation",
+      "cases": [
+        "timestamp-before-revocation"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-acquisition-fails",
+      "cases": [
+        "timestamp-acquisition-fails"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "revocation-lookup-404",
+      "cases": [
+        "revocation-lookup-404"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-lookup-404",
+      "cases": [
+        "timestamp-lookup-404"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "index-valid",
+      "cases": [
+        "index-valid"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "index-extension",
+      "cases": [
+        "index-extension"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "index-missing-timestamp",
+      "cases": [
+        "index-missing-timestamp"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "index-relative-url",
+      "cases": [
+        "index-relative-url"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "index-missing-expression",
+      "cases": [
+        "index-missing-expression"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "index-unknown-schema",
+      "cases": [
+        "index-unknown-schema"
+      ],
+      "original_outcome": "unsupported",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "archive-valid",
+      "cases": [
+        "archive-valid"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "archive-entry-only",
+      "cases": [
+        "archive-entry-only"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "archive-bundle-only",
+      "cases": [
+        "archive-bundle-only"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "archive-wrong-expression",
+      "cases": [
+        "archive-wrong-expression"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "index-duplicate-schema",
+      "cases": [
+        "index-duplicate-schema"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "template-expansions",
+      "cases": [
+        "template-expansions"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "publication-lookup-known",
+      "cases": [
+        "publication-lookup-known"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "publication-lookup-empty",
+      "cases": [
+        "publication-lookup-empty"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "publication-lookup-404",
+      "cases": [
+        "publication-lookup-404"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-lookup-404-http",
+      "cases": [
+        "timestamp-lookup-404-http"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-one",
+      "cases": [
+        "timestamp-one"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-two-authorities",
+      "cases": [
+        "timestamp-two-authorities"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-duplicate",
+      "cases": [
+        "timestamp-duplicate"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-granted-with-mods",
+      "cases": [
+        "timestamp-granted-with-mods"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-wrong-imprint",
+      "cases": [
+        "timestamp-wrong-imprint"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-sha512-imprint",
+      "cases": [
+        "timestamp-sha512-imprint"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-bad-signature",
+      "cases": [
+        "timestamp-bad-signature"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-bad-certificate-binding",
+      "cases": [
+        "timestamp-bad-certificate-binding"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-rejected-status",
+      "cases": [
+        "timestamp-rejected-status"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-granted-missing-token",
+      "cases": [
+        "timestamp-granted-missing-token"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-invalid-middle",
+      "cases": [
+        "timestamp-invalid-middle"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-nonresponse-middle",
+      "cases": [
+        "timestamp-nonresponse-middle"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-nonsequence-middle",
+      "cases": [
+        "timestamp-nonsequence-middle"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-untrusted",
+      "cases": [
+        "timestamp-untrusted"
+      ],
+      "original_outcome": "untrusted",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-revoked-tsa",
+      "cases": [
+        "timestamp-revoked-tsa"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-truncated-tag",
+      "cases": [
+        "timestamp-truncated-tag"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-truncated-length",
+      "cases": [
+        "timestamp-truncated-length"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-truncated-value",
+      "cases": [
+        "timestamp-truncated-value"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-indefinite-length",
+      "cases": [
+        "timestamp-indefinite-length"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-nonminimal-length",
+      "cases": [
+        "timestamp-nonminimal-length"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-huge-length",
+      "cases": [
+        "timestamp-huge-length"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-no-scan-ahead",
+      "cases": [
+        "timestamp-no-scan-ahead"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-newline-not-separator",
+      "cases": [
+        "timestamp-newline-not-separator"
+      ],
+      "original_outcome": "partial",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-empty",
+      "cases": [
+        "timestamp-empty"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-malformed-first",
+      "cases": [
+        "timestamp-malformed-first"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-revocation",
+      "cases": [
+        "timestamp-revocation"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "codex",
+      "source_id": "timestamp-lookup-200",
+      "cases": [
+        "timestamp-lookup-200"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "valid-minimal",
+      "cases": [
+        "supplemental-valid-minimal-loose",
+        "supplemental-valid-minimal-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "valid-baseline",
+      "cases": [
+        "supplemental-valid-baseline-loose",
+        "supplemental-valid-baseline-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "valid-other-license",
+      "cases": [
+        "supplemental-valid-other-license-loose",
+        "supplemental-valid-other-license-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "valid-license-crlf",
+      "cases": [
+        "supplemental-valid-license-crlf-loose",
+        "supplemental-valid-license-crlf-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "valid-manifest-formatting",
+      "cases": [
+        "supplemental-valid-manifest-formatting-loose",
+        "supplemental-valid-manifest-formatting-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "valid-path-255",
+      "cases": [
+        "supplemental-valid-path-255-loose",
+        "supplemental-valid-path-255-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "valid-text-rules",
+      "cases": [
+        "supplemental-valid-text-rules-loose",
+        "supplemental-valid-text-rules-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "valid-title-200",
+      "cases": [
+        "supplemental-valid-title-200-loose",
+        "supplemental-valid-title-200-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "valid-display-3",
+      "cases": [
+        "supplemental-valid-display-3-loose",
+        "supplemental-valid-display-3-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "nonbaseline-display-4",
+      "cases": [
+        "supplemental-nonbaseline-display-4-loose",
+        "supplemental-nonbaseline-display-4-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "nonbaseline-1001-files",
+      "cases": [
+        "supplemental-nonbaseline-1001-files-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "baseline-1000-files",
+      "cases": [
+        "supplemental-baseline-1000-files-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "baseline-readme-1mib",
+      "cases": [
+        "supplemental-baseline-readme-1mib-loose"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "nonbaseline-readme-over",
+      "cases": [
+        "supplemental-nonbaseline-readme-over-loose"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "baseline-sci-json-64kib",
+      "cases": [
+        "supplemental-baseline-sci-json-64kib-loose",
+        "supplemental-baseline-sci-json-64kib-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "nonbaseline-sci-json-over",
+      "cases": [
+        "supplemental-nonbaseline-sci-json-over-loose",
+        "supplemental-nonbaseline-sci-json-over-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "nonbaseline-manifest-over",
+      "cases": [
+        "supplemental-nonbaseline-manifest-over-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-size-64mib-exact",
+      "cases": [
+        "supplemental-zip-size-64mib-exact-loose"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-size-64mib-plus-1",
+      "cases": [
+        "supplemental-zip-size-64mib-plus-1-loose"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-unknown-schema",
+      "cases": [
+        "supplemental-manifest-unknown-schema-loose"
+      ],
+      "original_outcome": "unsupported",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-wrong-record-type",
+      "cases": [
+        "supplemental-manifest-wrong-record-type-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-extra-field",
+      "cases": [
+        "supplemental-manifest-extra-field-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-missing-files",
+      "cases": [
+        "supplemental-manifest-missing-files-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-jwk-extra-field",
+      "cases": [
+        "supplemental-manifest-jwk-extra-field-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-jwk-wrong-crv",
+      "cases": [
+        "supplemental-manifest-jwk-wrong-crv-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-jwk-noncanonical-x",
+      "cases": [
+        "supplemental-manifest-jwk-noncanonical-x-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-jwk-padded-x",
+      "cases": [
+        "supplemental-manifest-jwk-padded-x-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-bad-signature",
+      "cases": [
+        "supplemental-manifest-bad-signature-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-signature-63-bytes",
+      "cases": [
+        "supplemental-manifest-signature-63-bytes-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-signature-other-key",
+      "cases": [
+        "supplemental-manifest-signature-other-key-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-signature-s-not-reduced",
+      "cases": [
+        "supplemental-manifest-signature-s-not-reduced-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-identity-key",
+      "cases": [
+        "supplemental-manifest-identity-key-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-signature-r-identity",
+      "cases": [
+        "supplemental-manifest-signature-r-identity-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-bom",
+      "cases": [
+        "supplemental-manifest-bom-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-duplicate-key",
+      "cases": [
+        "supplemental-manifest-duplicate-key-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-duplicate-key-escaped",
+      "cases": [
+        "supplemental-manifest-duplicate-key-escaped-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-missing-readme",
+      "cases": [
+        "supplemental-manifest-missing-readme-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-file-outside-files",
+      "cases": [
+        "supplemental-manifest-file-outside-files-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-lists-signature",
+      "cases": [
+        "supplemental-manifest-lists-signature-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-sha256-uppercase",
+      "cases": [
+        "supplemental-manifest-sha256-uppercase-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-bytes-leading-zero",
+      "cases": [
+        "supplemental-manifest-bytes-leading-zero-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-bytes-float",
+      "cases": [
+        "supplemental-manifest-bytes-float-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-bytes-exponent",
+      "cases": [
+        "supplemental-manifest-bytes-exponent-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-bytes-too-large",
+      "cases": [
+        "supplemental-manifest-bytes-too-large-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-bytes-string",
+      "cases": [
+        "supplemental-manifest-bytes-string-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-file-extra-field",
+      "cases": [
+        "supplemental-manifest-file-extra-field-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-dotdot",
+      "cases": [
+        "supplemental-manifest-path-dotdot-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-dot",
+      "cases": [
+        "supplemental-manifest-path-dot-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-empty-component",
+      "cases": [
+        "supplemental-manifest-path-empty-component-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-trailing-slash",
+      "cases": [
+        "supplemental-manifest-path-trailing-slash-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-leading-slash",
+      "cases": [
+        "supplemental-manifest-path-leading-slash-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-trailing-period",
+      "cases": [
+        "supplemental-manifest-path-trailing-period-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-space",
+      "cases": [
+        "supplemental-manifest-path-space-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-non-ascii",
+      "cases": [
+        "supplemental-manifest-path-non-ascii-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-backslash",
+      "cases": [
+        "supplemental-manifest-path-backslash-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-colon",
+      "cases": [
+        "supplemental-manifest-path-colon-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-con",
+      "cases": [
+        "supplemental-manifest-path-con-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-con-ext",
+      "cases": [
+        "supplemental-manifest-path-con-ext-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-com1-dir",
+      "cases": [
+        "supplemental-manifest-path-com1-dir-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-lpt9",
+      "cases": [
+        "supplemental-manifest-path-lpt9-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-256",
+      "cases": [
+        "supplemental-manifest-path-256-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-case-conflict",
+      "cases": [
+        "supplemental-manifest-path-case-conflict-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-file-dir-conflict",
+      "cases": [
+        "supplemental-manifest-path-file-dir-conflict-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "manifest-path-dir-case-conflict",
+      "cases": [
+        "supplemental-manifest-path-dir-case-conflict-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "valid-com10-name",
+      "cases": [
+        "supplemental-valid-com10-name-loose",
+        "supplemental-valid-com10-name-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "file-hash-mismatch",
+      "cases": [
+        "supplemental-file-hash-mismatch-loose",
+        "supplemental-file-hash-mismatch-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "file-size-mismatch",
+      "cases": [
+        "supplemental-file-size-mismatch-loose",
+        "supplemental-file-size-mismatch-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "loose-missing-file",
+      "cases": [
+        "supplemental-loose-missing-file-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "loose-unlisted-file",
+      "cases": [
+        "supplemental-loose-unlisted-file-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "loose-with-tsr-sidecar-name",
+      "cases": [
+        "supplemental-loose-with-tsr-sidecar-name-loose"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-missing-title",
+      "cases": [
+        "supplemental-meta-missing-title-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-unknown-field",
+      "cases": [
+        "supplemental-meta-unknown-field-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-blank-title",
+      "cases": [
+        "supplemental-meta-blank-title-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-title-201",
+      "cases": [
+        "supplemental-meta-title-201-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-abstract-2501",
+      "cases": [
+        "supplemental-meta-abstract-2501-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-title-null",
+      "cases": [
+        "supplemental-meta-title-null-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-title-tab",
+      "cases": [
+        "supplemental-meta-title-tab-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-keyword-lf",
+      "cases": [
+        "supplemental-meta-keyword-lf-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-nbsp",
+      "cases": [
+        "supplemental-meta-nbsp-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-zwsp",
+      "cases": [
+        "supplemental-meta-zwsp-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-rlo",
+      "cases": [
+        "supplemental-meta-rlo-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-soft-hyphen",
+      "cases": [
+        "supplemental-meta-soft-hyphen-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-zwj-no-context",
+      "cases": [
+        "supplemental-meta-zwj-no-context-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-zwnj-no-context",
+      "cases": [
+        "supplemental-meta-zwnj-no-context-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-zwj-at-start",
+      "cases": [
+        "supplemental-meta-zwj-at-start-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-noncharacter",
+      "cases": [
+        "supplemental-meta-noncharacter-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-private-use",
+      "cases": [
+        "supplemental-meta-private-use-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-escaped-nul",
+      "cases": [
+        "supplemental-meta-escaped-nul-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-unpaired-surrogate",
+      "cases": [
+        "supplemental-meta-unpaired-surrogate-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-paired-surrogate-escape",
+      "cases": [
+        "supplemental-meta-paired-surrogate-escape-loose"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-invalid-utf8",
+      "cases": [
+        "supplemental-meta-invalid-utf8-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-overlong-utf8",
+      "cases": [
+        "supplemental-meta-overlong-utf8-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-bom",
+      "cases": [
+        "supplemental-meta-bom-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-duplicate-key",
+      "cases": [
+        "supplemental-meta-duplicate-key-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-trailing-data",
+      "cases": [
+        "supplemental-meta-trailing-data-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-top-level-array",
+      "cases": [
+        "supplemental-meta-top-level-array-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-categories-4",
+      "cases": [
+        "supplemental-meta-categories-4-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-category-dup",
+      "cases": [
+        "supplemental-meta-category-dup-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-category-scheme-upper",
+      "cases": [
+        "supplemental-meta-category-scheme-upper-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-category-scheme-65",
+      "cases": [
+        "supplemental-meta-category-scheme-65-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-category-unknown-scheme",
+      "cases": [
+        "supplemental-meta-category-unknown-scheme-loose"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-keywords-21",
+      "cases": [
+        "supplemental-meta-keywords-21-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-keyword-65",
+      "cases": [
+        "supplemental-meta-keyword-65-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-display-not-listed",
+      "cases": [
+        "supplemental-meta-display-not-listed-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-display-not-under-files",
+      "cases": [
+        "supplemental-meta-display-not-under-files-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-display-duplicate",
+      "cases": [
+        "supplemental-meta-display-duplicate-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-display-case",
+      "cases": [
+        "supplemental-meta-display-case-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-display-extra-field",
+      "cases": [
+        "supplemental-meta-display-extra-field-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-display-caption-2001",
+      "cases": [
+        "supplemental-meta-display-caption-2001-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-citation-sci-uppercase",
+      "cases": [
+        "supplemental-meta-citation-sci-uppercase-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-citation-sci-short",
+      "cases": [
+        "supplemental-meta-citation-sci-short-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-citation-sci-no-algorithm",
+      "cases": [
+        "supplemental-meta-citation-sci-no-algorithm-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-citation-ftp",
+      "cases": [
+        "supplemental-meta-citation-ftp-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-citation-relative",
+      "cases": [
+        "supplemental-meta-citation-relative-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-citation-relation-unknown",
+      "cases": [
+        "supplemental-meta-citation-relation-unknown-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-citation-relation-dup",
+      "cases": [
+        "supplemental-meta-citation-relation-dup-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-citation-relation-string",
+      "cases": [
+        "supplemental-meta-citation-relation-string-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-citation-extra-field",
+      "cases": [
+        "supplemental-meta-citation-extra-field-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-citation-reason-1001",
+      "cases": [
+        "supplemental-meta-citation-reason-1001-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-citations-1001",
+      "cases": [
+        "supplemental-meta-citations-1001-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-readme-invalid-utf8",
+      "cases": [
+        "supplemental-meta-readme-invalid-utf8-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-readme-nul",
+      "cases": [
+        "supplemental-meta-readme-nul-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-readme-bom",
+      "cases": [
+        "supplemental-meta-readme-bom-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-readme-escape",
+      "cases": [
+        "supplemental-meta-readme-escape-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-readme-empty",
+      "cases": [
+        "supplemental-meta-readme-empty-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-readme-whitespace",
+      "cases": [
+        "supplemental-meta-readme-whitespace-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-license-empty",
+      "cases": [
+        "supplemental-meta-license-empty-loose"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "meta-license-bad-char",
+      "cases": [
+        "supplemental-meta-license-bad-char-loose"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-valid",
+      "cases": [
+        "supplemental-zip-valid-zip"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-files-unsorted",
+      "cases": [
+        "supplemental-zip-files-unsorted-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-signature-first",
+      "cases": [
+        "supplemental-zip-signature-first-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-deflate",
+      "cases": [
+        "supplemental-zip-deflate-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-utf8-flag",
+      "cases": [
+        "supplemental-zip-utf8-flag-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-data-descriptor-flag",
+      "cases": [
+        "supplemental-zip-data-descriptor-flag-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-extra-field",
+      "cases": [
+        "supplemental-zip-extra-field-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-entry-comment",
+      "cases": [
+        "supplemental-zip-entry-comment-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-mtime",
+      "cases": [
+        "supplemental-zip-mtime-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-mdate",
+      "cases": [
+        "supplemental-zip-mdate-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-unix-made-by",
+      "cases": [
+        "supplemental-zip-unix-made-by-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-ext-attr",
+      "cases": [
+        "supplemental-zip-ext-attr-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-version-needed-20",
+      "cases": [
+        "supplemental-zip-version-needed-20-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-central-crc-mismatch",
+      "cases": [
+        "supplemental-zip-central-crc-mismatch-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-bad-crc",
+      "cases": [
+        "supplemental-zip-bad-crc-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-gap",
+      "cases": [
+        "supplemental-zip-gap-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-trailing-byte",
+      "cases": [
+        "supplemental-zip-trailing-byte-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-eocd-comment",
+      "cases": [
+        "supplemental-zip-eocd-comment-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-directory-entry",
+      "cases": [
+        "supplemental-zip-directory-entry-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-unlisted-entry",
+      "cases": [
+        "supplemental-zip-unlisted-entry-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-tsr-entry",
+      "cases": [
+        "supplemental-zip-tsr-entry-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-duplicate-entry",
+      "cases": [
+        "supplemental-zip-duplicate-entry-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-missing-entry",
+      "cases": [
+        "supplemental-zip-missing-entry-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-prefix-byte",
+      "cases": [
+        "supplemental-zip-prefix-byte-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "zip-name-case",
+      "cases": [
+        "supplemental-zip-name-case-zip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-valid",
+      "cases": [
+        "supplemental-claim-valid"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-valid-note",
+      "cases": [
+        "supplemental-claim-valid-note"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-github",
+      "cases": [
+        "supplemental-claim-github"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-expired",
+      "cases": [
+        "supplemental-claim-expired"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-account-mismatch",
+      "cases": [
+        "supplemental-claim-account-mismatch"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-type-mismatch",
+      "cases": [
+        "supplemental-claim-type-mismatch"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-key-mismatch",
+      "cases": [
+        "supplemental-claim-key-mismatch"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-bad-signature",
+      "cases": [
+        "supplemental-claim-bad-signature"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-no-expires",
+      "cases": [
+        "supplemental-claim-no-expires"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-bad-expires",
+      "cases": [
+        "supplemental-claim-bad-expires"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-extra-field",
+      "cases": [
+        "supplemental-claim-extra-field"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-wrong-schema",
+      "cases": [
+        "supplemental-claim-wrong-schema"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-domain-uppercase",
+      "cases": [
+        "supplemental-claim-domain-uppercase"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-domain-ip",
+      "cases": [
+        "supplemental-claim-domain-ip"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-domain-final-dot",
+      "cases": [
+        "supplemental-claim-domain-final-dot"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-domain-alabel",
+      "cases": [
+        "supplemental-claim-domain-alabel"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-domain-bad-alabel",
+      "cases": [
+        "supplemental-claim-domain-bad-alabel"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-note-tab-ok",
+      "cases": [
+        "supplemental-claim-note-tab-ok"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "claim-note-zwsp",
+      "cases": [
+        "supplemental-claim-note-zwsp"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": true
+    },
+    {
+      "source": "claude",
+      "source_id": "revocation-valid",
+      "cases": [
+        "supplemental-revocation-valid"
+      ],
+      "original_outcome": "valid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "revocation-other-signer",
+      "cases": [
+        "supplemental-revocation-other-signer"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "revocation-extra-field",
+      "cases": [
+        "supplemental-revocation-extra-field"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "revocation-wrong-schema",
+      "cases": [
+        "supplemental-revocation-wrong-schema"
+      ],
+      "original_outcome": "invalid",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "revocation-unknown-version",
+      "cases": [
+        "supplemental-revocation-unknown-version"
+      ],
+      "original_outcome": "unsupported",
+      "outcome_changed": false
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-one",
+      "cases": [
+        "timestamp-one"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-two",
+      "cases": [
+        "timestamp-two-authorities"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-wrong-imprint",
+      "cases": [
+        "timestamp-wrong-imprint"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-sha1-imprint",
+      "cases": [
+        "timestamp-sha1-imprint"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-untrusted-tsa",
+      "cases": [
+        "timestamp-untrusted"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-rejection",
+      "cases": [
+        "timestamp-rejected-status"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-failed-then-valid",
+      "cases": [
+        "timestamp-failed-then-valid"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-truncated-second",
+      "cases": [
+        "timestamp-truncated-value"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-garbage-then-valid",
+      "cases": [
+        "timestamp-no-scan-ahead"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-trailing-zero",
+      "cases": [
+        "timestamp-trailing-zero"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-empty",
+      "cases": [
+        "timestamp-empty"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    },
+    {
+      "source": "claude",
+      "source_id": "ts-revocation",
+      "cases": [
+        "timestamp-revocation"
+      ],
+      "original_outcome": null,
+      "outcome_changed": false,
+      "note": "Replaced clock-dependent PKI with deterministic equivalent coverage; see REVIEW.md."
+    }
+  ]
+}

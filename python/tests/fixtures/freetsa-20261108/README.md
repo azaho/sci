@@ -1,0 +1,1 @@
+Public FreeTSA response acquired on 2026-11-08 UTC for an ephemeral synthetic test signature. No private key is retained. CA and CRL fetched from the public FreeTSA endpoints. This regression covers a timestamp with no Accuracy field. These files are test inputs, never installed as system trust.

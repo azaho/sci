@@ -1,0 +1,7 @@
+# Preserve intentionally malformed JSON, signed bytes, CRLF/LF, and binary fixtures.
+0.1/** -text -diff
+# Keep the machine-readable indexes reviewable without newline conversion.
+0.1/catalog.json -text diff
+0.1/inventory.json -text diff
+# These dedicated synthetic private keys are public fixture inputs, never secrets.
+test-keys/** -text
