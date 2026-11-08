@@ -1,159 +1,227 @@
 from __future__ import annotations
 import argparse
+import base64
 import json
-import sqlite3
+import re
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlencode
-from pysci import load_bundle, Invalid
-from pysci.validation import strict_json
 from sci import config
-from sci.clients.network import Network, index
+from sci.clients import catalog
+from sci.clients.network import origin
+from sci.storage.catalog import Catalog
 from sci.output import CommandError
 
 
-def search(args: argparse.Namespace) -> dict[str, Any]:
-    sources = args.sources or ["."]
-    c = config.read()
-    expanded = []
-    for s in sources:
-        if s == "@local":
-            expanded.extend(c.get("folders", []))
-        elif s == "@index":
-            if not c.get("index"):
+def sources(values: list[str]) -> list[str]:
+    settings = config.read()
+    expanded: list[str] = []
+    for value in values:
+        if value == "@local":
+            expanded.extend(settings.get("folders", []))
+        elif value == "@index":
+            if not settings.get("index"):
                 raise CommandError("missing_index", "Configure an index")
-            expanded.append(c["index"])
+            expanded.append(settings["index"])
         else:
-            expanded.append(s)
-    expanded = list(
-        dict.fromkeys(s if s.startswith("https://") else str(Path(s).resolve()) for s in expanded)
-    )
-    if args.limit < 1 or args.limit > 1000:
-        raise CommandError("limit", "Limit must be 1–1000")
-    if args.domain and any(not s.startswith("https://") for s in expanded):
-        raise CommandError("domain_scope", "--domain requires remote-only scope")
-    groups = []
-    local: dict[str, Any] = {}
-    errors = []
-    config.home().mkdir(parents=True, exist_ok=True)
-    cache = config.home() / "catalog.sqlite"
-    try:
-        db = sqlite3.connect(cache)
-        db.execute("pragma quick_check").fetchall()
-        db.execute(
-            "create table if not exists bundles(path text primary key, identity text, data text)"
+            expanded.append(value)
+    return list(
+        dict.fromkeys(
+            origin(s) if "://" in s else str(Path(s).expanduser().resolve()) for s in expanded
         )
-    except sqlite3.DatabaseError:
-        if cache.exists():
-            cache.rename(cache.with_suffix(".corrupt"))
-        db = sqlite3.connect(cache)
-        db.execute("create table bundles(path text primary key, identity text, data text)")
-    try:
-        for source in expanded:
-            try:
-                if source.startswith("https://"):
-                    net = Network(args.timeout)
-                    d = index(net, source)
-                    if d.get("catalog_schema") != "sciscape_catalog_v1":
-                        raise CommandError("unsupported_capability", "Unknown catalog schema", 4)
-                    params = {"order": "accepted_at.desc,id.desc", "limit": str(args.limit)}
-                    if args.query:
-                        params["search_text"] = "plfts(simple)." + args.query
-                    if args.category:
-                        params["categories"] = "cs." + json.dumps(
-                            [dict(zip(["scheme", "code"], args.category))]
-                        )
-                    if args.key_x:
-                        params["public_key->>x"] = "eq." + args.key_x
-                    if args.domain:
-                        params["admission_accounts"] = "cs." + json.dumps(
-                            [{"type": "domain", "id": args.domain}]
-                        )
-                    rows = strict_json(
-                        net.request(
-                            d["catalog_url"] + "/publications?" + urlencode(params),
-                            limit=4 * 1024 * 1024,
-                        )
-                    )
-                    if not isinstance(rows, list):
-                        raise Invalid("catalog response must be an array")
-                    groups.append(
-                        {"source": source, "verification": "catalog_metadata", "results": rows}
-                    )
+    )
+
+
+def run(args: argparse.Namespace) -> dict[str, Any]:
+    options = {
+        "query": args.query or "",
+        "limit": args.limit if args.limit is not None else 20,
+        "category": args.category,
+        "key_x": args.key_x,
+        "domain": args.domain,
+    }
+    positions: dict[str, Any] = {}
+    if args.cursor:
+        try:
+            if len(args.cursor) > 65536:
+                raise ValueError()
+            token = json.loads(
+                base64.urlsafe_b64decode(args.cursor + "=" * (-len(args.cursor) % 4))
+            )
+            if (
+                set(token) != {"schema", "sources", "options", "positions"}
+                or token["schema"] != "sci-search/1"
+            ):
+                raise ValueError()
+            expanded = token["sources"]
+            previous = token["options"]
+            positions = token["positions"]
+            if (
+                not isinstance(expanded, list)
+                or not all(isinstance(s, str) for s in expanded)
+                or not isinstance(positions, dict)
+            ):
+                raise ValueError()
+            if (
+                not isinstance(previous, dict)
+                or len(set(expanded)) != len(expanded)
+                or sources(expanded) != expanded
+            ):
+                raise ValueError()
+            if set(positions) - {*expanded, "local"}:
+                raise ValueError()
+            for source, position in positions.items():
+                if position == "done":
                     continue
-                folder = Path(source)
-                if not folder.is_dir():
-                    raise Invalid("folder unavailable")
-                current = []
-                for path in sorted(folder.glob("*.zip")):
-                    current.append(str(path))
-                    try:
-                        st = path.lstat()
-                        identity = f"{st.st_dev}:{st.st_ino}:{st.st_size}:{st.st_mtime_ns}:{st.st_ctime_ns}"
-                        row = db.execute(
-                            "select data from bundles where path=? and identity=?",
-                            (str(path), identity),
-                        ).fetchone()
-                        if row:
-                            obj = json.loads(row[0])
-                        else:
-                            b = load_bundle(path)
-                            obj = {
-                                "id": b.id,
-                                "metadata": b.metadata,
-                                "signer": b.signer,
-                                "readme": b.entries["README.md"].decode(),
-                            }
-                            with db:
-                                db.execute(
-                                    "insert or replace into bundles values(?,?,?)",
-                                    (str(path), identity, json.dumps(obj)),
-                                )
-                        if args.key_x and obj["signer"] != args.key_x:
+                if source == "local":
+                    if not isinstance(position, str) or not re.fullmatch("[0-9a-f]{64}", position):
+                        raise ValueError()
+                elif (
+                    not isinstance(position, dict)
+                    or set(position) != {"id", "time"}
+                    or not all(isinstance(v, str) for v in position.values())
+                ):
+                    raise ValueError()
+            if set(previous) != set(options):
+                raise ValueError()
+            for name in options:
+                explicit = getattr(args, name)
+                if explicit is not None and explicit != previous[name]:
+                    raise CommandError("cursor_conflict", "Cursor query or filters differ")
+            if args.sources and sources(args.sources) != expanded:
+                raise CommandError("cursor_conflict", "Cursor sources differ")
+            options = previous
+        except (ValueError, KeyError, TypeError) as exc:
+            raise CommandError("cursor", "Malformed search continuation token") from exc
+    else:
+        expanded = sources(args.sources or ["."])
+    if type(options["limit"]) is not int or not 1 <= options["limit"] <= 99:
+        raise CommandError("limit", "Limit must be 1–99")
+    if not isinstance(options["query"], str) or any(
+        options[n] is not None and not isinstance(options[n], str) for n in ("key_x", "domain")
+    ):
+        raise CommandError("cursor", "Invalid search filters")
+    if options["category"] is not None and (
+        not isinstance(options["category"], list)
+        or len(options["category"]) != 2
+        or not all(isinstance(x, str) for x in options["category"])
+    ):
+        raise CommandError("category", "Supply scheme and code")
+    local_sources = [s for s in expanded if not s.startswith("https://")]
+    if options["domain"] and local_sources:
+        raise CommandError("domain_scope", "--domain requires remote-only scope")
+    groups: list[dict[str, Any]] = []
+    errors: list[dict[str, str]] = []
+    next_positions = dict(positions)
+    more = False
+    if local_sources and positions.get("local") != "done":
+        local: dict[str, Any] = {}
+        cache = Catalog(config.home() / "catalog.sqlite")
+        try:
+            for source in local_sources:
+                try:
+                    rows, invalid = cache.scan(Path(source))
+                    errors.extend(invalid)
+                    if args.sources:
+                        config.remember(Path(source))
+                    for row in rows:
+                        metadata = row["metadata"]
+                        if options["key_x"] and row["signer"] != options["key_x"]:
                             continue
-                        if args.category and dict(
-                            zip(["scheme", "code"], args.category)
-                        ) not in obj["metadata"].get("categories", []):
+                        if options["category"] and dict(
+                            zip(["scheme", "code"], options["category"])
+                        ) not in metadata.get("categories", []):
                             continue
                         haystack = " ".join(
                             [
-                                obj["metadata"]["title"],
-                                obj["metadata"]["abstract"],
-                                *obj["metadata"].get("keywords", []),
-                                obj["readme"],
+                                metadata["title"],
+                                metadata["abstract"],
+                                *metadata.get("keywords", []),
+                                row["readme"],
                             ]
                         ).casefold()
-                        if not all(t in haystack for t in args.query.casefold().split()):
+                        if not all(t in haystack for t in options["query"].casefold().split()):
                             continue
-                        if obj["id"] in local:
-                            local[obj["id"]]["paths"].append(str(path))
-                        else:
-                            local[obj["id"]] = {
-                                "id": obj["id"],
-                                "metadata": obj["metadata"],
-                                "signer": obj["signer"],
-                                "paths": [str(path)],
+                        if row["id"] not in local:
+                            local[row["id"]] = {
+                                "id": "sha256:" + row["id"],
+                                "title": metadata["title"],
+                                "abstract": metadata["abstract"],
+                                "metadata": metadata,
+                                "citations": metadata.get("citations", []),
+                                "signer": row["signer"],
+                                "paths": [],
                             }
-                    except Exception as exc:
-                        errors.append({"path": str(path), "error": str(exc)})
-                with db:
-                    for (p,) in db.execute("select path from bundles").fetchall():
-                        if Path(p).parent == folder and p not in current:
-                            db.execute("delete from bundles where path=?", (p,))
-                if args.sources:
-                    config.remember(folder)
-            except Exception as exc:
-                errors.append({"source": source, "error": str(exc)})
-    finally:
-        db.close()
-    if any(not s.startswith("https://") for s in expanded):
-        groups.insert(
-            0,
+                        local[row["id"]]["paths"].append(row["path"])
+                except Exception as exc:
+                    errors.append({"source": source, "error": str(exc)})
+        finally:
+            cache.close()
+        after = positions.get("local", "")
+        if not isinstance(after, str):
+            raise CommandError("cursor", "Invalid local position")
+        ids = [pid for pid in sorted(local) if pid > after]
+        selected = ids[: options["limit"]]
+        local_more = len(ids) > len(selected)
+        next_positions["local"] = selected[-1] if local_more else "done"
+        more |= local_more
+        groups.append(
             {
                 "source": "local",
+                "sources": local_sources,
+                "fields": ["title", "abstract", "keywords", "README"],
                 "verification": "complete",
-                "results": [local[k] for k in sorted(local)[: args.limit]],
-                "more": len(local) > args.limit,
-            },
+                "results": [local[pid] for pid in selected],
+                "more": local_more,
+            }
         )
-    return {"groups": groups, "errors": errors, "exit_code": 5 if errors else 0}
+    for source in expanded:
+        if not source.startswith("https://") or positions.get(source) == "done":
+            continue
+        try:
+            rows, position = catalog.page(source, options, positions.get(source), args.timeout)
+            next_positions[source] = position or "done"
+            more |= position is not None
+            groups.append(
+                {
+                    "source": source,
+                    "fields": ["title", "abstract", "keywords"],
+                    "verification": "catalog_metadata",
+                    "results": rows,
+                    "more": position is not None,
+                }
+            )
+        except Exception as exc:
+            errors.append({"source": source, "error": str(exc)})
+    cursor = None
+    if more:
+        payload = {
+            "schema": "sci-search/1",
+            "sources": expanded,
+            "options": options,
+            "positions": next_positions,
+        }
+        cursor = (
+            base64.urlsafe_b64encode(json.dumps(payload, separators=(",", ":")).encode())
+            .rstrip(b"=")
+            .decode()
+        )
+    return {"groups": groups, "errors": errors, "cursor": cursor, "exit_code": 5 if errors else 0}
+
+
+def configure(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    c = subparsers.add_parser(
+        "search",
+        help="Search verified local ZIPs or online catalog metadata. Default: current folder offline. Local search updates the cache and remembers explicitly selected folders.",
+        description="Search verified local ZIPs or online catalog metadata. Default: current folder offline. Local search updates the cache and remembers explicitly selected folders.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        epilog="Outputs JSON. Exit codes: 0 complete, 2 arguments/config, 3 invalid content, 4 unsupported, 5 partial/incomplete, 6 policy refusal. Example: sci search decoding --in ./campaign --limit 20",
+    )
+    c.add_argument("--timeout", type=float, default=120, help="Total network deadline in seconds")
+    c.add_argument("query", nargs="?", default=None)
+    c.add_argument("--in", dest="sources", action="append")
+    c.add_argument("--limit", type=int, default=None, help="Results per group, 1–99 (default: 20)")
+    c.add_argument("--category", nargs=2, metavar=("SCHEME", "CODE"))
+    c.add_argument("--key-x")
+    c.add_argument("--domain")
+    c.add_argument("--cursor", help="Continue the same sources, query and filters")
+    c.set_defaults(handler=run)

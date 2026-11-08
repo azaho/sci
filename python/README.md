@@ -22,3 +22,8 @@ persistence. `Bundle.zip()` creates exact protocol bytes. Timestamp verification
 uses explicit anchors, CRLs and evaluation time with OpenSSL, never system trust
 or implicit network access. Verify the target signature first. Missing revocation
 information cannot establish a trusted timestamp.
+
+`pysci.reading.read_verified` takes a bounded byte reader and verifies manifest,
+selected-file or metadata scope. `read_local` provides the same scopes for local
+directories and ZIPs. Results list exactly the retained verified bytes; they never
+claim complete verification of unrequested files.

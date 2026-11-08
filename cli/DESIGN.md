@@ -104,7 +104,7 @@ Build the [manifest](../protocol/README.md#3-manifest) with sorted file paths an
 
 Preserve existing manifest bytes and the ID when the input and selected key are unchanged. Otherwise require `--replace`; discard proofs for the replaced signature.
 
-Use the configured TSA unless `--no-timestamp` is set; `--tsa URL` overrides it. Without a TSA, offer configuration or an explicit skip. Noninteractive use requires a TSA or `--no-timestamp` before writing output. A timestamp failure preserves the signed publication and returns `partial`; retry with `timestamp`.
+Use the configured TSA unless `--no-timestamp` is set; `--tsa URL` overrides it. The default is [FreeTSA](https://freetsa.org/tsr), with its [CA certificate](https://freetsa.org/files/cacert.pem) explicitly configured as a trust anchor. Use no automatic fallback TSA. Limit combined requests to one per second per egress IP, including concurrent CLI processes and any Sciscape workers sharing that IP. A timestamp failure preserves the signed publication and returns `partial`; retry with `timestamp`.
 
 `--output DIR` also performs local publication as defined below. Packing can complete even if timestamping fails. A packing failure preserves the signed directory. Signing without timestamping is offline.
 
@@ -265,5 +265,9 @@ Valid non-baseline bundles can pass `verify` with exit 0. Local work limits retu
 
 ## Remaining decisions
 
-- Default TSA, trust authorities, and proof count/byte limits.
-- Package name and installation method.
+- Additional trust authorities and proof count/byte limits.
+
+The initial default TSA is FreeTSA. The Python library package is `pysci`; the CLI
+package is `sci-cli`, installed with its Python dependency from Git. Both are local
+builds until the plan’s release conditions are met; no registry publication is
+part of this implementation.

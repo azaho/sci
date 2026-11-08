@@ -70,4 +70,4 @@ Sciscape's production deployment is a separate release gate.
 - [CLI instructions](cli/README.md) and [design](cli/DESIGN.md)
 - [Python](python/README.md) and [TypeScript](typescript/README.md)
 - [Development and tests](CONTRIBUTING.md), [source provenance](SOURCE.md)
-- [Implementation status and release gates](STATUS.md)
+- [Implementation status and release gates](STATUS.md), [plan audit](PLAN-AUDIT.md)

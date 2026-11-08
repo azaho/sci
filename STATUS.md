@@ -15,15 +15,17 @@ Before a stable release:
 
 - Complete live GitHub and Hugging Face hosting/CORS tests, plus second-archive
   retrieval and interrupted-upload recovery against real provider accounts.
-- Complete selective file/ZIP-range retrieval and search continuation parity with
-  the design; current read/pull verify complete inputs and local search reports
-  whether more results exist.
+- Complete selective ZIP-range retrieval and optional pull proof retrieval.
+  Selective loose-file reads and source-bound search continuation are implemented.
 - Complete the browser/backend deployment and all hosted resource-limit tests in
   Sciscape's independent test project, then its production project.
 - Review URI/DOI equivalence and uncommon RFC 3339 leap-second handling beyond the
   bundled corpus; the verifier does not claim exhaustive standards certification.
-- Finish an independent security audit and keep both repositories' required checks
-  enabled before merge. No registry publication or protocol release is automated.
+- Complete the remaining implementation and operational review and keep both
+  repositories' checks passing before merge. No registry publication or protocol release is automated.
 
 Legacy infrastructure, data, repository name and banner remain unchanged. Campaigns
 and repository renames are later plan stages, not implicitly triggered by this PR.
+
+See [PLAN-AUDIT.md](PLAN-AUDIT.md) for the requirement-by-requirement audit and
+remaining design deviations. The draft label does not waive those requirements.

@@ -1,12 +1,14 @@
 from __future__ import annotations
 import re
+import math
+import random
 import time
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urljoin
 import httpx
 from pysci import Bundle, Incomplete, Invalid, verify
 from pysci import validation as v
-from pysci.discovery import absolute, descriptor, expand
+from pysci.discovery import absolute, descriptor, expand, lookup_sources
 from sci import config
 from sci.output import CommandError
 
@@ -30,7 +32,7 @@ def origin(value: str) -> str:
 
 class Network:
     def __init__(self, timeout: float = 120) -> None:
-        if timeout <= 0:
+        if not math.isfinite(timeout) or timeout <= 0:
             raise CommandError("timeout", "Timeout must be positive")
         self.deadline = time.monotonic() + timeout
 
@@ -59,18 +61,37 @@ class Network:
                     follow_redirects=False,
                 ) as response:
                     if response.status_code in (301, 302, 303, 307, 308) and method == "GET":
-                        url = response.headers.get("location", "")
+                        url = urljoin(url, response.headers.get("location", ""))
                         continue
                     if response.status_code == 404:
                         raise CommandError("no_known_sources", "Source not found", 5)
                     if response.status_code in (429, 500, 502, 503, 504):
-                        delay = min(float(response.headers.get("retry-after", 2**attempt)), 10)
+                        try:
+                            delay = max(
+                                0.0,
+                                float(
+                                    response.headers.get(
+                                        "retry-after", 2**attempt + random.random()
+                                    )
+                                ),
+                            )
+                        except ValueError:
+                            from email.utils import parsedate_to_datetime
+
+                            delay = max(
+                                0.0,
+                                parsedate_to_datetime(response.headers["retry-after"]).timestamp()
+                                - time.time(),
+                            )
+                        if not math.isfinite(delay):
+                            raise Incomplete("invalid retry delay")
                         if time.monotonic() + delay >= self.deadline:
                             raise Incomplete("retry exceeds deadline")
                         time.sleep(delay)
                         continue
                     if response.status_code >= 400:
-                        raise CommandError("remote_refused", f"HTTP {response.status_code}", 6)
+                        code = {400: 2, 403: 6, 409: 5, 413: 5, 422: 3}.get(response.status_code, 5)
+                        raise CommandError("remote_refused", f"HTTP {response.status_code}", code)
                     chunks = bytearray()
                     for chunk in response.iter_bytes():
                         if len(chunks) + len(chunk) > limit:
@@ -99,12 +120,9 @@ def retrieve(value: str, archives: list[str], source: str | None, timeout: float
     net = Network(timeout)
     if not archives:
         desc = index(net, source)
-        obj = v.strict_json(
-            net.request(expand(desc["publication_lookup_url"], id=pid), limit=65536)
+        archives = lookup_sources(
+            net.request(expand(desc["publication_lookup_url"], id=pid), limit=65536), 200
         )
-        if not isinstance(obj, dict) or not isinstance(obj.get("descriptors"), list):
-            raise Invalid("malformed source response")
-        archives = obj["descriptors"]
     if not archives:
         raise CommandError("no_known_sources", "No known archive sources", 5)
     failures = []

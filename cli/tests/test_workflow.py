@@ -39,7 +39,7 @@ def test_complete_offline_workflow(tmp_path):
     assert cli(home, "verify", packed)["id"] == first["id"]
     assert (
         cli(home, "search", "measured", "--in", campaign)["groups"][0]["results"][0]["id"]
-        == first["id"][7:]
+        == first["id"]
     )
     assert "42" in cli(home, "read", packed)["text"]
     (draft / "README.md").write_text("changed")
@@ -75,8 +75,8 @@ def test_help_does_not_touch_home(tmp_path):
 
 def test_timestamp_failure_preserves_signed_files(tmp_path, monkeypatch):
     from sci.main import parser
-    from sci.commands.local import sign
-    from sci.commands import identity
+    from sci.commands.sign import run as sign
+    from sci.clients import tsa
     from pysci import load_bundle
 
     monkeypatch.setenv("SCI_HOME", str(tmp_path / "home"))
@@ -90,7 +90,7 @@ def test_timestamp_failure_preserves_signed_files(tmp_path, monkeypatch):
     def unavailable(args):
         raise OSError("TSA unavailable")
 
-    monkeypatch.setattr(identity, "timestamp", unavailable)
+    monkeypatch.setattr(tsa, "timestamp", unavailable)
     result = sign(parser().parse_args(["sign", str(draft)]))
     assert result["status"] == "partial" and result["exit_code"] == 5
     old = load_bundle(draft)

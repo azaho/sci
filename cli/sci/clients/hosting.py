@@ -41,10 +41,10 @@ def run(args: list[str], cwd: Path | None = None) -> str:
     return result.stdout
 
 
-def host(b: Bundle, address: str, create: bool, dry_run: bool) -> str:
+def host(b: Bundle, address: str, create: bool, dry_run: bool, source: Path | None = None) -> str:
     provider, repo = destination(address)
     if provider == "huggingface":
-        return host_huggingface(b, repo, create, dry_run)
+        return host_huggingface(b, repo, create, dry_run, source)
     descriptor = f"https://raw.githubusercontent.com/{repo}/main/sci/archive.json"
     if dry_run:
         return descriptor
@@ -77,6 +77,9 @@ def host(b: Bundle, address: str, create: bool, dry_run: bool) -> str:
         )
         for path in sorted(include):
             atomic(checkout / "sci/publications" / b.id[:2] / b.id / path, b.entries[path])
+        proof = sidecar(b, source)
+        if proof is not None:
+            atomic(checkout / "sci/publications" / b.id[:2] / b.id / "manifest.json.sig.tsr", proof)
         atomic(checkout / "sci/archive.json", canonical_json(d))
         packed = root / (b.id + ".zip")
         packed.write_bytes(b.zip())
@@ -140,7 +143,9 @@ def host(b: Bundle, address: str, create: bool, dry_run: bool) -> str:
     return descriptor
 
 
-def host_huggingface(b: Bundle, repo: str, create: bool, dry_run: bool) -> str:
+def host_huggingface(
+    b: Bundle, repo: str, create: bool, dry_run: bool, source: Path | None = None
+) -> str:
     from huggingface_hub import HfApi, CommitOperationAdd, hf_hub_download
     from huggingface_hub.errors import RepositoryNotFoundError, EntryNotFoundError, HfHubHTTPError
 
@@ -169,6 +174,9 @@ def host_huggingface(b: Bundle, repo: str, create: bool, dry_run: bool) -> str:
         | {item["path"] for item in b.metadata.get("display", [])}
     )
     desired = {f"sci/publications/{b.id[:2]}/{b.id}/{p}": b.entries[p] for p in include}
+    proof = sidecar(b, source)
+    if proof is not None:
+        desired[f"sci/publications/{b.id[:2]}/{b.id}/manifest.json.sig.tsr"] = proof
     desired[f"bundles/{b.id[:2]}/{b.id}.zip"] = b.zip()
     desired["sci/archive.json"] = canonical_json(d)
     for attempt in range(3):
@@ -214,3 +222,16 @@ def host_huggingface(b: Bundle, repo: str, create: bool, dry_run: bool) -> str:
             if exc.response.status_code not in (409, 412) or attempt == 2:
                 raise
     raise Incomplete("concurrent archive updates; retry publication")
+
+
+def sidecar(bundle: Bundle, source: Path | None) -> bytes | None:
+    from pysci.bundle import read_regular
+
+    if source is None:
+        return None
+    path = (
+        source / "manifest.json.sig.tsr"
+        if source.is_dir()
+        else source.with_name(bundle.id + ".tsr")
+    )
+    return read_regular(path, 4 * 1024 * 1024) if path.exists() else None

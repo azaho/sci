@@ -1,6 +1,6 @@
 # SCI test vectors
 
-609 offline cases for [SCI protocol draft 0.1](../sci-spec.md), pinned to
+609 offline cases for [SCI protocol draft 0.1](../README.md), pinned to
 [commit ae6d5a362a7183762fc642cd2cac3dfbb9c7b1f5](https://github.com/azaho/sci-spec/blob/ae6d5a362a7183762fc642cd2cac3dfbb9c7b1f5/sci-spec.md).
 The catalog records the exact specification SHA-256. These fixtures combine
 both original corpora, update their expectations for the current draft, and add

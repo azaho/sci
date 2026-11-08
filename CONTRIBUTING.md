@@ -24,3 +24,7 @@ pass. Add regressions beside the affected component. Keep protocol changes in
 `protocol/README.md` and implementation choices outside it. Keep each package's
 license text and notices in its distributable. Never publish packages to a registry
 as part of PR checks.
+
+Keep one command module (or folder) per command as required by PLAN.md. Define its
+arguments and handler there; do not grow command-specific branching in main.py.
+Record remaining plan requirements in [PLAN-AUDIT.md](PLAN-AUDIT.md).

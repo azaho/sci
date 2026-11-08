@@ -26,5 +26,13 @@ process stops during replacement, restore both staged files together, remove the
 staging directory, and run `sci verify`. Do not continue signing with a pending pair.
 
 See [DESIGN.md](DESIGN.md) for the target behavior and [STATUS.md](../STATUS.md) for
-release gates. The alpha retrieves complete ZIPs or loose bundles; selective ZIP
-range retrieval remains a performance/compatibility follow-up.
+release gates. Reads prefer individual files and report manifest, file or metadata verification
+separately. Selected ZIP-range retrieval remains an unimplemented design requirement;
+a bounded complete ZIP is the current fallback. `pull` verifies the complete bundle.
+
+`search --cursor TOKEN` resumes the same source/query/filter snapshot. Search limits
+are 1–99 per group (default 20), leaving room for a lookahead row within the index’s
+100-row response budget. Explicit conflicting options are rejected.
+
+Each command owns its arguments and handler in `sci/commands/<command>.py`. Shared
+network operations live in `clients/`; file and cache operations live in `storage/`.
