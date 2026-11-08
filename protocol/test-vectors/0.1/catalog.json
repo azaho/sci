@@ -1,8 +1,8 @@
 {
   "schema": "sci-test-vectors/1",
   "protocol": "sci-publication/0.1",
-  "spec_commit": "d17af535ab1e50850fedcddba57a719cf8659e86",
-  "spec_sha256": "5303f0449f885e18c6d55139acddf994bc12663d21059b7c3f0550a2a076883a",
+  "spec_commit": "0164db28435d7ca461c041039d2ed2fafcfa026f",
+  "spec_sha256": "f254d72767824542c97ef9e735755a28f706b417b730ed15ccc2062011fe9bb6",
   "test_public_key": {
     "kty": "OKP",
     "crv": "Ed25519",
