@@ -50,13 +50,11 @@ function getFetch(opts: RetrievalOptions): FetchLike {
   return f;
 }
 
-/** Read a response body with a hard byte limit. */
+/** Read a decoded response body with a hard byte limit. */
 async function readLimited(res: Response, maxBytes: number): Promise<Uint8Array> {
-  const declared = res.headers.get('content-length');
-  if (declared !== null && /^\d+$/.test(declared) && Number(declared) > maxBytes) {
-    await res.body?.cancel().catch(() => undefined);
-    incomplete('budget.response_bytes', '§6', 'Response exceeds the local size budget', { observed: Number(declared) });
-  }
+  // Fetch decodes HTTP content encodings, but Content-Length can describe the
+  // encoded transfer. CORS may also hide Content-Encoding. Bound the actual
+  // decoded bytes below instead of comparing transport headers to file sizes.
   if (!res.body) {
     const buf = new Uint8Array(await res.arrayBuffer());
     if (buf.length > maxBytes) incomplete('budget.response_bytes', '§6', 'Response exceeds the local size budget');

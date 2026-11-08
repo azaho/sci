@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
+import { gzipSync } from 'node:zlib';
 import {
   checkKeyAssociation,
   type FetchLike,
@@ -85,6 +86,59 @@ describe('retrieval with injected fetch', () => {
     assert.match(fetch.log[fetch.log.length - 1] ?? '', /bytes=\d+-\d+$/);
     const full = await remote.verifyComplete();
     assert.equal(full.zipSha256 !== undefined, true);
+  });
+
+  for (const exposeEncoding of [true, false]) {
+    test(`decoded gzip responses respect file bytes (Content-Encoding exposed: ${exposeEncoding})`, async () => {
+      const fetch: FetchLike = async (url) => {
+        const body = looseRoutes[url];
+        if (!body) return new Response(null, { status: 404 });
+        // Fetch decodes the body but retains the wire Content-Length. CORS can hide Content-Encoding.
+        const headers = new Headers({ 'content-length': String(gzipSync(body).length) });
+        if (exposeEncoding) headers.set('content-encoding', 'gzip');
+        return new Response(body.slice(), { headers });
+      };
+      const readme = pub.files.get('README.md');
+      assert.ok(readme);
+      assert.ok(gzipSync(readme).length > readme.length);
+      const remote = await openPublication(['https://loose.example/archive.json'], pub.digest, { fetch });
+      assert.deepEqual(await remote.readFile('README.md'), readme);
+      assert.equal((await remote.readMetadata()).metadata.title, 'Test');
+    });
+  }
+
+  test('decoded streams exceeding the file budget are cancelled even with a small Content-Length', async () => {
+    let cancelled = false;
+    let pulls = 0;
+    const fallback = mockFetch(looseRoutes);
+    const fetch: FetchLike = async (url, init) => {
+      if (!url.endsWith('/README.md')) return fallback(url, init);
+      return new Response(
+        new ReadableStream<Uint8Array>({
+          pull(controller) {
+            pulls++;
+            controller.enqueue(pulls === 1 ? enc('# Hello\n') : enc('!'));
+          },
+          cancel() {
+            cancelled = true;
+          },
+        }),
+        { headers: { 'content-length': '1', 'content-encoding': 'gzip' } },
+      );
+    };
+    const remote = await openPublication(['https://loose.example/archive.json'], pub.digest, { fetch });
+    await assert.rejects(remote.readFile('README.md'), /budget\.response_bytes/);
+    assert.ok(cancelled);
+  });
+
+  test('decoded files with the correct size still require the signed hash', async () => {
+    const fallback = mockFetch(looseRoutes);
+    const fetch: FetchLike = async (url, init) => {
+      if (!url.endsWith('/README.md')) return fallback(url, init);
+      return new Response(enc('# Evil!\n').slice(), { headers: { 'content-length': '1', 'content-encoding': 'gzip' } });
+    };
+    const remote = await openPublication(['https://loose.example/archive.json'], pub.digest, { fetch });
+    await assert.rejects(remote.readFile('README.md'), /hash/);
   });
 
   test('servers without range support or with hidden Content-Range fall back to a bounded download', async () => {
