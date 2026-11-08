@@ -1,0 +1,49 @@
+{
+  "name": "@sci/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Runtime-agnostic TypeScript implementation of the SCI protocol 0.1",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./bundle": {
+      "types": "./dist/sci.bundle.d.ts",
+      "import": "./dist/sci.bundle.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "clean": "node -e \"import('node:fs').then(f=>{for(const d of ['dist','build'])f.rmSync(d,{recursive:true,force:true})})\"",
+    "build": "npm run clean && tsc -p tsconfig.build.json && node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.tests.json",
+    "lint": "biome check src tests scripts",
+    "test": "node --test --disable-warning=ExperimentalWarning tests/*.test.ts",
+    "test:deno": "deno test --allow-read tests/",
+    "smoke": "node scripts/smoke-bundle.mjs && deno run --allow-read scripts/smoke-bundle.mjs",
+    "conformance": "python3 ../protocol/test-vectors/tools/run_adapter.py -- node build/adapter.mjs",
+    "check": "npm run typecheck && npm run lint && npm run build && npm test && npm run test:deno && npm run smoke && npm run conformance"
+  },
+  "dependencies": {
+    "@noble/curves": "2.4.0",
+    "@noble/hashes": "2.4.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.3",
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "6.0.3"
+  }
+}
