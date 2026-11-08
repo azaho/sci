@@ -64,5 +64,6 @@ jobs:
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
         with:
           python-version: '3.12'
+          enable-cache: false
       - name: Install from this commit in clean environments
         run: cli/tests/install_check.sh "${{ github.server_url }}/${{ github.repository }}" "${{ github.event.pull_request.head.sha || github.sha }}"
