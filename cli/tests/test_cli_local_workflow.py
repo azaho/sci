@@ -306,3 +306,26 @@ def test_interactive_revoke_requires_confirmation(cli: Cli) -> None:
     cli.stdin = "revoke\n"
     assert cli("revoke", "--output", str(cli.cwd / "rev")).code == 0
     assert (cli.cwd / "rev" / "revocation.json").exists()
+
+
+def test_display_files_must_be_baseline_pngs(cli: Cli, tmp_path: Path) -> None:
+    draft = write_draft(tmp_path / "draft", license=True)
+    figure = draft / "files" / "fig.png"
+    metadata = json.loads((draft / "sci.json").read_text())
+
+    good = figure.read_bytes()
+    figure.write_bytes(good[:-1] + bytes([good[-1] ^ 1]))
+    run = cli("check", str(draft), "--json")
+    assert run.code == 0 and run.result["baseline"]["status"] == "eligible"
+    assert "does not decode" in run.json["warnings"][0]
+
+    figure.write_bytes(good)
+    (draft / "files" / "fig.jpg").write_bytes(b"\xff\xd8\xff\xe0")
+    metadata["display"] = [{"path": "files/fig.jpg"}]
+    (draft / "sci.json").write_text(json.dumps(metadata))
+    run = cli("check", str(draft), "--json")
+    assert run.code == 6 and run.json["errors"][0]["code"] == "baseline_display_file"
+    assert run.result["baseline"]["reasons"][0]["file"] == "files/fig.jpg"
+    assert cli("keygen", "--json").code == 0
+    run = cli("sign", str(draft), "--no-timestamp", "--json")
+    assert run.code == 6 and run.json["errors"][0]["code"] == "baseline_refused"

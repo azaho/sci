@@ -210,8 +210,9 @@ def test_evaluate_baseline_limits() -> None:
         metadata_bytes=65537,
         readme_bytes=2**20 + 1,
         license_sha256="0" * 64,
+        display_problems={"files/a.jpg": "the extension is not .png"},
     )
-    assert not report.eligible and len(report.reasons) == 7
+    assert not report.eligible and len(report.reasons) == 8
 
 
 def test_writer_matches_independent_reader() -> None:

@@ -4,6 +4,7 @@ import {
   blobSource,
   bytesSource,
   checkZipBundle,
+  fromHex,
   locateZipEntry,
   parseMetadata,
   readZipDirectory,
@@ -70,9 +71,13 @@ describe('canonical ZIP (§2.2)', () => {
   });
 });
 
+const TINY_PNG = fromHex(
+  '89504e470d0a1a0a0000000d49484452000000010000000108000000003a7e9b550000000a4944415478da6360000000020001e527defc0000000049454e44ae426082',
+) as Uint8Array;
+
 describe('complete bundle checks (§6.4) and baseline (§2.1)', () => {
   test('baseline publication via ZIP, Blob, and loose files', async () => {
-    const pub = makePublication({ LICENSE: await baselineLicense(), 'files/fig.png': new Uint8Array([137, 80, 78, 71]) }, undefined, {
+    const pub = makePublication({ LICENSE: await baselineLicense(), 'files/fig.png': TINY_PNG }, undefined, {
       title: 'T',
       abstract: 'A\nB',
       display: [{ path: 'files/fig.png', caption: 'Figure' }],
@@ -81,7 +86,7 @@ describe('complete bundle checks (§6.4) and baseline (§2.1)', () => {
     const z = await verifyZipBundle(pub.zip, { expectedId: pub.id, retain: (p) => p === 'files/fig.png' });
     assert.equal(z.baseline.baseline, true);
     assert.equal(z.zipSha256, sha256Hex(pub.zip));
-    assert.deepEqual(z.files.get('files/fig.png'), new Uint8Array([137, 80, 78, 71]));
+    assert.deepEqual(z.files.get('files/fig.png'), TINY_PNG);
     assert.equal(z.metadata.citations?.[0]?.targetKey, 'doi:10.1000/xyz');
     const b = await verifyZipBundle(blobSource(new Blob([pub.zip.slice()])), { expectedId: pub.digest });
     assert.equal(b.manifest.id, pub.id);
@@ -100,6 +105,18 @@ describe('complete bundle checks (§6.4) and baseline (§2.1)', () => {
     const r = await verifyZipBundle(pub.zip);
     assert.equal(r.baseline.baseline, false);
     assert.deepEqual(r.baseline.unmet, ['license']);
+  });
+
+  test('display files must pass the PNG structure checks, split across any chunk size', async () => {
+    const license = await baselineLicense();
+    const verdict = async (name: string, bytes: Uint8Array, chunkBytes = 3) => {
+      const pub = makePublication({ LICENSE: license, [name]: bytes }, undefined, { title: 'T', abstract: 'A', display: [{ path: name }] });
+      return (await verifyZipBundle(pub.zip, { budget: { chunkBytes } })).baseline.unmet;
+    };
+    assert.deepEqual(await verdict('files/f.png', TINY_PNG), []);
+    assert.deepEqual(await verdict('files/f.PNG', TINY_PNG, 65_536), []);
+    assert.deepEqual(await verdict('files/f.jpg', TINY_PNG), ['display_files']);
+    assert.deepEqual(await verdict('files/f.png', TINY_PNG.subarray(0, TINY_PNG.length - 1)), ['display_files']);
   });
 
   test('inventory, integrity, and identity failures', async () => {

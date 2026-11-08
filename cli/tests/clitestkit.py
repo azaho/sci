@@ -24,6 +24,11 @@ from pysci.baseline import baseline_license_bytes
 from sci.clients import http
 from sci.main import main
 
+TINY_PNG = bytes.fromhex(
+    "89504e470d0a1a0a0000000d49484452000000010000000108000000003a7e9b55"
+    "0000000a4944415478da6360000000020001e527defc0000000049454e44ae426082"
+)
+
 CLI_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = CLI_ROOT.parent
 TEST_KEYS = REPO_ROOT / "protocol" / "test-vectors" / "test-keys"
@@ -119,7 +124,7 @@ def write_draft(
     }
     (directory / "sci.json").write_text(json.dumps(metadata))
     (directory / "README.md").write_text(readme)
-    (directory / "files" / "fig.png").write_bytes(b"\x89PNG\r\n\x1a\nnot really a png\x00\x01")
+    (directory / "files" / "fig.png").write_bytes(TINY_PNG)
     (directory / "files" / "data.csv").write_text("a,b\n1,2\n" * 50)
     if license:
         (directory / "LICENSE").write_bytes(baseline_license_bytes())

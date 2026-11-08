@@ -41,6 +41,7 @@ from .manifest import (
 )
 from .metadata import Metadata, parse_metadata
 from .paths import path_sort_key
+from .png import PngStructure, display_problem, is_display_candidate
 from .source import ByteSource, FileSource, MemorySource, PathSource, as_source, iter_chunks
 from .text import TextFileValidator
 from .zipformat import (
@@ -204,6 +205,7 @@ class _PayloadChecks:
         if LICENSE_PATH in manifest.files:
             self.text[LICENSE_PATH] = TextFileValidator(file=LICENSE_PATH)
         self.license_sha256: str | None = None
+        self.png: dict[str, PngStructure] = {}
 
     def attach(self, path: str, digest: _FileDigest) -> None:
         if path == METADATA_PATH:
@@ -215,6 +217,19 @@ class _PayloadChecks:
             digest.sinks.append(self.metadata_chunks.append)
         elif path in self.text:
             digest.sinks.append(self.text[path].feed)
+        elif is_display_candidate(path, self.manifest.files[path].bytes):
+            # Display paths are known only after sci.json, which can follow the files.
+            self.png[path] = PngStructure()
+            digest.sinks.append(self.png[path].feed)
+
+    def display_problems(self, metadata: Metadata) -> dict[str, str]:
+        problems: dict[str, str] = {}
+        for item in metadata.display:
+            size = self.manifest.files[item.path].bytes
+            problem = display_problem(item.path, size, self.png.get(item.path))
+            if problem is not None:
+                problems[item.path] = problem
+        return problems
 
     def finish(self, issues: IssueCollector) -> Metadata | None:
         for validator in self.text.values():
@@ -274,6 +289,7 @@ def _finish(
         metadata_bytes=manifest.files[METADATA_PATH].bytes,
         readme_bytes=manifest.files[README_PATH].bytes,
         license_sha256=None if license_entry is None else license_entry.sha256,
+        display_problems=payload.display_problems(metadata),
     )
     return VerificationResult(
         outcome=Outcome.VALID,

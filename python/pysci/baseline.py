@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from functools import cache
 from importlib import resources
@@ -76,6 +77,7 @@ def evaluate_baseline(
     metadata_bytes: int,
     readme_bytes: int,
     license_sha256: str | None,
+    display_problems: Mapping[str, str],
     limits: BaselineLimits = BASELINE_LIMITS,
 ) -> BaselineReport:
     """Evaluate §2.1 for an otherwise valid publication (or a draft plan).
@@ -83,6 +85,8 @@ def evaluate_baseline(
     ``file_count`` counts the manifest ``files`` entries (metadata, README, and
     LICENSE included; manifest and signature excluded). ``license_sha256`` is
     the SHA-256 of the ``LICENSE`` bytes, or None if there is no LICENSE.
+    ``display_problems`` maps each display file outside the §2.1 display
+    requirements to the reason (see :func:`pysci.png.display_problem`).
     """
     reasons: list[Issue] = []
 
@@ -105,6 +109,17 @@ def evaluate_baseline(
     )
     check(metadata_bytes, limits.metadata_bytes, "baseline_metadata_bytes", "bytes of sci.json")
     check(readme_bytes, limits.readme_bytes, "baseline_readme_bytes", "bytes of README.md")
+    for path, problem in display_problems.items():
+        reasons.append(
+            Issue(
+                "baseline_display_file",
+                "display files must be static PNGs named .png: at most 2 MiB, 8,000,000 pixels, "
+                "and 8,192 pixels per side; convert the file or remove it from display",
+                section="2.1",
+                file=path,
+                observed=problem,
+            )
+        )
     if license_sha256 is None:
         reasons.append(
             Issue(

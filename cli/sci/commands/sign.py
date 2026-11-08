@@ -25,7 +25,7 @@ from ..storage.files import recover_replacements, replace_together, temp_names
 from ..storage.inputs import SignedInput
 from ..storage.keys import require_outside
 from ..storage.local_publish import publish_to_folder, remember_folder
-from .check import describe, draft_report_json
+from .check import describe, draft_report_json, warn_display
 from .common import KEY_ARG_HELP, signing_key, trust
 
 
@@ -96,6 +96,7 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
         result.warn(f"restored files from an interrupted signing operation: {restored}")
     report = check_draft(draft, ignore=temp_names(draft))
     result.data = {"path": str(draft), "check": draft_report_json(report)}
+    warn_display(result, report)
     if report.issues:
         describe(result, report)
         result.exit_code = exit_for_outcome(report.outcome)

@@ -118,6 +118,7 @@ export {
   validateMetadata,
 } from './metadata.ts';
 export { checkManifestPaths, checkPathSyntax, isValidManifestPath } from './paths.ts';
+export { DISPLAY_LIMITS, isDisplayCandidate, PngStructure } from './png.ts';
 export {
   type AdmissionDecision,
   applyIndexEvent,

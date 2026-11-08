@@ -56,6 +56,12 @@ def describe(result: Result, report: DraftReport) -> None:
         result.say("note: manifest.json/manifest.json.sig present and ignored")
 
 
+def warn_display(result: Result, report: DraftReport) -> None:
+    """Report display images that may not render; they do not change the exit code."""
+    for issue in report.display_warnings:
+        result.warn(f"{issue.file}: display image does not decode: {issue.observed}")
+
+
 def run(args: argparse.Namespace, ctx: Context) -> Result:
     draft = ctx.resolve(args.dir)
     if not draft.is_dir():
@@ -64,6 +70,7 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
     result = Result("check")
     result.data = {"path": str(draft), **draft_report_json(report)}
     describe(result, report)
+    warn_display(result, report)
     if report.issues:
         result.exit_code = exit_for_outcome(report.outcome)
         result.errors.extend(issue_record(i) for i in report.issues)

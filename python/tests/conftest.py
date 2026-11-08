@@ -10,6 +10,11 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from pysci.baseline import baseline_license_bytes
 
+TINY_PNG = bytes.fromhex(
+    "89504e470d0a1a0a0000000d49484452000000010000000108000000003a7e9b55"
+    "0000000a4944415478da6360000000020001e527defc0000000049454e44ae426082"
+)
+
 PYTHON_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PYTHON_ROOT.parent
 CORPUS = REPO_ROOT / "protocol" / "test-vectors" / "0.1"
@@ -45,7 +50,7 @@ def make_draft(**overrides: bytes) -> dict[str, bytes]:
         ).encode(),
         "README.md": b"# Hello\n\nBody text.\n",
         "LICENSE": baseline_license_bytes(),
-        "files/fig.png": b"\x89PNG not really",
+        "files/fig.png": TINY_PNG,
         "files/data/table.csv": b"a,b\n1,2\n",
     }
     for key, value in overrides.items():

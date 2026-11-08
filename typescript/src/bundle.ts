@@ -8,6 +8,7 @@ import { type CheckResult, captureAsync, check, fail, incomplete } from './error
 import { Crc32, createSha256, type IncrementalHash, sha256 } from './hash.ts';
 import { type Manifest, verifyManifest, zipSizeOf } from './manifest.ts';
 import { type Metadata, parseMetadata } from './metadata.ts';
+import { isDisplayCandidate, PngStructure } from './png.ts';
 import { type ByteSource, bytesSource } from './source.ts';
 import { checkTextFile } from './text.ts';
 import {
@@ -37,7 +38,16 @@ export const BASELINE_LIMITS = Object.freeze({
 export interface BaselineReport {
   readonly baseline: boolean;
   /** Names of the §2.1 requirements that are not met. */
-  readonly unmet: readonly ('zip_bytes' | 'files' | 'display_items' | 'manifest_bytes' | 'metadata_bytes' | 'readme_bytes' | 'license')[];
+  readonly unmet: readonly (
+    | 'zip_bytes'
+    | 'files'
+    | 'display_items'
+    | 'manifest_bytes'
+    | 'metadata_bytes'
+    | 'readme_bytes'
+    | 'display_files'
+    | 'license'
+  )[];
 }
 
 export function evaluateBaseline(input: {
@@ -48,6 +58,8 @@ export function evaluateBaseline(input: {
   readonly metadataBytes: number;
   readonly readmeBytes: number;
   readonly licenseSha256: string | undefined;
+  /** Whether every display file meets the §2.1 display requirements. */
+  readonly displayFilesOk: boolean;
 }): BaselineReport {
   const unmet: BaselineReport['unmet'][number][] = [];
   if (input.zipBytes > BASELINE_LIMITS.zipBytes) unmet.push('zip_bytes');
@@ -56,6 +68,7 @@ export function evaluateBaseline(input: {
   if (input.manifestBytes > BASELINE_LIMITS.manifestBytes) unmet.push('manifest_bytes');
   if (input.metadataBytes > BASELINE_LIMITS.metadataBytes) unmet.push('metadata_bytes');
   if (input.readmeBytes > BASELINE_LIMITS.readmeBytes) unmet.push('readme_bytes');
+  if (!input.displayFilesOk) unmet.push('display_files');
   if (input.licenseSha256 === undefined || !APPROVED_LICENSE_SHA256.includes(input.licenseSha256)) unmet.push('license');
   return { baseline: unmet.length === 0, unmet };
 }
@@ -88,10 +101,19 @@ export interface BundleOptions {
 
 const TEXT_FILES = new Set(['sci.json', 'README.md', 'LICENSE']);
 
+/** Display paths are known only after sci.json, which can follow the files: check every candidate. */
+function pngSink(png: Map<string, PngStructure>, path: string, bytes: number): PngStructure[] {
+  if (!isDisplayCandidate(path, bytes)) return [];
+  const structure = new PngStructure();
+  png.set(path, structure);
+  return [structure];
+}
+
 function finishMetadata(
   manifest: Manifest,
   signature: Uint8Array,
   retained: Map<string, Uint8Array>,
+  png: ReadonlyMap<string, PngStructure>,
   budget: Budget,
   zipSha256: string | undefined,
 ): VerifiedBundle {
@@ -116,6 +138,7 @@ function finishMetadata(
     metadataBytes: metadataBytes.length,
     readmeBytes: readmeBytes.length,
     licenseSha256: licenseBytes ? toHex(sha256(licenseBytes)) : undefined,
+    displayFilesOk: (metadata.display ?? []).every((item) => png.get(item.path)?.ok === true),
   });
   return {
     manifest,
@@ -152,7 +175,7 @@ export async function verifyZipBundle(input: ByteSource | Uint8Array, options: B
   if (m.size > budget.maxManifestBytes) incomplete('budget.manifest_bytes', '§6', 'manifest.json exceeds the local size budget');
   check(s.size === 64, 'signature.length', '§3', 'manifest.json.sig must be exactly 64 bytes', { observed: s.size });
   const zipHash = createSha256();
-  const collect = async (entry: typeof m, hashers: IncrementalHash[] = []): Promise<Uint8Array> => {
+  const collect = async (entry: typeof m, hashers: Pick<IncrementalHash, 'update'>[] = []): Promise<Uint8Array> => {
     const out = new Uint8Array(entry.size);
     let o = 0;
     await streamZipEntry(source, entry, {
@@ -171,6 +194,7 @@ export async function verifyZipBundle(input: ByteSource | Uint8Array, options: B
   const manifest = verifyManifest(manifestBytes, signature, { expectedId: options.expectedId, budget });
   checkZipInventory(dir.entries, manifest.files.keys());
   const retained = new Map<string, Uint8Array>();
+  const png = new Map<string, PngStructure>();
   for (const entry of dir.entries.slice(2)) {
     const listed = manifest.files.get(entry.name);
     if (!listed) fail('bundle.unlisted_file', '§6.4', 'Unlisted entry', { path: entry.name });
@@ -184,10 +208,11 @@ export async function verifyZipBundle(input: ByteSource | Uint8Array, options: B
       if (entry.size > limit) incomplete('budget.text_bytes', '§6', `${entry.name} exceeds the local budget`, { path: entry.name });
     }
     const h = createSha256();
+    const sinks = [h, ...pngSink(png, entry.name, listed.bytes)];
     if (keep) {
-      retained.set(entry.name, await collect(entry, [h]));
+      retained.set(entry.name, await collect(entry, sinks));
     } else {
-      await streamZipEntry(source, entry, { chunkBytes: budget.chunkBytes, hashers: [h], archiveHashers: [zipHash] });
+      await streamZipEntry(source, entry, { chunkBytes: budget.chunkBytes, hashers: sinks, archiveHashers: [zipHash] });
     }
     check(toHex(h.digest()) === listed.sha256, 'file.hash_mismatch', '§6.2', 'Entry SHA-256 differs from the manifest', {
       path: entry.name,
@@ -195,7 +220,7 @@ export async function verifyZipBundle(input: ByteSource | Uint8Array, options: B
   }
   zipHash.update(dir.centralBytes);
   zipHash.update(dir.eocdBytes);
-  const result = finishMetadata(manifest, signature, retained, budget, toHex(zipHash.digest()));
+  const result = finishMetadata(manifest, signature, retained, png, budget, toHex(zipHash.digest()));
   check(result.zipBytes === source.size, 'zip.size_formula', '§2.1', 'ZIP size differs from the §2.1 formula');
   return result;
 }
@@ -241,6 +266,7 @@ export async function verifyLooseBundle(files: LooseFiles, options: BundleOption
     check(manifest.files.has(path), 'bundle.unlisted_file', '§3, §6.4', 'Bundle contains a file not listed in the manifest', { path });
   }
   const retained = new Map<string, Uint8Array>();
+  const png = new Map<string, PngStructure>();
   for (const [path, entry] of manifest.files) {
     const src = files.get(path);
     if (!src) fail('bundle.missing_file', '§3, §6.4', 'Listed file is missing', { path });
@@ -252,12 +278,15 @@ export async function verifyLooseBundle(files: LooseFiles, options: BundleOption
       if (size > limit) incomplete('budget.text_bytes', '§6', `${path} exceeds the local budget`, { path });
     }
     const h = createSha256();
+    const sinks = [h, ...pngSink(png, path, entry.bytes)];
     if (keep) {
       const data = await loadSmall(src);
-      h.update(data);
+      for (const sink of sinks) sink.update(data);
       retained.set(path, data);
     } else {
-      await streamSource(src, budget.chunkBytes, (c) => h.update(c));
+      await streamSource(src, budget.chunkBytes, (c) => {
+        for (const sink of sinks) sink.update(c);
+      });
     }
     check(toHex(h.digest()) === entry.sha256, 'file.hash_mismatch', '§6.2', 'File SHA-256 differs from the manifest', { path });
   }
@@ -265,7 +294,7 @@ export async function verifyLooseBundle(files: LooseFiles, options: BundleOption
   if (options.computeZipSha256 ?? true) {
     zipSha256 = await canonicalZipSha256(manifestBytes, signature, manifest, files, budget.chunkBytes);
   }
-  return finishMetadata(manifest, signature, retained, budget, zipSha256);
+  return finishMetadata(manifest, signature, retained, png, budget, zipSha256);
 }
 
 /** Stream-hash the canonical ZIP built from loose files without materializing it. */

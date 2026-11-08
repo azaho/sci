@@ -35,6 +35,7 @@ from .manifest import (
 )
 from .metadata import Metadata, parse_metadata
 from .paths import check_paths
+from .png import PngStructure, display_problem, is_display_candidate, png_decode_problem
 from .source import ByteSource, PathSource, as_source, iter_chunks
 from .text import TextFileValidator
 from .zipformat import canonical_zip_size
@@ -75,6 +76,8 @@ class DraftReport:
     zip_bytes: int | None
     baseline: BaselineReport | None
     signed: bool = False
+    display_warnings: tuple[Issue, ...] = ()
+    """Display images that pass the baseline checks but do not decode (§6.2)."""
 
     @property
     def valid(self) -> bool:
@@ -242,6 +245,7 @@ def _check(sources: dict[str, ByteSource], collector: IssueCollector, signed: bo
                     break
             collector.extend(validator.finish())
     sizes = {path: source.size for path, source in sources.items()}
+    display_problems, display_warnings = _check_display(metadata, sources)
     manifest_size = zip_size = None
     baseline = None
     planned = serialize_manifest(
@@ -266,10 +270,49 @@ def _check(sources: dict[str, ByteSource], collector: IssueCollector, signed: bo
             metadata_bytes=sizes.get(METADATA_PATH, 0),
             readme_bytes=sizes.get(README_PATH, 0),
             license_sha256=license_hash,
+            display_problems=display_problems,
         )
     return DraftReport(
-        tuple(collector.issues), sizes, metadata, manifest_size, zip_size, baseline, signed
+        tuple(collector.issues),
+        sizes,
+        metadata,
+        manifest_size,
+        zip_size,
+        baseline,
+        signed,
+        display_warnings,
     )
+
+
+def _check_display(
+    metadata: Metadata | None, sources: Mapping[str, ByteSource]
+) -> tuple[dict[str, str], tuple[Issue, ...]]:
+    """Baseline problems (§2.1) and decode warnings (§6.2) for the display files."""
+    problems: dict[str, str] = {}
+    warnings: list[Issue] = []
+    for item in metadata.display if metadata else ():
+        source = sources[item.path]
+        structure = None
+        if is_display_candidate(item.path, source.size):
+            structure = PngStructure()
+            for chunk in iter_chunks(source):
+                structure.feed(chunk)
+        problem = display_problem(item.path, source.size, structure)
+        if problem is not None:
+            problems[item.path] = problem
+            continue
+        reason = png_decode_problem(source.read_at(0, source.size))
+        if reason is not None:
+            warnings.append(
+                Issue(
+                    "display_undecodable",
+                    "publishing tools should check that display images decode",
+                    section="6.2",
+                    file=item.path,
+                    observed=reason,
+                )
+            )
+    return problems, tuple(warnings)
 
 
 def sign_draft(

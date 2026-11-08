@@ -207,7 +207,7 @@ export function checkLocalHeader(header: Uint8Array, entry: ZipEntry): void {
 export interface StreamEntryOptions {
   readonly chunkBytes?: number;
   /** Additional hashers fed with the entry's data. */
-  readonly hashers?: readonly IncrementalHash[];
+  readonly hashers?: readonly Pick<IncrementalHash, 'update'>[];
   /** Hashers fed with the local header and data, in archive order (whole-ZIP hashing). */
   readonly archiveHashers?: readonly IncrementalHash[];
   /** Receive data chunks (e.g. to retain verified bytes). */

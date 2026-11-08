@@ -44,8 +44,10 @@ write a publication (complete rules: `sci spec --section 2` and `--section 4`):
   Required: title (max 200 characters) and abstract (max 2,500). Optional:
   categories (max 3 {scheme, code}; arxiv codes such as cs.LG, q-bio.NC),
   keywords (max 20, each max 64 characters), display (max 3 paths under
-  files/ shown first; readers render PNG and JPEG; caption max 2,000), and
-  citations (max 1,000). Omit unused fields; null and other fields are rejected.
+  files/ shown first; caption max 2,000), and citations (max 1,000). Display
+  files must be static .png images: max 2 MiB, 8,000,000 pixels, and 8,192
+  pixels per side (other formats can stay in files/ but not in display).
+  Omit unused fields; null and other fields are rejected.
   Line breaks and tabs are allowed only in abstract, citation reason, README.md,
   and LICENSE. File paths use only ASCII letters, digits, ".", "_", and "-"
   per component (no spaces), max 255 bytes.
