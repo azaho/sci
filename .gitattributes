@@ -1,0 +1,4 @@
+*.bin binary
+*.tsr binary
+*.sig binary
+*.zip binary
