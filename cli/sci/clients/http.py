@@ -143,6 +143,10 @@ class Deadline:
     def expired(self) -> bool:
         return self.remaining() <= 0
 
+    def extend(self, seconds: float) -> None:
+        """Move the deadline later, for time spent in a wait that is not the operation's."""
+        self._end += seconds
+
     def check(self, what: str) -> float:
         left = self.remaining()
         if left <= 0:

@@ -149,12 +149,12 @@ Reader files are the manifest, signature, metadata, README, any license, and fil
 
 Publish `sci/archive.json` under [SCI protocol §8.2](../protocol/README.md#82-archive-descriptor). Maintain a sorted `sci/publications.txt` list containing completed uploads. Preserve existing publications and unrelated files. Batch repository changes into commits; merge concurrent additions without force-pushing.
 
-For GitHub, upload `<id>.zip` to release `sci-<id>` with a matching tag. Keep the release as a draft until its asset is complete; publish it without marking it as latest. Descriptor:
+For GitHub, upload `<id>.zip` as an asset of the shared release `sci-<id2>`, with a matching tag, where `<id2>` is the first two characters of the ID. Do not mark these releases as latest. An asset cannot be downloaded until its upload completes. Commit reader files in batches, after their ZIPs are uploaded. Wait when GitHub reports a rate limit. Descriptor:
 
 ```json
 {
   "schema": "sci-archive/0.1",
-  "bundle_url": "https://github.com/OWNER/REPO/releases/download/sci-{id}/{id}.zip",
+  "bundle_url": "https://github.com/OWNER/REPO/releases/download/sci-{id2}/{id}.zip",
   "entry_url": "https://raw.githubusercontent.com/OWNER/REPO/main/sci/publications/{id2}/{id}/{+path}",
   "list_url": "https://raw.githubusercontent.com/OWNER/REPO/main/sci/publications.txt"
 }

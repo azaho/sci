@@ -156,7 +156,13 @@ def _hosted(
         archive: GitHubArchive | HuggingFaceArchive
         if destination.kind == "github":
             token = github_token(ctx.env, ctx.runner)
-            archive = GitHubArchive(ctx.http, destination.owner, destination.repo, token)
+            archive = GitHubArchive(
+                ctx.http,
+                destination.owner,
+                destination.repo,
+                token,
+                notice=lambda message: print(message, file=ctx.stderr, flush=True),
+            )
         else:
             token = huggingface_token(ctx.env)
             archive = HuggingFaceArchive(ctx.http, destination.owner, destination.repo, token)
@@ -233,8 +239,9 @@ conflicting bytes rejected. Hosted archives: the repository must be public
 (manifest, signature, sci.json, README, LICENSE, display files, timestamp
 sidecar) go to sci/publications/<id2>/<id>/ on main; sci/archive.json and a
 sorted sci/publications.txt are maintained in batched commits without
-force-pushing. GitHub stores <id>.zip in release sci-<id> (draft until the
-asset is complete, never marked latest); Hugging Face stores
+force-pushing. GitHub stores <id>.zip as an asset of the shared release
+sci-<id2>, named for the first two ID characters (never marked latest);
+Hugging Face stores
 bundles/<id2>/<id>.zip via LFS. Retries compare remote digests and reuse
 matching content. Credentials: `gh auth login` or GH_TOKEN/GITHUB_TOKEN;
 `hf auth login` or HF_TOKEN.
