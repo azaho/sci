@@ -75,8 +75,8 @@ Display files in baseline publications MUST meet these requirements:
 | --- | --- | --- |
 | `.png` | 2 MiB (2,097,152 bytes) | Valid static PNG; at most 8,000,000 pixels; width and height each at most 8,192 pixels. |
 
-Compare the extension without regard to ASCII case. Use the file's full byte count and the width and height in its `IHDR` chunk.
-The file MUST conform to [PNG, Third Edition](https://www.w3.org/TR/2025/REC-png-3-20250624/). The animation chunks `acTL`, `fcTL`, and `fdAT` MUST NOT occur, including in a single-frame image.
+Compare the extension without regard to ASCII case.
+The file MUST be a PNG image as defined in [PNG, Third Edition](https://www.w3.org/TR/2025/REC-png-3-20250624/). The chunks `acTL`, `fcTL`, and `fdAT` MUST NOT occur.
 
 For a publication distributed as loose files, use the size of the exact ZIP defined in section 2.2. Tools MAY calculate this size without constructing the ZIP:
 ```text
@@ -381,7 +381,7 @@ Before using a file as part of a publication, readers, archivers, and indexers M
 - Check that the SHA-256 of the retrieved bytes equals that entry's `sha256` value.
 
 Complete these checks before decoding or rendering the file.
-Before rendering a PNG, readers MUST also validate its contents.
+Publishing tools SHOULD check that display images decode. Readers SHOULD limit memory and processing time when decoding display images.
 
 ### 6.3 Metadata checks
 
