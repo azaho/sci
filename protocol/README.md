@@ -73,10 +73,9 @@ Display files in baseline publications MUST meet these requirements:
 
 | Extension | Maximum file size | Requirements |
 | --- | --- | --- |
-| `.png` | 2 MiB (2,097,152 bytes) | At most 8,000,000 pixels; width and height each from 1 to 8,192 pixels; structure as specified below. |
+| `.png` | 2 MiB (2,097,152 bytes) | At most 8,000,000 pixels; width and height each from 1 to 8,192 pixels.<br><br>For baseline checks, use the signature, chunk layout, and `IHDR` dimensions defined in [PNG, Third Edition](https://www.w3.org/TR/2025/REC-png-3-20250624/). The file MUST start with the PNG signature, followed by one `IHDR` chunk with 13 data bytes. Complete chunks MUST account for all bytes after the signature and end with one empty `IEND` chunk. No other `IHDR` or `IEND` chunk may occur. The chunks `acTL`, `fcTL`, and `fdAT` MUST NOT occur. Baseline checks do not require CRC verification, image decoding, or other PNG conformance checks. |
 
 Compare the extension without regard to ASCII case.
-For baseline checks, use the signature, chunk layout, and `IHDR` dimensions defined in [PNG, Third Edition](https://www.w3.org/TR/2025/REC-png-3-20250624/). The file MUST start with the PNG signature, followed by one `IHDR` chunk with 13 data bytes. Complete chunks MUST account for all bytes after the signature and end with one empty `IEND` chunk. No other `IHDR` or `IEND` chunk may occur. The chunks `acTL`, `fcTL`, and `fdAT` MUST NOT occur. Baseline checks do not require CRC verification, image decoding, or other PNG conformance checks.
 
 For a publication distributed as loose files, use the size of the exact ZIP defined in section 2.2. Tools MAY calculate this size without constructing the ZIP:
 ```text
