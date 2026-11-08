@@ -188,7 +188,13 @@ def test_local_search_cache_and_candidates(cli: Cli) -> None:
     assert run.result["groups"][0]["results"] == []
     run = cli("search", "--category", "arxiv", "q-bio.NC", "--in", str(campaign), "--json")
     assert len(run.result["groups"][0]["results"]) == 3
-    assert cli("search", "--in", str(campaign)).code == 2  # no query, no filter
+    listing = cli("search", "--in", str(campaign), "--limit", "2", "--json")
+    assert listing.code == 0 and len(listing.result["groups"][0]["results"]) == 2
+    cursor = listing.result["next_cursor"]
+    rest = cli("search", "--in", str(campaign), "--cursor", cursor, "--json")
+    assert len(rest.result["groups"][0]["results"]) == 1
+    run_index = cli("search", "--in", "https://index.example", "--json")
+    assert run_index.code == 2 and run_index.json["errors"][0]["code"] == "missing_query"
     assert cli("search", "x", "--domain", "lab.example", "--in", str(campaign)).code == 2
     # removed bundle disappears; corrupt cache is rebuilt
     victim = campaign / f"{sorted(ids)[0].removeprefix('sha256:')}.zip"

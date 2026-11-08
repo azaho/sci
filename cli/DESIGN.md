@@ -38,7 +38,7 @@ Repeat `--in` to combine sources:
 | `@local` | Known folders at command start |
 | `@index` | Configured index |
 
-Without `--in`, search the current folder offline. Deduplicate resolved sources. Reject an unconfigured `@index`. An archive without a catalog is not a search service; do not enumerate or download it to build an index.
+Without `--in`, search the current folder offline. Without a query or filter, list local folders; index sources require one. Deduplicate resolved sources. Reject an unconfigured `@index`. An archive without a catalog is not a search service; do not enumerate or download it to build an index.
 
 ```sh
 sci search "neural decoding" --in ./campaign-a --in ./campaign-b
