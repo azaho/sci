@@ -2,18 +2,8 @@ name: Test vectors
 
 on:
   pull_request:
-    paths:
-      - 'protocol/test-vectors/**'
-      - 'protocol/README.md'
-      - 'protocol/sci-baseline-LICENSE.txt'
-      - '.github/workflows/test-vectors.yml'
   push:
     branches: [main]
-    paths:
-      - 'protocol/test-vectors/**'
-      - 'protocol/README.md'
-      - 'protocol/sci-baseline-LICENSE.txt'
-      - '.github/workflows/test-vectors.yml'
   workflow_dispatch:
 
 permissions:

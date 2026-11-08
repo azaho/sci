@@ -14,7 +14,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  python:
+  components:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      python: ${{ steps.detect.outputs.python }}
+      typescript: ${{ steps.detect.outputs.typescript }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - id: detect
+        shell: bash
+        run: |
+          python=false
+          typescript=false
+          if [[ -e pyproject.toml || -d python || -d cli ]]; then python=true; fi
+          if [[ -d typescript ]]; then typescript=true; fi
+          echo "python=$python" >> "$GITHUB_OUTPUT"
+          echo "typescript=$typescript" >> "$GITHUB_OUTPUT"
+
+  python-tests:
+    needs: components
+    if: needs.components.outputs.python == 'true'
     name: Python library and CLI (${{ matrix.python }})
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -35,7 +55,9 @@ jobs:
         run: uv run pytest python/tests cli/tests
 
   typescript:
-    name: TypeScript library (Node and Deno)
+    name: typescript
+    needs: components
+    if: needs.components.outputs.typescript == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
@@ -56,6 +78,8 @@ jobs:
         run: npm run check
 
   install:
+    needs: components
+    if: needs.components.outputs.python == 'true'
     name: Documented Git installation
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -67,3 +91,27 @@ jobs:
           enable-cache: false
       - name: Install from this commit in clean environments
         run: cli/tests/install_check.sh "${{ github.server_url }}/${{ github.repository }}" "${{ github.event.pull_request.head.sha || github.sha }}"
+
+  # Keep this name stable: main requires the python check.
+  python:
+    name: python
+    needs: [components, python-tests, install]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      COMPONENTS_RESULT: ${{ needs.components.result }}
+      PYTHON_PRESENT: ${{ needs.components.outputs.python }}
+      TESTS_RESULT: ${{ needs.python-tests.result }}
+      INSTALL_RESULT: ${{ needs.install.result }}
+    steps:
+      - name: Check Python results
+        shell: bash
+        run: |
+          [[ "$COMPONENTS_RESULT" == success ]] || exit 1
+          if [[ "$PYTHON_PRESENT" == true ]]; then
+            [[ "$TESTS_RESULT" == success && "$INSTALL_RESULT" == success ]] || exit 1
+          else
+            [[ "$PYTHON_PRESENT" == false && "$TESTS_RESULT" == skipped && "$INSTALL_RESULT" == skipped ]] || exit 1
+            echo "Python library and CLI are absent; no Python implementation tests apply."
+          fi
