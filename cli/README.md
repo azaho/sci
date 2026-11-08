@@ -113,6 +113,14 @@ Timestamp proofs can be submitted to an index with
 with `sci revoke --output DIR` (permanent; keep it private until needed) and
 sent with `sci revoke --submit DIR`.
 
+## Format reference for agents
+
+`sci --help` summarizes the draft format: files, `sci.json` fields and limits,
+citation targets and relations. `sci spec` prints the complete protocol
+specification bundled with the installed CLI (`--section 4` for metadata,
+`--section 4.4` for citations, `--list` for the outline), so agents can read the
+authoritative rules offline.
+
 ## Output for agents
 
 Every command accepts `--json` and prints one object:

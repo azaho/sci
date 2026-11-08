@@ -62,8 +62,14 @@ def render(result: Result, *, as_json: bool, stdout: TextIO, stderr: TextIO) -> 
         stdout.write(line + "\n")
     for warning in result.warnings:
         stderr.write(f"warning: {warning}\n")
+    # Commands such as `check` list their issues in the report itself; do not
+    # print the same problem a second time on stderr.
+    shown = {line.strip() for line in result.lines}
     for record in result.errors:
-        stderr.write(f"error: {record}\n")
+        text = str(record)
+        if text in shown or text.removesuffix(" (retrying may help)") in shown:
+            continue
+        stderr.write(f"error: {text}\n")
     if result.exit_code != Exit.OK:
         meaning = EXIT_MEANINGS.get(int(result.exit_code), "")
         label = "partial result" if result.partial else "failed"

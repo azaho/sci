@@ -21,6 +21,7 @@ Draft, 2026-11-07. Commands implement the [SCI protocol](../protocol/README.md) 
 | `sci revoke [--output DIR \| --submit DIR]` | Create or submit a key revocation. |
 | `sci index [URL]` | Show or save the default index origin. |
 | `sci folders [add DIR \| remove DIR]` | Manage the folders selected by `@local`. |
+| `sci spec [--section N \| --list]` | Print the bundled protocol specification. |
 
 `--in` selects a read source. `--to` selects a publishing or submission destination. `--output` selects a local file or directory. Each command defines the values it accepts.
 
@@ -231,6 +232,12 @@ Pace requests to FreeTSA, together with Sciscape writes from the same machine, t
 List known folders and their availability. `add DIR` saves an existing folder's canonical absolute path. `remove DIR` forgets the path without deleting files.
 
 Remember folders after an explicit local search or a successful bundle write by `sign --output`, `pull --zip`, or `publish`. Keep the list in configuration so cache deletion does not erase it. Do not scan the computer for campaigns.
+
+### `sci spec [--section N | --list]`
+
+Print the complete protocol specification that the installed CLI implements, byte for byte. Bundle it with the library and check it against the hash pinned by the conformance corpus. `--section N` prints one numbered section with its subsections; `--list` prints section numbers and titles. This command works offline and lets agents read the authoritative rules without fetching them.
+
+Top-level help also summarizes the draft format (files, `sci.json` fields and limits, citation targets and relations) and points to the relevant sections.
 
 ## Shared behavior
 

@@ -26,6 +26,7 @@ DESIGN_COMMANDS = {
     "revoke",
     "index",
     "folders",
+    "spec",
 }
 
 
@@ -107,3 +108,26 @@ def test_package_metadata() -> None:
     assert project["license"] == "Apache-2.0"
     assert project["requires-python"] == ">=3.11"
     assert any(dep.startswith("pysci") for dep in project["dependencies"])
+
+
+def test_top_level_help_documents_the_draft_format() -> None:
+    import json
+
+    text = _help()
+    assert "write a publication" in text and "`sci spec --section 2` and `--section 4`" in text
+    for field in ("title", "abstract", "categories", "keywords", "display", "citations"):
+        assert f'"{field}"' in text
+    for relation in ("uses", "reviews", "supports", "challenges", "supersedes"):
+        assert relation in text
+    # The example is valid JSON once its placeholder digest is filled in.
+    lines = text.split("sci.json example:\n", 1)[1].splitlines()
+    end = next(i for i, line in enumerate(lines) if line == "    }")
+    example = "\n".join(lines[: end + 1]).replace("<64 hex digits>", "0" * 64)
+    assert set(json.loads(example)) == {
+        "title",
+        "abstract",
+        "categories",
+        "keywords",
+        "display",
+        "citations",
+    }

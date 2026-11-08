@@ -51,6 +51,7 @@ Both libraries must pass the same corpus cases. Report a subset pass as a subset
 - Keep command and HTTP entry points small; put shared operations in separate modules.
 - Put tests beside their component.
 - Pin dependencies through `uv.lock` and `typescript/package-lock.json`.
+- `python/pysci/data/sci-protocol.md` is the copy of `protocol/README.md` that `sci spec` prints. Update both together; a test checks that they match and that the hash equals the corpus pin.
 - Do not edit signed JSON or binary fixtures by hand. Regenerate them with `protocol/test-vectors/tools/generate.py` after reviewing a protocol change.
 - After protocol `0.1` is released, changes to accepted bytes or their meaning require a new schema version.
 

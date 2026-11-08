@@ -10,6 +10,7 @@ from . import (
     index,
     keygen,
     license,
+    protocol,
     publish,
     pull,
     read,
@@ -37,6 +38,7 @@ COMMANDS: tuple[Command, ...] = (
     revoke.COMMAND,
     index.COMMAND,
     folders.COMMAND,
+    protocol.COMMAND,
 )
 
 __all__ = ["COMMANDS"]

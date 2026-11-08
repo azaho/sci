@@ -20,6 +20,45 @@ from .errors import EXIT_MEANINGS, CliError, Exit
 from .output import Result, render
 from .spec import add_command
 
+DRAFT_GUIDE = """\
+write a publication (complete rules: `sci spec --section 2` and `--section 4`):
+  draft/
+    sci.json     required metadata, max 64 KiB
+    README.md    required main text, nonblank UTF-8 Markdown, max 1 MiB
+    LICENSE      written by `sci license` (CC BY 4.0 text/figures/data, MIT code)
+    files/       optional code, data, figures; max 1,000 files, ZIP max 64 MiB
+  sci.json example:
+    {
+      "title": "Spike timing predicts choice in mouse V1 across three datasets",
+      "abstract": "Question, approach, main finding, and main limitation.",
+      "categories": [{"scheme": "arxiv", "code": "q-bio.NC"}],
+      "keywords": ["spike timing", "decision making"],
+      "display": [{"path": "files/accuracy.png", "caption": "Accuracy by time bin."}],
+      "citations": [
+        {"target": "sci:sha256:<64 hex digits>", "relations": ["uses"],
+         "reason": "We reuse its preprocessing code."},
+        {"target": "doi:10.48550/arXiv.1706.03762"},
+        {"target": "https://example.org/data/release-3"}
+      ]
+    }
+  Required: title (max 200 characters) and abstract (max 2,500). Optional:
+  categories (max 3 {scheme, code}; arxiv codes such as cs.LG, q-bio.NC),
+  keywords (max 20, each max 64 characters), display (max 3 paths under
+  files/ shown first; readers render PNG and JPEG; caption max 2,000), and
+  citations (max 1,000). Omit unused fields; null and other fields are rejected.
+  Line breaks and tabs are allowed only in abstract, citation reason, README.md,
+  and LICENSE. File paths use only ASCII letters, digits, ".", "_", and "-"
+  per component (no spaces), max 255 bytes.
+  Citations: target is "sci:sha256:<digest>" (the ID printed by `sci sign`),
+  "doi:<DOI>" (no https://doi.org/ prefix), or an http(s) URL. Optional
+  relations: uses, reviews, supports, challenges, supersedes; optional reason
+  (max 1,000). Citations are signed: add them before signing.
+  `sci sign` adds manifest.json and manifest.json.sig to the draft. Changing
+  any file afterwards needs `sci sign --replace`, which creates a new ID. To
+  correct a published result, sign a new publication that cites the old one
+  with "relations": ["supersedes"].
+"""
+
 DESCRIPTION = f"""\
 sci: sign, verify, publish, and find SCI research publications (protocol {PROTOCOL_VERSION}).
 
@@ -71,7 +110,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser = _Parser(
         prog="sci",
-        description=DESCRIPTION,
+        description=DESCRIPTION + "\n" + DRAFT_GUIDE,
         epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
