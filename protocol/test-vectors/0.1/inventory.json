@@ -1,7 +1,7 @@
 {
   "catalog.json": {
-    "bytes": 442954,
-    "sha256": "7017156dcc7a7b422f9942b3e943bda6dc304da9ad686aba8e7cc869f4a28ec7"
+    "bytes": 447070,
+    "sha256": "499990254045f3e1b36a6c2e6e65e3c33b0b4740473accb6b99680b1da2bfeae"
   },
   "claim/claim-bad-signature/record.json": {
     "bytes": 234,
@@ -975,6 +975,10 @@
     "bytes": 24147,
     "sha256": "ac0980ce2162f0e8c136350d5f21895c460d9025fea24b4fd8a8b1766a28e55b"
   },
+  "publication/display-png-animation-names-in-data/bundle.zip": {
+    "bytes": 23635,
+    "sha256": "41865d081c48cf43aea2a9c83be14787f4b000d9e4469703b237b446971b84fa"
+  },
   "publication/display-png-apng-single-frame/bundle.zip": {
     "bytes": 23664,
     "sha256": "a72332b57046846cee1c9c0f4ff30733307194f3a86888d03168002e45fe217b"
@@ -1038,6 +1042,10 @@
   "publication/display-png-chunk-fdAT/bundle.zip": {
     "bytes": 23621,
     "sha256": "3c2c0817db487269bf918d3e8e149de1e4ff3bb1ee0a64b898a7f19560ee9f2d"
+  },
+  "publication/display-png-chunk-length-overflow/bundle.zip": {
+    "bytes": 23591,
+    "sha256": "2d32b27481fee06db685c1d87b001ee0313831ea2a4632dcf3d23fc06f7b5353"
   },
   "publication/display-png-color-0-depth-1/bundle.zip": {
     "bytes": 23607,
@@ -1127,6 +1135,18 @@
     "bytes": 23627,
     "sha256": "d8a3a1b5b598b8bf96338ed492294bf6e648e2f0109f4c4dc563a65ca00a9a3c"
   },
+  "publication/display-png-header-long/bundle.zip": {
+    "bytes": 23606,
+    "sha256": "b14609baceebd3032ba59f73eeba7e62cf3990b39678d3e07217bb2c240a84c7"
+  },
+  "publication/display-png-header-not-first/bundle.zip": {
+    "bytes": 23626,
+    "sha256": "b44da4afd4328dd2a47c10f9668474093bf2647e7e7f3dcf58e22e05295f490f"
+  },
+  "publication/display-png-header-short/bundle.zip": {
+    "bytes": 23604,
+    "sha256": "b12b8f06dde75f50bdd75caadc061d036b4915420adce87ce6d84a92ce2f71cc"
+  },
   "publication/display-png-height-8192/bundle.zip": {
     "bytes": 23634,
     "sha256": "f6c736cdb4306af357214c553c55c6e18a3b53c9466dd3457d994cf3ba3e9000"
@@ -1151,6 +1171,10 @@
     "bytes": 23605,
     "sha256": "02ce24334a6f955b360f62ed313cb40868f4629bc368e6ff55580148faf160e0"
   },
+  "publication/display-png-nonempty-iend/bundle.zip": {
+    "bytes": 23606,
+    "sha256": "fec90fdfbeea9548a1b24cb48d6b8faf0d43bc6aee9f529b604d31cf859fd7ae"
+  },
   "publication/display-png-pixels-limit/bundle.zip": {
     "bytes": 31386,
     "sha256": "5f1d6e6d876aefbbf395cc880f86fe4b0e6b8bb872536acaf416cf141abddc43"
@@ -1158,6 +1182,10 @@
   "publication/display-png-pixels-over/bundle.zip": {
     "bytes": 31388,
     "sha256": "b61efcec1d90e051290d30f2224e2bc2d18132deb4dac99ecbc3a25ca414bde9"
+  },
+  "publication/display-png-short-chunk-header/bundle.zip": {
+    "bytes": 23596,
+    "sha256": "544433caa7677a9c77ad35bd1517ac280b949ef139f3ef42328fa5876067a071"
   },
   "publication/display-png-short-pixels/bundle.zip": {
     "bytes": 23604,
@@ -1210,6 +1238,10 @@
   "publication/display-png-truncated-chunk/bundle.zip": {
     "bytes": 23602,
     "sha256": "34e132281073f1a317eeddd6188cb76378d7e8eba3c1a69f0c9494a635874bea"
+  },
+  "publication/display-png-unchecked-header-fields/bundle.zip": {
+    "bytes": 23605,
+    "sha256": "0f536967f3ec436d869bbf58fe32f2d5d513d852d9ba9d22ef04efffa77b567b"
   },
   "publication/display-png-unknown-critical/bundle.zip": {
     "bytes": 23617,

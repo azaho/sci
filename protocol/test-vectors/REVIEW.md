@@ -5,11 +5,12 @@ The current spec pin is in [README.md](README.md).
 
 ## PNG display profile
 
-- Add 56 signed cases for §2.1, including exact limits and values above them.
+- Add 64 signed cases for §2.1, including exact limits and values above them.
 - Keep all original artifact bytes. Eight cases with non-PNG display files
   become non-baseline. Their publication validity does not change.
-- Use one bounded PNG fixture check and Pillow for both audit tools. This is
-  not an independent PNG cross-check or a complete PNG validator.
+- Use one baseline display structure check for both audit tools. CRC checks
+  and decoding are not required. Nine existing display cases become baseline;
+  their signed bytes and publication validity results do not change.
 - Read the spec from `protocol/README.md`, its path in this repository.
 
 ## Sources

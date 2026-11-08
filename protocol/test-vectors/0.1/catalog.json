@@ -1,8 +1,8 @@
 {
   "schema": "sci-test-vectors/1",
   "protocol": "sci-publication/0.1",
-  "spec_commit": "2c01a6f9620774db311ac0bb2765703ab1627fae",
-  "spec_sha256": "aecf46f9d4242724c67c79f0ecfa21853e28a22596734ab21a692e3a00ddc778",
+  "spec_commit": "d17af535ab1e50850fedcddba57a719cf8659e86",
+  "spec_sha256": "5303f0449f885e18c6d55139acddf994bc12663d21059b7c3f0550a2a076883a",
   "test_public_key": {
     "kty": "OKP",
     "crv": "Ed25519",
@@ -12843,7 +12843,7 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File fails the baseline structure or dimension checks; publication stays valid.",
       "artifacts": {
         "bundle.zip": "publication/display-png-empty/bundle.zip"
       },
@@ -12861,7 +12861,7 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File fails the baseline structure or dimension checks; publication stays valid.",
       "artifacts": {
         "bundle.zip": "publication/display-png-signature-only/bundle.zip"
       },
@@ -12879,7 +12879,7 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File fails the baseline structure or dimension checks; publication stays valid.",
       "artifacts": {
         "bundle.zip": "publication/display-png-svg-disguised/bundle.zip"
       },
@@ -12897,13 +12897,13 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File meets the baseline structure checks; PNG conformance and decoding are not required.",
       "artifacts": {
         "bundle.zip": "publication/display-png-bad-crc/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": false
+        "baseline": true
       },
       "context": {
         "publication_id": "sha256:37a93b0a5cfe53954038d6d0870440289e3d9ede53f8aff39fd2decac1c0f276"
@@ -12915,7 +12915,7 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File fails the baseline structure or dimension checks; publication stays valid.",
       "artifacts": {
         "bundle.zip": "publication/display-png-truncated-chunk/bundle.zip"
       },
@@ -12933,7 +12933,7 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File fails the baseline structure or dimension checks; publication stays valid.",
       "artifacts": {
         "bundle.zip": "publication/display-png-trailing-bytes/bundle.zip"
       },
@@ -12951,7 +12951,7 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File fails the baseline structure or dimension checks; publication stays valid.",
       "artifacts": {
         "bundle.zip": "publication/display-png-duplicate-header/bundle.zip"
       },
@@ -12969,13 +12969,13 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File meets the baseline structure checks; PNG conformance and decoding are not required.",
       "artifacts": {
         "bundle.zip": "publication/display-png-missing-idat/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": false
+        "baseline": true
       },
       "context": {
         "publication_id": "sha256:05dfb4034bddf9127aaf1960ff620ea23594bb8f1fc44eed94e33c3d6612bded"
@@ -12987,7 +12987,7 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File fails the baseline structure or dimension checks; publication stays valid.",
       "artifacts": {
         "bundle.zip": "publication/display-png-missing-iend/bundle.zip"
       },
@@ -13005,13 +13005,13 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File meets the baseline structure checks; PNG conformance and decoding are not required.",
       "artifacts": {
         "bundle.zip": "publication/display-png-unknown-critical/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": false
+        "baseline": true
       },
       "context": {
         "publication_id": "sha256:14a2ab7b5f1f88b421297abc8405707e7481e6c3145bcec9c79f54eb16a62f2e"
@@ -13023,13 +13023,13 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File meets the baseline structure checks; PNG conformance and decoding are not required.",
       "artifacts": {
         "bundle.zip": "publication/display-png-bad-zlib/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": false
+        "baseline": true
       },
       "context": {
         "publication_id": "sha256:3302a8bc38d00ae740dd1a83b61a6b647966e5b8d69793535eeb2e3189b7cc93"
@@ -13041,13 +13041,13 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File meets the baseline structure checks; PNG conformance and decoding are not required.",
       "artifacts": {
         "bundle.zip": "publication/display-png-short-pixels/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": false
+        "baseline": true
       },
       "context": {
         "publication_id": "sha256:6ea607022bb6c62e99295906ba8d48e271365538e13cb254c7bf83d50fa0dc0a"
@@ -13059,13 +13059,13 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File meets the baseline structure checks; PNG conformance and decoding are not required.",
       "artifacts": {
         "bundle.zip": "publication/display-png-extra-pixels/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": false
+        "baseline": true
       },
       "context": {
         "publication_id": "sha256:44ce8693f2a80d34777875f13531bc9f5e27f6c4a69b07dbf7da667b5e818ad8"
@@ -13077,13 +13077,13 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File meets the baseline structure checks; PNG conformance and decoding are not required.",
       "artifacts": {
         "bundle.zip": "publication/display-png-bad-filter/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": false
+        "baseline": true
       },
       "context": {
         "publication_id": "sha256:0846db77db29f454e296bd9f2d11aa360519dc42c2d85e236ac79d8675bd2d31"
@@ -13095,13 +13095,13 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File meets the baseline structure checks; PNG conformance and decoding are not required.",
       "artifacts": {
         "bundle.zip": "publication/display-png-extra-zlib/bundle.zip"
       },
       "expected": {
         "outcome": "valid",
-        "baseline": false
+        "baseline": true
       },
       "context": {
         "publication_id": "sha256:e79ad25b3a7627a32c41f2e4b8fe270e2694124222902a20b5106a3542578e0b"
@@ -13113,7 +13113,7 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File fails the baseline structure or dimension checks; publication stays valid.",
       "artifacts": {
         "bundle.zip": "publication/display-png-zero-width/bundle.zip"
       },
@@ -13131,7 +13131,7 @@
       "sections": [
         "2.1"
       ],
-      "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
+      "description": "File fails the baseline structure or dimension checks; publication stays valid.",
       "artifacts": {
         "bundle.zip": "publication/display-png-zero-height/bundle.zip"
       },
@@ -13141,6 +13141,150 @@
       },
       "context": {
         "publication_id": "sha256:ef1fd6f162e4fa2c55ed65d82ed5fe51252478d0909f13087b9a7e3e39d8e64e"
+      }
+    },
+    {
+      "id": "display-png-header-not-first",
+      "kind": "publication",
+      "sections": [
+        "2.1"
+      ],
+      "description": "File fails a required chunk boundary, header, or end-marker check.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-header-not-first/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:9d15baebf1225504800413265787d2ecbbadb32da8a9b115602384ead76aa92b"
+      }
+    },
+    {
+      "id": "display-png-header-short",
+      "kind": "publication",
+      "sections": [
+        "2.1"
+      ],
+      "description": "File fails a required chunk boundary, header, or end-marker check.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-header-short/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:ac56cc8d48f157f5cc84fade238914c8a885ba21d248555e076996cac2a1b037"
+      }
+    },
+    {
+      "id": "display-png-header-long",
+      "kind": "publication",
+      "sections": [
+        "2.1"
+      ],
+      "description": "File fails a required chunk boundary, header, or end-marker check.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-header-long/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:393b30fe36081ecbd931e65baa5d5bf53a39290ed045678cf42b7c7c327cc4ed"
+      }
+    },
+    {
+      "id": "display-png-nonempty-iend",
+      "kind": "publication",
+      "sections": [
+        "2.1"
+      ],
+      "description": "File fails a required chunk boundary, header, or end-marker check.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-nonempty-iend/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:ebeae779a58e19103b0351cd1ca4e0e262d555fff9addcedaf99f2ffb969aefd"
+      }
+    },
+    {
+      "id": "display-png-short-chunk-header",
+      "kind": "publication",
+      "sections": [
+        "2.1"
+      ],
+      "description": "File fails a required chunk boundary, header, or end-marker check.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-short-chunk-header/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:0eefa50f3b789fadc28d010ddc1ad8f3ce2a808064d91a955d12b62de4730e44"
+      }
+    },
+    {
+      "id": "display-png-chunk-length-overflow",
+      "kind": "publication",
+      "sections": [
+        "2.1"
+      ],
+      "description": "File fails a required chunk boundary, header, or end-marker check.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-chunk-length-overflow/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": false
+      },
+      "context": {
+        "publication_id": "sha256:614872c0d4694ce10b5cc1b366398ec8ed62167bcc958b58854dea078f54f9fe"
+      }
+    },
+    {
+      "id": "display-png-unchecked-header-fields",
+      "kind": "publication",
+      "sections": [
+        "2.1"
+      ],
+      "description": "Baseline checks use IHDR dimensions, not the remaining header fields.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-unchecked-header-fields/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:61940944fd3bb1b766b2716b30b7f952f408ab6f0596ef988c21775eb2cc8942"
+      }
+    },
+    {
+      "id": "display-png-animation-names-in-data",
+      "kind": "publication",
+      "sections": [
+        "2.1"
+      ],
+      "description": "Animation chunk names inside data do not count as animation chunks.",
+      "artifacts": {
+        "bundle.zip": "publication/display-png-animation-names-in-data/bundle.zip"
+      },
+      "expected": {
+        "outcome": "valid",
+        "baseline": true
+      },
+      "context": {
+        "publication_id": "sha256:9dbbc14242839bcda368508f6e0ae4ff444bf803b2284826fd948ebac4416b04"
       }
     },
     {
@@ -13270,7 +13414,7 @@
       },
       "expected": {
         "outcome": "valid",
-        "baseline": false
+        "baseline": true
       }
     },
     {

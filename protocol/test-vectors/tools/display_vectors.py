@@ -78,8 +78,27 @@ def generate_display_vectors(pub, emit, bundle):
         'extra-zlib': SIGNATURE + header + compressed + chunk(b'IDAT', zlib.compress(b'\0\0')) + end,
         'zero-width': png(0, 1), 'zero-height': png(1, 0),
     }
+    structure_only = {'bad-crc', 'missing-idat', 'unknown-critical', 'bad-zlib',
+                      'short-pixels', 'extra-pixels', 'bad-filter', 'extra-zlib'}
     for name, data in invalid.items():
-        case(name, data, False, 'Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.')
+        baseline = name in structure_only
+        description = ('File meets the baseline structure checks; PNG conformance and decoding are not required.'
+                       if baseline else 'File fails the baseline structure or dimension checks; publication stays valid.')
+        case(name, data, baseline, description)
+    for name, data in {
+        'header-not-first': SIGNATURE + chunk(b'tEXt', b'key\0value') + header + compressed + end,
+        'header-short': SIGNATURE + chunk(b'IHDR', image[16:28]) + compressed + end,
+        'header-long': SIGNATURE + chunk(b'IHDR', image[16:29] + b'\0') + compressed + end,
+        'nonempty-iend': image[:-12] + chunk(b'IEND', b'x'),
+        'short-chunk-header': image[:-12] + b'\0\0\0',
+        'chunk-length-overflow': SIGNATURE + header + struct.pack('>I4s', 0xffffffff, b'IDAT') + end,
+    }.items():
+        case(name, data, False, 'File fails a required chunk boundary, header, or end-marker check.')
+    case('unchecked-header-fields',
+         SIGNATURE + chunk(b'IHDR', struct.pack('>II', 1, 1) + b'\xff' * 5) + compressed + end,
+         True, 'Baseline checks use IHDR dimensions, not the remaining header fields.')
+    case('animation-names-in-data', image[:-12] + chunk(b'tEXt', b'key\0acTL fcTL fdAT') + end,
+         True, 'Animation chunk names inside data do not count as animation chunks.')
     case('wrong-extension', image, False, 'PNG contents require the .png extension for this profile.', 'files/figure.txt')
     pub('display-png-empty-array', '2.1', 'An empty display array meets the profile.', metadata={**meta, 'display': []})
     pub('display-png-supporting-files', '2.1', 'Unselected SVG and malformed PNG files stay opaque supporting files.',
@@ -93,7 +112,7 @@ def generate_display_vectors(pub, emit, bundle):
     # Exercise the same profile on a loose bundle without changing the signed input.
     import io
     import zipfile
-    for name, data, baseline in (('static', image, True), ('bad-crc', invalid['bad-crc'], False)):
+    for name, data, baseline in (('static', image, True), ('bad-crc', invalid['bad-crc'], True)):
         z, _, _ = bundle(files={'files/figure.png': data}, metadata={**meta, 'display': [{'path': 'files/figure.png'}]})
         with zipfile.ZipFile(io.BytesIO(z)) as archive:
             files = {path: archive.read(path) for path in archive.namelist()}

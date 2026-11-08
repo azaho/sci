@@ -1,7 +1,7 @@
 # SCI test vectors
 
-665 offline cases for [SCI protocol draft 0.1](../README.md), pinned to
-[commit 2c01a6f9620774db311ac0bb2765703ab1627fae](https://github.com/azaho/sci-dev/blob/2c01a6f9620774db311ac0bb2765703ab1627fae/protocol/README.md).
+673 offline cases for [SCI protocol draft 0.1](../README.md), pinned to
+[commit d17af535ab1e50850fedcddba57a719cf8659e86](https://github.com/azaho/sci-dev/blob/d17af535ab1e50850fedcddba57a719cf8659e86/protocol/README.md).
 The catalog records the exact specification SHA-256. These fixtures combine
 both original corpora, update their expectations for the current draft, and add
 regressions found during review. [REVIEW.md](REVIEW.md) explains the changes;
@@ -30,7 +30,7 @@ publication ID: that is the hash of the original manifest bytes.
 
 | Kind | Cases | Operation |
 | --- | ---: | --- |
-| `publication` | 532 | Verify a ZIP, loose bundle, or manifest-only input; classify baseline separately. |
+| `publication` | 540 | Verify a ZIP, loose bundle, or manifest-only input; classify baseline separately. |
 | `claim` | 33 | Verify a signed key association using the supplied account, retrieval evidence, clock, and revocation state. |
 | `revocation` | 12 | Verify a revocation record against the expected key. |
 | `timestamp` | 29 | Frame DER values, verify each proof with the supplied clock, trust roots, and CRLs, and preserve usable earlier proofs. |
@@ -158,14 +158,15 @@ The text regression test checks every one of the 1,114,112 Unicode code points
 against RFC 9839's positive intervals. Neither text checker uses runtime Unicode
 category data.
 
-Both checkers use the same PNG profile check and Pillow decoder. PNG validation
-is not independently implemented. The 56 PNG cases cover file and image size
-limits, color types, bit depths, interlacing, animation chunks, corrupt data,
-extension case, and unselected supporting files. Eight existing cases become
-non-baseline; their signed bytes and validity results do not change.
+Both checkers use the same baseline display structure check. This check is not
+independently implemented. The 64 display cases cover size and dimension limits,
+chunk boundaries, animation chunks, extension case, and unselected files.
+Nine existing cases accept PNG faults outside the required baseline checks.
+Eight original cases with non-PNG display files become non-baseline.
+Existing signed bytes and publication validity results do not change.
 
 The 15 HTTP/state scenarios are declarative adapter inputs: the corpus audit
-checks their structure, not a live service. The other 650 expected results are
+checks their structure, not a live service. The other 658 expected results are
 executed by the audit. CI repeats the audits, adapter example, and regeneration
 on Ubuntu/Python 3.12; local validation also uses Python 3.14/OpenSSL 4.
 
@@ -195,7 +196,7 @@ past incomplete framing. Timestamp failure never invalidates publication bytes.
 The corpus does not exhaust DOI equivalence, arbitrary URI/IDNA syntax,
 RFC 3339 leap seconds, all Ed25519 encodings, arbitrary certificate chains and
 revocation policies, deep parser/resource attacks, live retrieval/CORS, browser
-rendering, concurrency, or storage/throughput behavior. PNG checks cover this
-corpus, not the full PNG specification or every resource attack. Unselected
-supporting files are opaque bytes; no fixture authorizes executing them.
+rendering, concurrency, or storage/throughput behavior. Display checks cover
+baseline structure, not PNG conformance, decoding, or every resource attack.
+Unselected supporting files are opaque bytes; no fixture authorizes executing them.
 Independent implementations should add coverage for these documented gaps.
