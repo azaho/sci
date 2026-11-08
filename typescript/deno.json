@@ -1,0 +1,5 @@
+{
+  "nodeModulesDir": "manual",
+  "lock": false,
+  "test": { "include": ["tests/"] }
+}

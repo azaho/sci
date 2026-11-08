@@ -1,0 +1,17 @@
+[tool.uv.workspace]
+members = ["python", "cli"]
+
+[tool.uv.sources]
+pysci = { workspace = true }
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+
+[[tool.mypy.overrides]]
+module = ["asn1crypto.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+markers = ["network: requires network access (deselected unless SCI_NETWORK_TESTS=1)"]
