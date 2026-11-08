@@ -1,8 +1,8 @@
 {
   "schema": "sci-test-vectors/1",
   "protocol": "sci-publication/0.1",
-  "spec_commit": "9d171cbfff3d4916b88e17f9d3c1c78e5053f822",
-  "spec_sha256": "ba25f7d9d2de715bfd59bc3c7bb342678638fed5728f25fc19ebc27fd4bfa5d5",
+  "spec_commit": "6f663a0987ea4cfa9a2ce183dddda039def9c2ac",
+  "spec_sha256": "652b33e715bea0edaa14a97fe5f41a71af9c10601699964a0d01941eaca8a2f8",
   "test_public_key": {
     "kty": "OKP",
     "crv": "Ed25519",
@@ -1832,8 +1832,7 @@
       "kind": "publication",
       "sections": [
         "2.1",
-        "4.3",
-        "4.3.1"
+        "4.3"
       ],
       "description": "Non-PNG display items remain valid but are not baseline.",
       "artifacts": {
@@ -1852,8 +1851,7 @@
       "kind": "publication",
       "sections": [
         "2.1",
-        "4.3",
-        "4.3.1"
+        "4.3"
       ],
       "description": "Non-PNG display items remain valid but are not baseline.",
       "artifacts": {
@@ -1979,8 +1977,8 @@
       "id": "display-caption-2000",
       "kind": "publication",
       "sections": [
-        "4.3",
-        "4.3.1"
+        "2.1",
+        "4.3"
       ],
       "description": "Caption length exactly 2,000 code points; the text display file is non-baseline.",
       "artifacts": {
@@ -3796,8 +3794,7 @@
       "id": "supplemental-valid-baseline-loose",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Valid publication with LICENSE, categories, display items, citations, nested files, and an empty file. SVG and CSV display items are non-baseline.",
       "artifacts": {
@@ -3831,8 +3828,7 @@
       "id": "supplemental-valid-baseline-zip",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Valid publication with LICENSE, categories, display items, citations, nested files, and an empty file. SVG and CSV display items are non-baseline.",
       "artifacts": {
@@ -4194,8 +4190,7 @@
       "kind": "publication",
       "sections": [
         "2.1",
-        "4.3",
-        "4.3.1"
+        "4.3"
       ],
       "description": "Exactly 3 display items, but their types are non-baseline.",
       "artifacts": {
@@ -4230,8 +4225,7 @@
       "kind": "publication",
       "sections": [
         "2.1",
-        "4.3",
-        "4.3.1"
+        "4.3"
       ],
       "description": "Exactly 3 display items, but their types are non-baseline.",
       "artifacts": {
@@ -12271,8 +12265,7 @@
       "id": "display-png-static",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "A complete static PNG meets the display profile.",
       "artifacts": {
@@ -12290,8 +12283,7 @@
       "id": "display-png-upper-extension",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Compare the extension without ASCII case.",
       "artifacts": {
@@ -12309,8 +12301,7 @@
       "id": "display-png-mixed-extension",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Mixed-case extension; exact manifest path still required.",
       "artifacts": {
@@ -12328,8 +12319,7 @@
       "id": "display-png-color-0-depth-1",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12347,8 +12337,7 @@
       "id": "display-png-color-0-depth-2",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12366,8 +12355,7 @@
       "id": "display-png-color-0-depth-4",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12385,8 +12373,7 @@
       "id": "display-png-color-0-depth-8",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12404,8 +12391,7 @@
       "id": "display-png-color-0-depth-16",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12423,8 +12409,7 @@
       "id": "display-png-color-2-depth-8",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12442,8 +12427,7 @@
       "id": "display-png-color-2-depth-16",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12461,8 +12445,7 @@
       "id": "display-png-color-3-depth-1",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12480,8 +12463,7 @@
       "id": "display-png-color-3-depth-2",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12499,8 +12481,7 @@
       "id": "display-png-color-3-depth-4",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12518,8 +12499,7 @@
       "id": "display-png-color-3-depth-8",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12537,8 +12517,7 @@
       "id": "display-png-color-4-depth-8",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12556,8 +12535,7 @@
       "id": "display-png-color-4-depth-16",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12575,8 +12553,7 @@
       "id": "display-png-color-6-depth-8",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12594,8 +12571,7 @@
       "id": "display-png-color-6-depth-16",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG color types and bit depths remain available within the profile limits.",
       "artifacts": {
@@ -12613,8 +12589,7 @@
       "id": "display-png-interlaced",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Static Adam7 PNG is permitted.",
       "artifacts": {
@@ -12632,8 +12607,7 @@
       "id": "display-png-pixels-limit",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Exactly 8,000,000 pixels.",
       "artifacts": {
@@ -12651,8 +12625,7 @@
       "id": "display-png-pixels-over",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Pixel count exceeds the limit; each dimension is within its limit.",
       "artifacts": {
@@ -12670,8 +12643,7 @@
       "id": "display-png-width-8192",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Width at or one pixel above the limit; pixel count is within its limit.",
       "artifacts": {
@@ -12689,8 +12661,7 @@
       "id": "display-png-width-8193",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Width at or one pixel above the limit; pixel count is within its limit.",
       "artifacts": {
@@ -12708,8 +12679,7 @@
       "id": "display-png-height-8192",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Height at or one pixel above the limit; pixel count is within its limit.",
       "artifacts": {
@@ -12727,8 +12697,7 @@
       "id": "display-png-height-8193",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Height at or one pixel above the limit; pixel count is within its limit.",
       "artifacts": {
@@ -12746,8 +12715,7 @@
       "id": "display-png-bytes-2097152",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Whole file size at or one byte above 2 MiB; valid private ancillary chunk supplies padding.",
       "artifacts": {
@@ -12765,8 +12733,7 @@
       "id": "display-png-bytes-2097153",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Whole file size at or one byte above 2 MiB; valid private ancillary chunk supplies padding.",
       "artifacts": {
@@ -12784,8 +12751,7 @@
       "id": "display-png-apng-single-frame",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Valid single-frame APNG is outside the static profile.",
       "artifacts": {
@@ -12803,8 +12769,7 @@
       "id": "display-png-apng-two-frames",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Valid two-frame APNG is outside the static profile.",
       "artifacts": {
@@ -12822,8 +12787,7 @@
       "id": "display-png-chunk-acTL",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Each forbidden animation chunk excludes the file, even without other animation chunks.",
       "artifacts": {
@@ -12841,8 +12805,7 @@
       "id": "display-png-chunk-fcTL",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Each forbidden animation chunk excludes the file, even without other animation chunks.",
       "artifacts": {
@@ -12860,8 +12823,7 @@
       "id": "display-png-chunk-fdAT",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Each forbidden animation chunk excludes the file, even without other animation chunks.",
       "artifacts": {
@@ -12879,8 +12841,7 @@
       "id": "display-png-empty",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -12898,8 +12859,7 @@
       "id": "display-png-signature-only",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -12917,8 +12877,7 @@
       "id": "display-png-svg-disguised",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -12936,8 +12895,7 @@
       "id": "display-png-bad-crc",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -12955,8 +12913,7 @@
       "id": "display-png-truncated-chunk",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -12974,8 +12931,7 @@
       "id": "display-png-trailing-bytes",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -12993,8 +12949,7 @@
       "id": "display-png-duplicate-header",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -13012,8 +12967,7 @@
       "id": "display-png-missing-idat",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -13031,8 +12985,7 @@
       "id": "display-png-missing-iend",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -13050,8 +13003,7 @@
       "id": "display-png-unknown-critical",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -13069,8 +13021,7 @@
       "id": "display-png-bad-zlib",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -13088,8 +13039,7 @@
       "id": "display-png-short-pixels",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -13107,8 +13057,7 @@
       "id": "display-png-extra-pixels",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -13126,8 +13075,7 @@
       "id": "display-png-bad-filter",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -13145,8 +13093,7 @@
       "id": "display-png-extra-zlib",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -13164,8 +13111,7 @@
       "id": "display-png-zero-width",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -13183,8 +13129,7 @@
       "id": "display-png-zero-height",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.",
       "artifacts": {
@@ -13202,8 +13147,7 @@
       "id": "display-png-wrong-extension",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "PNG contents require the .png extension for this profile.",
       "artifacts": {
@@ -13221,7 +13165,7 @@
       "id": "display-png-empty-array",
       "kind": "publication",
       "sections": [
-        "4.3.1"
+        "2.1"
       ],
       "description": "An empty display array meets the profile.",
       "artifacts": {
@@ -13239,7 +13183,7 @@
       "id": "display-png-supporting-files",
       "kind": "publication",
       "sections": [
-        "4.3.1"
+        "2.1"
       ],
       "description": "Unselected SVG and malformed PNG files stay opaque supporting files.",
       "artifacts": {
@@ -13257,8 +13201,7 @@
       "id": "display-png-count-3",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Valid PNGs isolate the existing display-count limit.",
       "artifacts": {
@@ -13276,8 +13219,7 @@
       "id": "display-png-count-4",
       "kind": "publication",
       "sections": [
-        "2.1",
-        "4.3.1"
+        "2.1"
       ],
       "description": "Valid PNGs isolate the existing display-count limit.",
       "artifacts": {
@@ -13295,7 +13237,7 @@
       "id": "display-png-static-loose",
       "kind": "publication",
       "sections": [
-        "4.3.1"
+        "2.1"
       ],
       "description": "Loose-file form of the PNG profile case.",
       "artifacts": {
@@ -13315,7 +13257,7 @@
       "id": "display-png-bad-crc-loose",
       "kind": "publication",
       "sections": [
-        "4.3.1"
+        "2.1"
       ],
       "description": "Loose-file form of the PNG profile case.",
       "artifacts": {

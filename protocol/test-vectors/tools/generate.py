@@ -12,8 +12,8 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 ROOT = Path(__file__).resolve().parents[2]
-SPEC_COMMIT = '9d171cbfff3d4916b88e17f9d3c1c78e5053f822'
-SPEC_SHA256 = 'ba25f7d9d2de715bfd59bc3c7bb342678638fed5728f25fc19ebc27fd4bfa5d5'
+SPEC_COMMIT = '6f663a0987ea4cfa9a2ce183dddda039def9c2ac'
+SPEC_SHA256 = '652b33e715bea0edaa14a97fe5f41a71af9c10601699964a0d01941eaca8a2f8'
 SEED = hashlib.sha256(b'SCI conformance fixtures: PUBLIC TEST KEY, NOT FOR PRODUCTION').digest()
 KEY = Ed25519PrivateKey.from_private_bytes(SEED)
 PUBLIC = KEY.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
@@ -209,10 +209,10 @@ def generate_publications():
     pub('metadata-surrogate-pair','7','A valid surrogate pair decodes to one allowed non-BMP code point.',files={'sci.json':b'{"title":"\\ud83d\\ude00","abstract":"C"}'})
     supporting={f'files/{i}.txt':b'x' for i in range(4)}
     for n in (3,4):
-        pub(f'display-{n}','2.1,4.3,4.3.1','Non-PNG display items remain valid but are not baseline.',baseline=False,files=supporting,metadata={**META,'display':[{'path':f'files/{i}.txt'} for i in range(n)]})
+        pub(f'display-{n}','2.1,4.3','Non-PNG display items remain valid but are not baseline.',baseline=False,files=supporting,metadata={**META,'display':[{'path':f'files/{i}.txt'} for i in range(n)]})
     for name,items in [('display-duplicate',[{'path':'files/0.txt'}]*2),('display-missing',[{'path':'files/missing'}]),('display-root',[{'path':'README.md'}]),('display-case',[{'path':'files/0.TXT'}]),('display-caption-2001',[{'path':'files/0.txt','caption':'a'*2001}]),('display-extra-field',[{'path':'files/0.txt','extra':True}])]:
         pub(name,'4.3','Display items require unique exact supporting paths and valid captions.',outcome='invalid',files=supporting,metadata={**META,'display':items})
-    pub('display-caption-2000','4.3,4.3.1','Caption length exactly 2,000 code points; the text display file is non-baseline.',baseline=False,files=supporting,metadata={**META,'display':[{'path':'files/0.txt','caption':'a'*2000}]})
+    pub('display-caption-2000','2.1,4.3','Caption length exactly 2,000 code points; the text display file is non-baseline.',baseline=False,files=supporting,metadata={**META,'display':[{'path':'files/0.txt','caption':'a'*2000}]})
     targets=['sci:sha256:'+'a'*64,'doi:10.1000/182','https://example.org/paper?q=1#results','http://example.org/data']
     pub('citation-targets','4.4','SCI, DOI, HTTP and HTTPS targets; multiple relation claims.',metadata={**META,'citations':[{'target':t,'relations':['uses','supports'],'reason':'a\tb\nc\rd'} for t in targets]})
     for name,citations in [('citation-invalid-sci-hash',[{'target':'sci:sha256:'+'A'*64}]),('citation-invalid-scheme',[{'target':'ftp://example.org/a'}]),('citation-duplicate-relations',[{'target':targets[0],'relations':['uses','uses']}]),('citation-unknown-relation',[{'target':targets[0],'relations':['cites']}]),('citation-reason-1001',[{'target':targets[0],'reason':'a'*1001}]),('citation-extra-field',[{'target':targets[0],'extra':True}]),('citations-1001',[{'target':targets[0]}]*1001)]:

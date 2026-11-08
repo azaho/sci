@@ -29,7 +29,7 @@ def generate_display_vectors(pub, emit, bundle):
     image = png()
 
     def case(name, data, baseline, description, path='files/figure.png'):
-        pub('display-png-' + name, '2.1,4.3.1', description, baseline=baseline,
+        pub('display-png-' + name, '2.1', description, baseline=baseline,
             files={path: data}, metadata={**meta, 'display': [{'path': path}]})
 
     case('static', image, True, 'A complete static PNG meets the display profile.')
@@ -81,13 +81,13 @@ def generate_display_vectors(pub, emit, bundle):
     for name, data in invalid.items():
         case(name, data, False, 'Signed file bytes are intact, but the file is not a valid static PNG; publication stays valid.')
     case('wrong-extension', image, False, 'PNG contents require the .png extension for this profile.', 'files/figure.txt')
-    pub('display-png-empty-array', '4.3.1', 'An empty display array meets the profile.', metadata={**meta, 'display': []})
-    pub('display-png-supporting-files', '4.3.1', 'Unselected SVG and malformed PNG files stay opaque supporting files.',
+    pub('display-png-empty-array', '2.1', 'An empty display array meets the profile.', metadata={**meta, 'display': []})
+    pub('display-png-supporting-files', '2.1', 'Unselected SVG and malformed PNG files stay opaque supporting files.',
         files={'files/source.svg': invalid['svg-disguised'], 'files/broken.png': b'not PNG', 'files/figure.png': image},
         metadata={**meta, 'display': [{'path': 'files/figure.png'}]})
     for count in (3, 4):
         files = {f'files/{i}.png': image for i in range(count)}
-        pub(f'display-png-count-{count}', '2.1,4.3.1', 'Valid PNGs isolate the existing display-count limit.',
+        pub(f'display-png-count-{count}', '2.1', 'Valid PNGs isolate the existing display-count limit.',
             baseline=count == 3, files=files, metadata={**meta, 'display': [{'path': path} for path in files]})
 
     # Exercise the same profile on a loose bundle without changing the signed input.
@@ -97,5 +97,5 @@ def generate_display_vectors(pub, emit, bundle):
         z, _, _ = bundle(files={'files/figure.png': data}, metadata={**meta, 'display': [{'path': 'files/figure.png'}]})
         with zipfile.ZipFile(io.BytesIO(z)) as archive:
             files = {path: archive.read(path) for path in archive.namelist()}
-        emit('display-png-' + name + '-loose', 'publication', '4.3.1', 'Loose-file form of the PNG profile case.',
+        emit('display-png-' + name + '-loose', 'publication', '2.1', 'Loose-file form of the PNG profile case.',
              files, {'outcome': 'valid', 'baseline': baseline})
