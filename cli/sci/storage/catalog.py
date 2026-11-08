@@ -3,6 +3,9 @@
 File state (device, inode, size, modification and change times) detects
 changes; it is not a content proof. Unchanged files reuse their rows without
 opening the ZIP. Other commands verify their inputs independently.
+
+Several processes on one machine can share a catalog (WAL mode). WAL does not
+work across machines, so keep the state directory on a local disk.
 """
 
 from __future__ import annotations
@@ -10,6 +13,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import random
 import sqlite3
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
@@ -24,6 +28,9 @@ from pysci.source import FileSource
 from ..errors import issue_json
 
 SCHEMA_VERSION = "1"
+BUSY_TIMEOUT_SECONDS = 30.0
+_CORRUPT_CODES = (sqlite3.SQLITE_CORRUPT, sqlite3.SQLITE_NOTADB)
+_BUSY_CODES = (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED)
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -92,6 +99,15 @@ class LocalHit:
         }
 
 
+class _SchemaMismatch(Exception):
+    """The file is a database from another catalog schema."""
+
+
+def is_corrupt(exc: sqlite3.Error) -> bool:
+    """True only for damage to the file; a busy or locked database is not damaged."""
+    return (exc.sqlite_errorcode & 0xFF) in _CORRUPT_CODES
+
+
 def _stat_key(info: os.stat_result) -> tuple[int, int, int, int, int]:
     return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
 
@@ -105,27 +121,53 @@ class Catalog:
     def _open(self) -> sqlite3.Connection:
         self.path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
         try:
-            db = self._connect()
-            row = db.execute("SELECT value FROM meta WHERE key='schema'").fetchone()
-            if row is None or row[0] != SCHEMA_VERSION:
-                raise sqlite3.DatabaseError("schema mismatch")
-            if db.execute("PRAGMA quick_check").fetchone()[0] != "ok":
-                raise sqlite3.DatabaseError("integrity check failed")
-            return db
-        except sqlite3.DatabaseError:
-            with contextlib.suppress(Exception):
-                db.close()
-            for suffix in ("", "-wal", "-shm", "-journal"):
-                with contextlib.suppress(FileNotFoundError):
-                    os.unlink(str(self.path) + suffix)
-            self.rebuilt = True
             return self._connect()
+        except _SchemaMismatch:
+            pass
+        except sqlite3.DatabaseError as exc:
+            if not is_corrupt(exc):
+                raise
+        self._discard()
+        return self._connect()
+
+    def _discard(self) -> None:
+        for suffix in ("", "-wal", "-shm", "-journal"):
+            with contextlib.suppress(FileNotFoundError):
+                os.unlink(str(self.path) + suffix)
+        self.rebuilt = True
 
     def _connect(self) -> sqlite3.Connection:
-        db = sqlite3.connect(self.path, timeout=30, isolation_level=None)
-        db.executescript(_SCHEMA)
-        db.execute("INSERT OR IGNORE INTO meta(key, value) VALUES ('schema', ?)", (SCHEMA_VERSION,))
+        db = sqlite3.connect(self.path, timeout=BUSY_TIMEOUT_SECONDS, isolation_level=None)
+        try:
+            self._enable_wal(db)
+            # An existing catalog is opened without taking the write lock.
+            if db.execute("SELECT 1 FROM sqlite_master WHERE name='meta'").fetchone() is None:
+                db.executescript(
+                    f"BEGIN IMMEDIATE;{_SCHEMA}INSERT OR IGNORE INTO meta(key, value) "
+                    f"VALUES ('schema', '{SCHEMA_VERSION}');COMMIT;"
+                )
+            row = db.execute("SELECT value FROM meta WHERE key='schema'").fetchone()
+            if row is None or row[0] != SCHEMA_VERSION:
+                raise _SchemaMismatch
+        except BaseException:
+            db.close()
+            raise
         return db
+
+    @staticmethod
+    def _enable_wal(db: sqlite3.Connection) -> None:
+        try:
+            db.execute("PRAGMA journal_mode=WAL").fetchone()
+        except sqlite3.OperationalError as exc:
+            # Another process holds the lock; a later open switches the mode.
+            if (exc.sqlite_errorcode & 0xFF) not in _BUSY_CODES:
+                raise
+
+    def reset(self) -> None:
+        """Replace a catalog found to be corrupt after opening."""
+        self.db.close()
+        self._discard()
+        self.db = self._connect()
 
     def close(self) -> None:
         self.db.close()
@@ -144,6 +186,7 @@ class Catalog:
 
     def scan(self, folders: Sequence[Path]) -> ScanReport:
         report = ScanReport()
+        changed = False
         for folder in folders:
             key = str(folder)
             try:
@@ -169,14 +212,19 @@ class Catalog:
                     (key,),
                 )
             }
-            for path, info in sorted(current.items()):
-                if known.get(path) == _stat_key(info):
+            # Random order spreads processes that start together over different files.
+            for path, info in random.sample(sorted(current.items()), len(current)):
+                state = _stat_key(info)
+                if known.get(path) == state or self._indexed(path, state):
                     report.reused += 1
                     continue
                 self._index_file(Path(path), key, info, report)
-            absent = [p for p in known if p not in current]
-            with self._write() as db:
-                db.executemany("DELETE FROM files WHERE path=?", [(p,) for p in absent])
+            # A path missing from this listing may have been added since it was taken.
+            absent = [p for p in known if p not in current and not os.path.exists(p)]
+            if absent:
+                changed = True
+                with self._write() as db:
+                    db.executemany("DELETE FROM files WHERE path=?", [(p,) for p in absent])
             report.available.append(key)
             for row in self.db.execute(
                 "SELECT path, status, publication_id, issues FROM files "
@@ -191,12 +239,20 @@ class Catalog:
                         "issues": json.loads(row[3]),
                     }
                 )
-        with self._write() as db:
-            db.execute(
-                "DELETE FROM publications WHERE id NOT IN "
-                "(SELECT publication_id FROM files WHERE publication_id IS NOT NULL)"
-            )
+        if changed or report.verified:
+            with self._write() as db:
+                db.execute(
+                    "DELETE FROM publications WHERE id NOT IN "
+                    "(SELECT publication_id FROM files WHERE publication_id IS NOT NULL)"
+                )
         return report
+
+    def _indexed(self, path: str, state: tuple[int, ...]) -> bool:
+        """True if another process has indexed this file state since the scan began."""
+        row = self.db.execute(
+            "SELECT dev, ino, size, mtime_ns, ctime_ns FROM files WHERE path=?", (path,)
+        ).fetchone()
+        return row is not None and tuple(row) == state
 
     def _index_file(
         self, path: Path, folder: str, info: os.stat_result, report: ScanReport
