@@ -46,6 +46,10 @@ class FakeGitHub:
     assets: dict[int, bytes] = field(default_factory=dict)
     log: list[tuple[str, str]] = field(default_factory=list)
     race_once: bool = False
+    replies: list[tuple[str, str, int, dict[str, Any], bytes]] = field(default_factory=list)
+    """Queued one-time responses: (method, URL substring, status, headers, body)."""
+    hook: Any = None
+    mangle_inline: bool = False
     tokens: list[str | None] = field(default_factory=list)
 
     # ---------------------------------------------------------------- git model
@@ -121,12 +125,20 @@ class FakeGitHub:
                             return _reply(206, raw=self.assets[asset["id"]][:1])
             return _reply(404, raw=b"")
         self.tokens.append(request.unredirected.get("Authorization"))
+        if self.hook is not None:
+            self.hook(request)
+        for queued in self.replies:
+            if queued[0] == request.method and queued[1] in request.url:
+                self.replies.remove(queued)
+                return _reply(queued[2], headers=queued[3], raw=queued[4])
         repo_path = f"/repos/{self.owner}/{self.repo}"
         path = url.path
         if url.netloc == "uploads.github.com":
             release_id = int(path.split("/")[-2])
             name = urllib.parse.parse_qs(url.query)["name"][0]
             release = next(r for r in self.releases if r["id"] == release_id)
+            if any(a["name"] == name for a in release["assets"]):
+                return _reply(422, {"message": "already_exists"})
             asset_id = 1000 + len(self.assets)
             self.assets[asset_id] = body
             asset = {
@@ -184,7 +196,14 @@ class FakeGitHub:
             self.blobs[_blob_sha(data)] = data
             return _reply(201, {"sha": _blob_sha(data)})
         if rest == "/git/trees":
-            files = {e["path"]: e["sha"] for e in document["tree"]}
+            files = {}
+            for entry in document["tree"]:
+                if "content" in entry:
+                    data = entry["content"].encode() + (b"x" if self.mangle_inline else b"")
+                    self.blobs[_blob_sha(data)] = data
+                    files[entry["path"]] = _blob_sha(data)
+                else:
+                    files[entry["path"]] = entry["sha"]
             return _reply(201, {"sha": self._apply(document["base_tree"], files)})
         if rest == "/git/commits":
             sha = _sha(f"{document['tree']}{document['parents']}{len(self.commits)}".encode())
@@ -208,10 +227,20 @@ class FakeGitHub:
                 {path_name: base64.b64decode(document["content"])}, self.main
             )
             return _reply(201, {"commit": {"sha": self.main}})
-        if rest.startswith("/releases") and request.method == "GET" and "assets" not in rest:
-            page = int(urllib.parse.parse_qs(url.query).get("page", ["1"])[0])
-            return _reply(200, self.releases if page == 1 else [])
+        if rest.startswith("/releases/tags/") and request.method == "GET":
+            tag = rest.rsplit("/", 1)[1]
+            for release in self.releases:
+                if release["tag_name"] == tag:
+                    return _reply(200, release)
+            return _reply(404, {"message": "Not Found"})
+        if rest.endswith("/assets") and request.method == "GET":
+            release = next(r for r in self.releases if r["id"] == int(rest.split("/")[2]))
+            query = urllib.parse.parse_qs(url.query)
+            size, page = int(query["per_page"][0]), int(query["page"][0])
+            return _reply(200, release["assets"][(page - 1) * size : page * size])
         if rest == "/releases" and request.method == "POST":
+            if any(r["tag_name"] == document["tag_name"] for r in self.releases):
+                return _reply(422, {"message": "already_exists"})
             release_id = len(self.releases) + 1
             release = {
                 "id": release_id,

@@ -70,7 +70,7 @@ def test_github_publish_create_reuse_and_conflict(cli: Cli) -> None:
     )
     assert archive["availability"]["confirmed"] and archive["availability"]["reader_cors"]
     descriptor = json.loads(fake.read("sci/archive.json") or b"{}")
-    assert descriptor["bundle_url"].endswith("/releases/download/sci-{id}/{id}.zip")
+    assert descriptor["bundle_url"].endswith("/releases/download/sci-{id2}/{id}.zip")
     assert fake.read("sci/publications.txt") == "".join(f"{d}\n" for d in digests).encode()
     for digest in digests:
         prefix = f"sci/publications/{digest[:2]}/{digest}"
@@ -87,9 +87,9 @@ def test_github_publish_create_reuse_and_conflict(cli: Cli) -> None:
     assert fake.read(f"sci/publications/{digests[0][:2]}/{digests[0]}/manifest.json.sig.tsr") == b""
     releases = {r["tag_name"]: r for r in fake.releases}
     for digest in digests:
-        release = releases[f"sci-{digest}"]
+        release = releases[f"sci-{digest[:2]}"]
         assert release["draft"] is False and release["make_latest"] == "false"
-        assert [a["name"] for a in release["assets"]] == [f"{digest}.zip"]
+        assert f"{digest}.zip" in [a["name"] for a in release["assets"]]
     assert set(fake.tokens) == {"Bearer gh-test-token"}
     # retry: everything is reused, no new commits or uploads
     commits = len(fake.commits)

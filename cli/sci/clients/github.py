@@ -6,7 +6,9 @@ import base64
 import functools
 import hashlib
 import json
+import time
 import urllib.parse
+from collections.abc import Callable
 from typing import Any
 
 from pysci.jsonstrict import JsonValue
@@ -24,16 +26,25 @@ from .hosting import (
     merged_list,
     plan_reader_files,
 )
-from .http import Deadline, HttpClient, Response
+from .http import Deadline, HttpClient, Response, retry_after_seconds
 
 API = "https://api.github.com"
 JSON_LIMIT = 32 << 20
+BATCH_SIZE = 50
+"""Publications committed to ``main`` together; a failed run keeps earlier batches."""
+INLINE_FILE_LIMIT = 256 * 1024
+INLINE_REQUEST_LIMIT = 16 << 20
+_INLINE_NAMES = frozenset({"manifest.json", "sci.json", "README.md", "LICENSE"})
+SECONDARY_LIMIT_WAIT = 60.0
+MAX_RATE_LIMIT_WAIT = 3700.0
+MAX_RATE_LIMIT_WAITS = 8
+ASSET_PAGES = 20
 
 
 def descriptor_for(owner: str, repo: str) -> dict[str, str]:
     return {
         "schema": "sci-archive/0.1",
-        "bundle_url": f"https://github.com/{owner}/{repo}/releases/download/sci-{{id}}/{{id}}.zip",
+        "bundle_url": f"https://github.com/{owner}/{repo}/releases/download/sci-{{id2}}/{{id}}.zip",
         "entry_url": f"https://raw.githubusercontent.com/{owner}/{repo}/main/sci/publications/"
         "{id2}/{id}/{+path}",
         "list_url": f"https://raw.githubusercontent.com/{owner}/{repo}/main/sci/publications.txt",
@@ -42,6 +53,39 @@ def descriptor_for(owner: str, repo: str) -> dict[str, str]:
 
 class GitHubError(CliError):
     pass
+
+
+def _secondary_limit(response: Response) -> bool:
+    return response.status in (403, 429) and (
+        response.header("retry-after") is not None
+        or b"secondary rate limit" in response.body.lower()
+    )
+
+
+def _rate_limit_wait(response: Response) -> float | None:
+    """Seconds GitHub asks us to wait, or None if this is not a rate-limit response."""
+    if response.status not in (403, 429):
+        return None
+    wait = retry_after_seconds(response.header("retry-after"))
+    if wait is not None:
+        return wait
+    if response.header("x-ratelimit-remaining") == "0":
+        reset = response.header("x-ratelimit-reset") or ""
+        return max(0.0, int(reset) - time.time()) + 1.0 if reset.isdigit() else None
+    return SECONDARY_LIMIT_WAIT if _secondary_limit(response) or response.status == 429 else None
+
+
+def _inline_text(path: str, data: bytes) -> str | None:
+    """The text of a reader file small enough to send inside the tree request."""
+    name = path.rsplit("/", 1)[-1]
+    if len(data) > INLINE_FILE_LIMIT:
+        return None
+    if name not in _INLINE_NAMES and path not in (ARCHIVE_PATH, LIST_PATH):
+        return None
+    try:
+        return data.decode("utf-8")
+    except UnicodeDecodeError:
+        return None
 
 
 def _api_error(response: Response, what: str) -> CliError:
@@ -56,7 +100,9 @@ def _api_error(response: Response, what: str) -> CliError:
     if response.status in (401,):
         exit_code: int = Exit.USAGE
         code = "unauthorized"
-    elif response.status == 403 and response.header("x-ratelimit-remaining") == "0":
+    elif response.status == 403 and (
+        response.header("x-ratelimit-remaining") == "0" or _secondary_limit(response)
+    ):
         exit_code, code, temporary = Exit.INCOMPLETE, "rate_limited", True
     elif response.status == 403:
         exit_code, code = Exit.REFUSED, "forbidden"
@@ -73,8 +119,16 @@ def _api_error(response: Response, what: str) -> CliError:
 
 
 class GitHubArchive:
-    def __init__(self, http: HttpClient, owner: str, repo: str, token: str) -> None:
+    def __init__(
+        self,
+        http: HttpClient,
+        owner: str,
+        repo: str,
+        token: str,
+        notice: Callable[[str], None] | None = None,
+    ) -> None:
         self.http = http
+        self.notice = notice or (lambda _message: None)
         self.owner = owner
         self.repo = repo
         self.token = token
@@ -83,7 +137,7 @@ class GitHubArchive:
             f"https://raw.githubusercontent.com/{owner}/{repo}/main/{ARCHIVE_PATH}"
         )
         self._trees: dict[str, dict[str, tuple[str, str, int | None]]] = {}
-        self._releases: dict[str, dict[str, Any]] | None = None
+        self._buckets: dict[str, tuple[dict[str, Any], dict[str, dict[str, Any]]]] = {}
 
     # ------------------------------------------------------------------ HTTP
 
@@ -111,16 +165,24 @@ class GitHubArchive:
             body = json.dumps(document).encode("utf-8")
             all_headers["Content-Type"] = "application/json"
         all_headers.update(headers or {})
-        return self.http.request(
-            method,
-            url,
-            deadline=deadline,
-            headers=all_headers,
-            body=body,
-            auth=f"Bearer {self.token}",
-            max_bytes=max_bytes,
-            retry=method in ("GET", "HEAD", "PUT", "PATCH", "DELETE"),
-        )
+        for _wait in range(MAX_RATE_LIMIT_WAITS + 1):
+            response = self.http.request(
+                method,
+                url,
+                deadline=deadline,
+                headers=all_headers,
+                body=body,
+                auth=f"Bearer {self.token}",
+                max_bytes=max_bytes,
+                retry=method in ("GET", "HEAD", "PUT", "PATCH", "DELETE"),
+            )
+            wait = _rate_limit_wait(response)
+            if wait is None or wait > MAX_RATE_LIMIT_WAIT or _wait == MAX_RATE_LIMIT_WAITS:
+                return response
+            self.notice(f"GitHub rate limit reached; waiting {wait:.0f}s")
+            self.http.sleep(wait)
+            deadline.extend(wait)
+        raise AssertionError("unreachable")
 
     def _json(self, response: Response, what: str, ok: tuple[int, ...] = (200,)) -> Any:
         if response.status not in ok:
@@ -292,88 +354,114 @@ class GitHubArchive:
 
     # ------------------------------------------------------------------ releases
 
-    def _all_releases(self, deadline: Deadline) -> dict[str, dict[str, Any]]:
-        if self._releases is None:
-            releases: dict[str, dict[str, Any]] = {}
-            for page in range(1, 51):
-                records = self._json(
-                    self._call(
-                        "GET", f"{self._repo_path}/releases?per_page=100&page={page}", deadline
-                    ),
-                    "release listing",
+    def _bucket(
+        self, tag: str, deadline: Deadline
+    ) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+        """The shared release for ``tag`` and its assets by name, created if missing."""
+        if tag not in self._buckets:
+            release = self._find_release(tag, deadline)
+            if release is not None:
+                assets = self._list_assets(release, deadline)
+            else:
+                release, assets = self._create_release(tag, deadline)
+            self._buckets[tag] = (release, assets)
+        return self._buckets[tag]
+
+    def _find_release(self, tag: str, deadline: Deadline) -> dict[str, Any] | None:
+        response = self._call("GET", f"{self._repo_path}/releases/tags/{tag}", deadline)
+        if response.status == 404:
+            return None
+        release: dict[str, Any] = self._json(response, "release lookup")
+        return release
+
+    def _create_release(
+        self, tag: str, deadline: Deadline
+    ) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+        response = self._call(
+            "POST",
+            f"{self._repo_path}/releases",
+            deadline,
+            document={
+                "tag_name": tag,
+                "target_commitish": "main",
+                "name": tag,
+                "body": f"SCI publication bundles with IDs starting {tag.removeprefix('sci-')}",
+                "draft": False,
+                "make_latest": "false",
+            },
+        )
+        if response.status == 422:  # another publisher created it first
+            existing = self._find_release(tag, deadline)
+            if existing is not None:
+                return existing, self._list_assets(existing, deadline)
+        release: dict[str, Any] = self._json(response, "release creation", (201,))
+        return release, {}
+
+    def _list_assets(
+        self, release: dict[str, Any], deadline: Deadline
+    ) -> dict[str, dict[str, Any]]:
+        assets: dict[str, dict[str, Any]] = {}
+        for page in range(1, ASSET_PAGES + 1):
+            records = self._json(
+                self._call(
+                    "GET",
+                    f"{self._repo_path}/releases/{release['id']}/assets?per_page=100&page={page}",
+                    deadline,
+                ),
+                "release asset listing",
+            )
+            if not isinstance(records, list):
+                raise CliError(
+                    "invalid_response", "GitHub asset listing is not a list", Exit.INVALID
                 )
-                if not isinstance(records, list) or not records:
-                    break
-                for record in records:
-                    if isinstance(record, dict) and isinstance(record.get("tag_name"), str):
-                        releases.setdefault(record["tag_name"], record)
-                if len(records) < 100:
-                    break
-            self._releases = releases
-        return self._releases
+            assets.update(
+                (record["name"], record)
+                for record in records
+                if isinstance(record, dict) and isinstance(record.get("name"), str)
+            )
+            if len(records) < 100:
+                break
+        return assets
 
     def upload_release(self, pub: Prepared, deadline: Deadline) -> str:
-        """Ensure release ``sci-<id>`` holds ``<id>.zip``; return uploaded/reused.
+        """Ensure the shared release ``sci-<id2>`` holds ``<id>.zip``; return uploaded/reused.
 
-        The release stays a draft until its asset is complete, then is
-        published without being marked latest.
+        An asset cannot be downloaded until its upload completes, so a release
+        never exposes a partial ZIP.
         """
-        tag = f"sci-{pub.digest}"
+        tag = f"sci-{pub.digest[:2]}"
         name = f"{pub.digest}.zip"
-        releases = self._all_releases(deadline)
-        release = releases.get(tag)
-        if release is None:
-            release = self._json(
-                self._call(
-                    "POST",
-                    f"{self._repo_path}/releases",
-                    deadline,
-                    document={
-                        "tag_name": tag,
-                        "target_commitish": "main",
-                        "name": tag,
-                        "body": f"SCI publication sha256:{pub.digest}",
-                        "draft": True,
-                        "make_latest": "false",
-                    },
-                ),
-                "release creation",
-                (201,),
-            )
-            releases[tag] = release
-        status = "uploaded"
-        asset = next(
-            (a for a in release.get("assets", []) if isinstance(a, dict) and a.get("name") == name),
-            None,
-        )
-        if asset is not None and asset.get("state") != "uploaded":
-            response = self._call("DELETE", str(asset["url"]), deadline)
-            if response.status not in (204, 404):
-                raise _api_error(response, "incomplete asset removal")
-            asset = None
-        if asset is not None:
-            if not self._asset_matches(asset, pub, deadline):
-                raise CliError(
-                    "destination_conflict",
-                    f"release {tag} already has a different {name}",
-                    Exit.INVALID,
-                )
-            status = "reused"
-        else:
+        for attempt in (1, 2):
+            release, assets = self._bucket(tag, deadline)
+            asset = assets.get(name)
+            if asset is not None and asset.get("state") != "uploaded":
+                response = self._call("DELETE", str(asset["url"]), deadline)
+                if response.status not in (204, 404):
+                    raise _api_error(response, "incomplete asset removal")
+                del assets[name]
+                asset = None
+            if asset is not None:
+                if not self._asset_matches(asset, pub, deadline):
+                    raise CliError(
+                        "destination_conflict",
+                        f"release {tag} already has a different {name}",
+                        Exit.INVALID,
+                    )
+                return "reused"
             upload = str(release.get("upload_url", "")).split("{", 1)[0]
             if not upload.startswith("https://"):
                 raise CliError("invalid_response", "release has no upload_url", Exit.INVALID)
-            uploaded = self._json(
-                self._call(
-                    "POST",
-                    f"{upload}?{urllib.parse.urlencode({'name': name})}",
-                    deadline,
-                    body=pub.zip_path,
-                    headers={"Content-Type": "application/zip"},
-                ),
-                "asset upload",
-                (201,),
+            response = self._call(
+                "POST",
+                f"{upload}?{urllib.parse.urlencode({'name': name})}",
+                deadline,
+                body=pub.zip_path,
+                headers={"Content-Type": "application/zip"},
             )
+            if response.status == 422 and attempt == 1:  # another publisher uploaded it first
+                del self._buckets[tag]
+                continue
+            uploaded = self._json(response, "asset upload", (201,))
             if not isinstance(uploaded, dict) or uploaded.get("size") != pub.zip_size:
                 raise CliError(
                     "upload_incomplete",
@@ -389,18 +477,9 @@ class GitHubArchive:
                     Exit.INCOMPLETE,
                     retryable=True,
                 )
-        if release.get("draft"):
-            published = self._json(
-                self._call(
-                    "PATCH",
-                    f"{self._repo_path}/releases/{release['id']}",
-                    deadline,
-                    document={"draft": False, "make_latest": "false"},
-                ),
-                "release publication",
-            )
-            releases[tag] = published
-        return status
+            assets[name] = uploaded
+            return "uploaded"
+        raise AssertionError("unreachable")
 
     def _asset_matches(self, asset: dict[str, Any], pub: Prepared, deadline: Deadline) -> bool:
         digest = asset.get("digest")
@@ -428,8 +507,17 @@ class GitHubArchive:
             _NotFastForward: ``main`` moved; the caller rebuilds and retries.
         """
         root = self.commit_tree(head, deadline)
-        entries = []
+        entries: list[dict[str, str]] = []
+        inlined: dict[str, bytes] = {}
+        inline_bytes = 0
         for path, data in sorted(files.items()):
+            entry = {"path": path, "mode": "100644", "type": "blob"}
+            text = _inline_text(path, data)
+            if text is not None and inline_bytes + len(data) <= INLINE_REQUEST_LIMIT:
+                inline_bytes += len(data)
+                inlined[path] = data
+                entries.append({**entry, "content": text})
+                continue
             blob = self._json(
                 self._call(
                     "POST",
@@ -443,7 +531,7 @@ class GitHubArchive:
                 "blob creation",
                 (201,),
             )
-            entries.append({"path": path, "mode": "100644", "type": "blob", "sha": blob["sha"]})
+            entries.append({**entry, "sha": blob["sha"]})
         tree = self._json(
             self._call(
                 "POST",
@@ -454,6 +542,15 @@ class GitHubArchive:
             "tree creation",
             (201,),
         )
+        for path, data in inlined.items():
+            stored = self.lookup(tree["sha"], path, deadline)
+            if stored is None or stored.git_sha1 != _git_sha(data):
+                raise CliError(
+                    "upload_corrupted",
+                    f"GitHub stored different bytes for {path}",
+                    Exit.INCOMPLETE,
+                    retryable=True,
+                )
         commit = self._json(
             self._call(
                 "POST",
@@ -475,6 +572,49 @@ class GitHubArchive:
         self._json(response, "branch update")
         return str(commit["sha"])
 
+    def _commit_batch(
+        self,
+        head: str,
+        writes: dict[str, bytes],
+        completed: list[str],
+        write_archive: bool,
+        timeout: float,
+    ) -> tuple[str, str | None]:
+        """Commit one batch, rebuilding on a moved ``main``; return (head, commit or None)."""
+        for _attempt in range(4):
+            deadline = Deadline(timeout)
+            root = self.commit_tree(head, deadline)
+            files = dict(writes)
+            if write_archive and self.lookup(root, ARCHIVE_PATH, deadline) is None:
+                files[ARCHIVE_PATH] = descriptor_bytes(self.descriptor)
+            files[LIST_PATH] = merged_list(self.read(root, LIST_PATH, deadline), completed)
+            files = {
+                p: d
+                for p, d in files.items()
+                if (r := self.lookup(root, p, deadline)) is None or r.git_sha1 != _git_sha(d)
+            }
+            if not files:
+                return head, None
+            try:
+                commit_sha = self.commit(
+                    head, files, f"Publish {len(completed)} SCI publication(s)", deadline
+                )
+                return commit_sha, commit_sha
+            except _NotFastForward:
+                self._trees.clear()
+                new_head = self._ref("main", deadline)
+                if new_head is None:
+                    raise CliError(
+                        "branch_missing", "main disappeared during publishing", Exit.INCOMPLETE
+                    ) from None
+                head = new_head
+        raise CliError(
+            "concurrent_update",
+            "main kept moving during publishing; retry",
+            Exit.INCOMPLETE,
+            retryable=True,
+        )
+
     # ------------------------------------------------------------------ workflow
 
     def publish(
@@ -491,9 +631,40 @@ class GitHubArchive:
         reports: list[ItemReport] = []
         writes: dict[str, bytes] = {}
         completed: list[str] = []
+        commit_sha = None
+        committed_any = False
+        stopped: CliError | None = None
+
+        def commit_batch() -> None:
+            nonlocal head, commit_sha, write_archive, committed_any, stopped
+            assert head is not None
+            try:
+                head, new_commit = self._commit_batch(
+                    head, writes, completed, write_archive, timeout
+                )
+            except CliError as exc:
+                if not committed_any:
+                    raise
+                stopped = exc
+                for report in reports:
+                    if report.status == "pending_commit":
+                        report.fail(exc.records[0], exc.exit_code)
+                return
+            commit_sha = new_commit or commit_sha
+            write_archive = False
+            committed_any = True
+            writes.clear()
+            completed.clear()
+            for report in reports:
+                if report.status == "pending_commit":
+                    report.status = "hosted"
+
         for pub in pubs:
             report = ItemReport(pub.item.publication_id)
             reports.append(report)
+            if stopped is not None:
+                report.fail(stopped.records[0], stopped.exit_code)
+                continue
             item_deadline = Deadline(timeout)
             try:
                 remote = {
@@ -517,44 +688,10 @@ class GitHubArchive:
             report.uploaded = sorted(planned)
             completed.append(pub.digest)
             report.status = "pending_commit"
-        commit_sha = None
-        for _attempt in range(4):
-            commit_deadline = Deadline(timeout)
-            root = self.commit_tree(head, commit_deadline)
-            files = dict(writes)
-            if write_archive and self.lookup(root, ARCHIVE_PATH, commit_deadline) is None:
-                files[ARCHIVE_PATH] = descriptor_bytes(self.descriptor)
-            files[LIST_PATH] = merged_list(self.read(root, LIST_PATH, commit_deadline), completed)
-            files = {
-                p: d
-                for p, d in files.items()
-                if (r := self.lookup(root, p, commit_deadline)) is None or r.git_sha1 != _git_sha(d)
-            }
-            if not files:
-                break
-            try:
-                commit_sha = self.commit(
-                    head, files, f"Publish {len(completed)} SCI publication(s)", commit_deadline
-                )
-                break
-            except _NotFastForward:
-                self._trees.clear()
-                new_head = self._ref("main", commit_deadline)
-                if new_head is None:
-                    raise CliError(
-                        "branch_missing", "main disappeared during publishing", Exit.INCOMPLETE
-                    ) from None
-                head = new_head
-        else:
-            raise CliError(
-                "concurrent_update",
-                "main kept moving during publishing; retry",
-                Exit.INCOMPLETE,
-                retryable=True,
-            )
-        for report in reports:
-            if report.status == "pending_commit":
-                report.status = "hosted"
+            if len(completed) >= BATCH_SIZE:
+                commit_batch()
+        if stopped is None:
+            commit_batch()
         hosted = [p for p, r in zip(pubs, reports, strict=True) if r.status == "hosted"]
         checks: list[tuple[str, str, bytes | None]] = [
             ("descriptor", self.descriptor_url, descriptor_bytes(self.descriptor))
