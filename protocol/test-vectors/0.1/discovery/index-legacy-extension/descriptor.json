@@ -1,0 +1,1 @@
+{"schema":"sci-index/0.1","publication_lookup_url":"https://index.example/p/{id}","revocation_lookup_url":"https://index.example/k/{x}/{file}","timestamp_lookup_url":"https://index.example/t/{id}","lookup_url":"https://index.example/p/{id}"}

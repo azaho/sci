@@ -1,0 +1,1 @@
+{"schema":"sci-publication/0.1","public_key":{"kty":"OKP","crv":"Ed25519","x":"r62dZA1e7otKi0TIjDuv-wwYUtAUSQc8gahkAW7Cxwk"},"files":{"README.md":{"sha256":"9feea8484629acde377f062450e9fe90adfa9dc295e854a96911ef5de3510bb8","bytes":70},"sci.json":{"sha256":"322466aa2c865a70fa6cd8544733c8b53def31c8f8bf329918a22c6167cf4dcd","bytes":74}}}

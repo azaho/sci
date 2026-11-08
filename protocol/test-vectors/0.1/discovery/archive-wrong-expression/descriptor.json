@@ -1,0 +1,1 @@
+{"schema":"sci-archive/0.1","bundle_url":"https://archive.example/{id2}/{id}.zip","entry_url":"https://archive.example/{unknown}","blob_url":"https://archive.example/blobs/{sha256}","list_url":"https://archive.example/list.txt"}

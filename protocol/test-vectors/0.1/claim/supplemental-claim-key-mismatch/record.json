@@ -1,0 +1,1 @@
+{"schema":"sci-key-claim/0.1","public_key":{"kty":"OKP","crv":"Ed25519","x":"9vH9RYHu9VBlS6uqcFpCBJvLDwdH7-WDnoVkyDbPCV8"},"account":{"type":"domain","id":"example.org"},"expires":"2027-01-01T00:00:00Z"}
