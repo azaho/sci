@@ -20,6 +20,7 @@ export interface Claim {
   readonly publicKeyBytes: Uint8Array;
   readonly account: Account;
   readonly note?: string;
+  readonly name?: string;
   readonly expires: string;
   readonly expiresAt: Instant;
   readonly bytes: Uint8Array;
@@ -113,7 +114,7 @@ export function parseClaim(bytes: Uint8Array, signature: Uint8Array, budget?: Pa
   if (bytes.length > b.maxJsonBytes) incomplete('budget.json_bytes', '§6', 'Claim exceeds the local size budget');
   const value = parseJsonBytes(bytes, { maxDepth: b.maxJsonDepth, path: 'claim' });
   const obj = checkRecordSchema(value, SCHEMAS.claim, '§5.2.1', 'claim');
-  checkFields(obj, ['schema', 'public_key', 'account', 'expires'], ['note'], '§5.2.1');
+  checkFields(obj, ['schema', 'public_key', 'account', 'expires'], ['note', 'name'], '§5.2.1');
   const { jwk, bytes: keyBytes } = parsePublicJwk(obj.get('public_key'), '/public_key');
   const account = parseAccount(obj.get('account'));
   let note: string | undefined;
@@ -123,12 +124,37 @@ export function parseClaim(bytes: Uint8Array, signature: Uint8Array, budget?: Pa
     checkText(n, { controls: true, nonblank: true, maxCodePoints: 2500, path: '/note', requirement: '§5.2.1, §4.2' });
     note = n;
   }
+  let name: string | undefined;
+  if (obj.has('name')) {
+    const n = obj.get('name');
+    if (typeof n !== 'string') fail('claim.name', '§5.2.1', 'name must be a string', { path: '/name' });
+    checkText(n, { nonblank: true, maxCodePoints: 80, path: '/name', requirement: '§5.2.1' });
+    if (
+      /^[ \u00a0\u1680\u2000-\u200a\u202f\u205f\u3000]|[ \u00a0\u1680\u2000-\u200a\u202f\u205f\u3000]$/u.test(n) ||
+      /^[ \u00a0\u1680\u2000-\u200a\u202f\u205f\u3000\u200c\u200d]*$/u.test(n) ||
+      /[\u00ad\u061c\u200b\u200e\u200f\u2028-\u202e\u2060-\u2069\ufeff]/u.test(n)
+    ) {
+      fail('claim.name', '§5.2.1', 'name must be nonblank, without outer whitespace, line separators or hidden formatting controls', {
+        path: '/name',
+      });
+    }
+    name = n;
+  }
   const expires = obj.get('expires');
   if (typeof expires !== 'string') fail('claim.expires', '§5.2.1', 'expires must be a string', { path: '/expires' });
   const expiresAt = parseRfc3339(expires);
   if (!expiresAt) fail('claim.expires', '§5.2.1', 'expires must be an RFC 3339 date-time', { path: '/expires', observed: expires });
   verifyEd25519(keyBytes, bytes, signature, 'claim.json.sig');
-  return { publicKey: jwk, publicKeyBytes: keyBytes, account, ...(note !== undefined ? { note } : {}), expires, expiresAt, bytes };
+  return {
+    publicKey: jwk,
+    publicKeyBytes: keyBytes,
+    account,
+    ...(note !== undefined ? { note } : {}),
+    ...(name !== undefined ? { name } : {}),
+    expires,
+    expiresAt,
+    bytes,
+  };
 }
 
 export interface ClaimCheckOptions {

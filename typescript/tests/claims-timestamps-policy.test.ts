@@ -61,6 +61,46 @@ describe('claims (§5.2, §6.6) and revocations (§5.3, §6.7)', () => {
     assert.equal(issueOf(() => verifyClaim(bad, signEd25519(SEED, bad), base)).code, 'claim.expires');
   });
 
+  test('publisher names preserve Unicode and reject invalid display text', () => {
+    for (const name of [
+      'Andrii Zahorodnii',
+      'Massachusetts Institute of Technology',
+      '\u674e\u660e',
+      '\u0645\u0624\u0633\u0633\u0629 \u0627\u0644\u0628\u062d\u062b',
+      '\u092a\u0930\u0940\u0915\u094d\u0937\u0923',
+      'e\u0301',
+      'a\u200cb',
+      'a\u200db',
+      '\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00',
+    ]) {
+      const bytes = claim({ schema: 'sci-key-claim/0.1', name });
+      assert.equal(verifyClaim(bytes, signEd25519(SEED, bytes), base).name, name);
+    }
+    for (const name of [
+      '',
+      ' ',
+      '\u00a0',
+      ' Name',
+      'Name ',
+      '\u200d',
+      'a\nb',
+      'a\rb',
+      'a\tb',
+      'a\u2028b',
+      'a\u2029b',
+      'a\u202eb',
+      'a\u2066b',
+      'a\u200bb',
+      'a\ufeffb',
+      '\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00\ud801\udc00',
+    ]) {
+      const bytes = claim({ schema: 'sci-key-claim/0.1', name });
+      assert.equal(issueOf(() => verifyClaim(bytes, signEd25519(SEED, bytes), base)).outcome, 'invalid');
+    }
+    const nameless = claim({ schema: 'sci-key-claim/0.1' });
+    assert.equal(verifyClaim(nameless, signEd25519(SEED, nameless), base).name, undefined);
+  });
+
   test('RFC 3339 parsing', () => {
     assert.deepEqual(parseRfc3339('2026-11-07T12:00:00.5z'), { seconds: Date.UTC(2026, 10, 7, 12) / 1000, nanos: 500_000_000 });
     assert.equal(parseRfc3339('2026-02-29T00:00:00Z'), null);

@@ -2,7 +2,7 @@
   "schema": "sci-test-vectors/1",
   "protocol": "sci-publication/0.1",
   "spec_commit": "0164db28435d7ca461c041039d2ed2fafcfa026f",
-  "spec_sha256": "f254d72767824542c97ef9e735755a28f706b417b730ed15ccc2062011fe9bb6",
+  "spec_sha256": "635350d6d5e6068d36b0706c7813ffe19dbf725c72b4eec35aa848454fb3c34a",
   "test_public_key": {
     "kty": "OKP",
     "crv": "Ed25519",
@@ -3194,6 +3194,188 @@
         "requested_account": {
           "type": "domain",
           "id": "example.org."
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "known_revocation": false,
+        "retrieved_from_account_location": true
+      }
+    },
+    {
+      "id": "claim-name",
+      "kind": "claim",
+      "sections": [
+        "5.2.1",
+        "6.6"
+      ],
+      "description": "Publisher display name validation.",
+      "artifacts": {
+        "record.json": "claim/claim-name/record.json",
+        "record.json.sig": "claim/claim-name/record.json.sig"
+      },
+      "expected": {
+        "outcome": "valid"
+      },
+      "context": {
+        "expected_public_key_x": "B0FOUbkEkRCSvkhN3_l43qNcIhewT-QlZq-BnxuvDPg",
+        "requested_account": {
+          "type": "domain",
+          "id": "example.org"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "known_revocation": false,
+        "retrieved_from_account_location": true
+      }
+    },
+    {
+      "id": "claim-name-unicode",
+      "kind": "claim",
+      "sections": [
+        "5.2.1",
+        "6.6"
+      ],
+      "description": "Publisher display name validation.",
+      "artifacts": {
+        "record.json": "claim/claim-name-unicode/record.json",
+        "record.json.sig": "claim/claim-name-unicode/record.json.sig"
+      },
+      "expected": {
+        "outcome": "valid"
+      },
+      "context": {
+        "expected_public_key_x": "B0FOUbkEkRCSvkhN3_l43qNcIhewT-QlZq-BnxuvDPg",
+        "requested_account": {
+          "type": "domain",
+          "id": "example.org"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "known_revocation": false,
+        "retrieved_from_account_location": true
+      }
+    },
+    {
+      "id": "claim-name-boundary",
+      "kind": "claim",
+      "sections": [
+        "5.2.1",
+        "6.6"
+      ],
+      "description": "Publisher display name validation.",
+      "artifacts": {
+        "record.json": "claim/claim-name-boundary/record.json",
+        "record.json.sig": "claim/claim-name-boundary/record.json.sig"
+      },
+      "expected": {
+        "outcome": "valid"
+      },
+      "context": {
+        "expected_public_key_x": "B0FOUbkEkRCSvkhN3_l43qNcIhewT-QlZq-BnxuvDPg",
+        "requested_account": {
+          "type": "domain",
+          "id": "example.org"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "known_revocation": false,
+        "retrieved_from_account_location": true
+      }
+    },
+    {
+      "id": "claim-name-too-long",
+      "kind": "claim",
+      "sections": [
+        "5.2.1",
+        "6.6"
+      ],
+      "description": "Publisher display name validation.",
+      "artifacts": {
+        "record.json": "claim/claim-name-too-long/record.json",
+        "record.json.sig": "claim/claim-name-too-long/record.json.sig"
+      },
+      "expected": {
+        "outcome": "invalid"
+      },
+      "context": {
+        "expected_public_key_x": "B0FOUbkEkRCSvkhN3_l43qNcIhewT-QlZq-BnxuvDPg",
+        "requested_account": {
+          "type": "domain",
+          "id": "example.org"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "known_revocation": false,
+        "retrieved_from_account_location": true
+      }
+    },
+    {
+      "id": "claim-name-newline",
+      "kind": "claim",
+      "sections": [
+        "5.2.1",
+        "6.6"
+      ],
+      "description": "Publisher display name validation.",
+      "artifacts": {
+        "record.json": "claim/claim-name-newline/record.json",
+        "record.json.sig": "claim/claim-name-newline/record.json.sig"
+      },
+      "expected": {
+        "outcome": "invalid"
+      },
+      "context": {
+        "expected_public_key_x": "B0FOUbkEkRCSvkhN3_l43qNcIhewT-QlZq-BnxuvDPg",
+        "requested_account": {
+          "type": "domain",
+          "id": "example.org"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "known_revocation": false,
+        "retrieved_from_account_location": true
+      }
+    },
+    {
+      "id": "claim-name-bidi",
+      "kind": "claim",
+      "sections": [
+        "5.2.1",
+        "6.6"
+      ],
+      "description": "Publisher display name validation.",
+      "artifacts": {
+        "record.json": "claim/claim-name-bidi/record.json",
+        "record.json.sig": "claim/claim-name-bidi/record.json.sig"
+      },
+      "expected": {
+        "outcome": "invalid"
+      },
+      "context": {
+        "expected_public_key_x": "B0FOUbkEkRCSvkhN3_l43qNcIhewT-QlZq-BnxuvDPg",
+        "requested_account": {
+          "type": "domain",
+          "id": "example.org"
+        },
+        "now": "2026-11-07T12:00:00Z",
+        "known_revocation": false,
+        "retrieved_from_account_location": true
+      }
+    },
+    {
+      "id": "claim-name-blank",
+      "kind": "claim",
+      "sections": [
+        "5.2.1",
+        "6.6"
+      ],
+      "description": "Publisher display name validation.",
+      "artifacts": {
+        "record.json": "claim/claim-name-blank/record.json",
+        "record.json.sig": "claim/claim-name-blank/record.json.sig"
+      },
+      "expected": {
+        "outcome": "invalid"
+      },
+      "context": {
+        "expected_public_key_x": "B0FOUbkEkRCSvkhN3_l43qNcIhewT-QlZq-BnxuvDPg",
+        "requested_account": {
+          "type": "domain",
+          "id": "example.org"
         },
         "now": "2026-11-07T12:00:00Z",
         "known_revocation": false,
@@ -8468,7 +8650,7 @@
         "5.2",
         "6.6"
       ],
-      "description": "Extra field `name`.",
+      "description": "Extra field `alias`.",
       "artifacts": {
         "record.json": "claim/supplemental-claim-extra-field/record.json",
         "record.json.sig": "claim/supplemental-claim-extra-field/record.json.sig"

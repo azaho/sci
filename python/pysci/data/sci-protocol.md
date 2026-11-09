@@ -259,8 +259,21 @@ The claim is a JSON object with only these fields:
 | `schema` | Yes | String, exactly `sci-key-claim/0.1`. |
 | `public_key` | Yes | Public JWK under section 5.1. |
 | `account` | Yes | Object with exactly two string fields: `type` and `id`. The account method defines their values. |
+| `name` | No | Publisher display name. The rules below apply. |
 | `note` | No | Nonblank string, at most 2,500 Unicode code points. Uses the `abstract` character rules in section 4.2. |
 | `expires` | Yes | String, an expiry time in [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6) format. |
+
+`name`, when present, MUST be a nonblank string of at most 80 Unicode code points and follow the single-line character rules of section 4.2.
+It MUST NOT contain U+00AD, U+061C, U+200B, U+200E–U+200F, U+2028–U+202E, U+2060–U+2069, or U+FEFF.
+It MUST NOT begin or end with SPACE, U+00A0, U+1680, U+2000–U+200A, U+202F, U+205F, or U+3000, or consist only of those characters and U+200C–U+200D.
+These rules exclude line separators and hidden formatting controls while permitting joining controls needed by some scripts.
+Validators MUST NOT trim or normalize the signed name.
+
+The name describes the publisher in this key-account association. It is not a unique identifier, a claim of personal authorship, or independently verified real-world identity.
+Readers displaying the name SHOULD display its account alongside it, isolate bidirectional text, and render it as plain text.
+Names MUST NOT affect identity matching, signature verification, admission, or revocation decisions.
+The `note` remains explanatory text; readers MUST NOT infer a name from it.
+Claims without a name remain valid. Claim renewal does not change publication bytes or identifiers.
 
 Publishers SHOULD set `expires` no more than 90 days after signing.
 Readers and indexers MAY impose a shorter remaining validity period as local policy.

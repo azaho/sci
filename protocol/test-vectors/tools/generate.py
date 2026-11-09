@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC_COMMIT = '0164db28435d7ca461c041039d2ed2fafcfa026f'
-SPEC_SHA256 = 'f254d72767824542c97ef9e735755a28f706b417b730ed15ccc2062011fe9bb6'
+SPEC_SHA256 = '635350d6d5e6068d36b0706c7813ffe19dbf725c72b4eec35aa848454fb3c34a'
 SEED = hashlib.sha256(b'SCI conformance fixtures: PUBLIC TEST KEY, NOT FOR PRODUCTION').digest()
 KEY = Ed25519PrivateKey.from_private_bytes(SEED)
 PUBLIC = KEY.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
@@ -303,6 +303,17 @@ def generate_records():
                 if 'account' in change:
                     cx['requested_account']=change['account']
                 record('claim-'+name,c,'claim',outcome='invalid',context=cx,reason='Association must not be reported as verified.',section='5.2,6.6')
+            for label, name, outcome in [
+                ('name', 'Andrii Zahorodnii', 'valid'),
+                ('name-unicode', '李明', 'valid'),
+                ('name-boundary', '\U00010400' * 80, 'valid'),
+                ('name-too-long', '\U00010400' * 81, 'invalid'),
+                ('name-newline', 'First\nLast', 'invalid'),
+                ('name-bidi', 'First\u202eLast', 'invalid'),
+                ('name-blank', '\u00a0', 'invalid'),
+            ]:
+                record('claim-' + label, {**claim, 'name': name}, 'claim', outcome=outcome,
+                       context=ctx, section='5.2.1,6.6', reason='Publisher display name validation.')
             record('claim-bad-signature',claim,'claim',outcome='invalid',context=ctx,sig_transform=lambda s:bytes([s[0]^1])+s[1:],section='5.2,6.6',reason='Invalid claim signature.')
             record('claim-missing-source',claim,'claim',outcome='incomplete',context={**ctx,'transport':'unavailable'},section='6',reason='Unavailable hosted evidence is not an invalid signed claim.')
     # Explicit temporal/service scenarios, consumed by adapters rather than cryptographic validators.

@@ -758,7 +758,7 @@ def gen_claims():
           expected="invalid", account=acct)
     claim("claim-bad-expires", "`expires` not RFC 3339 (`2027-01-01`).",
           {**good, "expires": "2027-01-01"}, expected="invalid", account=acct)
-    claim("claim-extra-field", "Extra field `name`.", {**good, "name": "Alice"},
+    claim("claim-extra-field", "Extra field `alias`.", {**good, "alias": "Alice"},
           expected="invalid", account=acct)
     claim("claim-wrong-schema", "Publication schema in a claim.",
           {**good, "schema": "sci-publication/0.1"}, expected="invalid", account=acct)

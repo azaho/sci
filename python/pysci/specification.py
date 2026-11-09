@@ -9,7 +9,7 @@ from importlib import resources
 
 #: SHA-256 of ``protocol/README.md`` for protocol draft 0.1, as pinned by the
 #: conformance corpus (``protocol/test-vectors/0.1/catalog.json``).
-PROTOCOL_SPEC_SHA256 = "f254d72767824542c97ef9e735755a28f706b417b730ed15ccc2062011fe9bb6"
+PROTOCOL_SPEC_SHA256 = "635350d6d5e6068d36b0706c7813ffe19dbf725c72b4eec35aa848454fb3c34a"
 
 _HEADING = re.compile(r"^(#{2,6}) (\d+(?:\.\d+)*)\.? ")
 _ANY_HEADING = re.compile(r"^(#{1,6}) ")
