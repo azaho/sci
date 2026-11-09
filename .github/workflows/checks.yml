@@ -76,6 +76,13 @@ jobs:
       - run: npm ci
       - name: Type check, lint, build, Node and Deno tests, protocol conformance
         run: npm run check
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
+        with:
+          deno-version: v2.1.4
+      - name: Real FreeTSA regression on the older Edge runtime
+        # Types are checked above with the supported compiler; this step tests
+        # the old runtime's crypto implementation against the same fixture.
+        run: deno test --no-check --allow-read tests/freetsa.test.ts
 
   install:
     needs: components
