@@ -239,14 +239,34 @@ function parseContentRange(v: string | null): { start: number; end: number; tota
  * A {@link ByteSource} over a `bundle_url` using single-range requests (§8.2). If the server
  * ignores ranges or hides `Content-Range`, falls back to one bounded full download.
  */
-export async function httpRangeSource(url: string, opts: RetrievalOptions = {}): Promise<ByteSource> {
+export async function httpRangeSource(url: string, opts: RetrievalOptions & { readonly expectedSize?: number } = {}): Promise<ByteSource> {
   const b = resolveBudget(opts.budget);
+  const expectedSize = opts.expectedSize;
+  if (expectedSize !== undefined) {
+    if (!Number.isSafeInteger(expectedSize) || expectedSize < 0) throw new RangeError('Invalid expected ZIP size');
+    if (expectedSize > b.maxTotalBytes) incomplete('budget.total_bytes', '§6', 'Bundle exceeds the local verification budget');
+  }
+  const sizeMismatch = (): never => fail('zip.size_formula', '§2.1', 'ZIP size differs from the signed manifest');
+  const checkSize = (size: number): void => {
+    if (expectedSize !== undefined && size !== expectedSize) sizeMismatch();
+  };
+  const initialBytes = async (maxBytes: number, init: RequestInit = {}): Promise<Fetched> => {
+    try {
+      return await fetchBytes(url, opts, expectedSize ?? maxBytes, init);
+    } catch (error) {
+      // The signed size is a format constraint, not an operator-tunable budget.
+      // readLimited has already cancelled the oversized stream before throwing.
+      if (expectedSize !== undefined && error instanceof SciError && error.issue.code === 'budget.response_bytes') sizeMismatch();
+      throw error;
+    }
+  };
   // GitHub release storage accepts explicit ranges but rejects suffix ranges with HTTP 501.
-  const probe = await fetchBytes(url, opts, Math.max(22, b.maxTotalBytes), { headers: { Range: 'bytes=0-0' } });
+  const probe = await initialBytes(Math.max(22, b.maxTotalBytes), { headers: { Range: 'bytes=0-0' } });
   const cr = probe.status === 206 ? parseContentRange(probe.headers.get('content-range')) : null;
   if (probe.status === 200 || (probe.status === 206 && !cr)) {
     let full = probe.body;
-    if (probe.status === 206) full = requireOk(await fetchBytes(url, opts, b.maxTotalBytes), url);
+    if (probe.status === 206) full = requireOk(await initialBytes(b.maxTotalBytes), url);
+    checkSize(full.length);
     return {
       size: full.length,
       read(offset, length) {
@@ -257,6 +277,7 @@ export async function httpRangeSource(url: string, opts: RetrievalOptions = {}):
   }
   if (probe.status !== 206 || !cr) incomplete('transport.status', '§6', `Unexpected HTTP status ${probe.status}`, { path: url });
   const total = cr.total;
+  checkSize(total);
   if (total > b.maxTotalBytes) incomplete('budget.total_bytes', '§6', 'Bundle exceeds the local verification budget', { observed: total });
   const cached = probe.body;
   if (cached.length !== cr.end - cr.start + 1) incomplete('transport.range', '§8.2', 'Range response length mismatch', { path: url });
@@ -368,7 +389,7 @@ class Remote implements RemotePublication {
         const expectedSize = zipSizeOf(this.manifest.bytes.length, this.signature.length, this.manifest.files);
         const b = resolveBudget(this.#opts.budget);
         if (expectedSize > b.maxTotalBytes) incomplete('budget.total_bytes', '§6', 'Bundle exceeds the local verification budget');
-        const source = await httpRangeSource(url, { ...this.#opts, budget: { ...b, maxTotalBytes: expectedSize } });
+        const source = await httpRangeSource(url, { ...this.#opts, expectedSize });
         if (source.size !== expectedSize) fail('zip.size_formula', '§2.1', 'ZIP size differs from the signed manifest');
         const dir = await readZipDirectory(source, resolveBudget(this.#opts.budget).maxEntries);
         return { source, dir };
