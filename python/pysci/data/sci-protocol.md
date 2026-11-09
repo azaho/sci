@@ -264,6 +264,7 @@ The claim is a JSON object with only these fields:
 | `expires` | Yes | String, an expiry time in [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6) format. |
 
 Publishers SHOULD set `expires` no more than 90 days after signing.
+Expiry ends a claim's current status. A hosted claim still covers publications timestamped before `expires`, under section 6.6, so a retired key needs no renewal.
 Readers and indexers MAY impose a shorter remaining validity period as local policy.
 Readers and indexers MAY reuse a successful association check until the claim expires.
 
@@ -426,7 +427,7 @@ Before reporting a key's external association as verified, readers, archivers, a
 - Check that the claim's decoded public key bytes equal the expected public key bytes.
 - Check that `account.type` and `account.id` equal the requested account type and identifier.
 - Check the claim signature under section 5.1.
-- Check that the current time is before `expires`.
+- Check that the current time is before `expires`. Alternatively, to report an association as held when a publication was made, check that a timestamp verified under section 6.8 for that publication has a `genTime` before `expires`.
 - Check that the key has no known verified revocation.
 
 A successful check for the same key and account MAY be reused under section 5.2.1.
