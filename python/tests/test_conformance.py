@@ -32,4 +32,4 @@ def test_adapter_passes_corpus() -> None:
     command += ["--", sys.executable, str(adapter)]
     completed = subprocess.run(command, capture_output=True, text=True, timeout=600, check=False)
     assert completed.returncode == 0, completed.stderr[-4000:]
-    assert "Adapter passed 663 cases" in completed.stdout
+    assert "Adapter passed 670 cases" in completed.stdout

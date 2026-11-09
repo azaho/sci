@@ -301,7 +301,7 @@ def check_record(raw,sig,kind,ctx):
     schema='sci-key-revocation/0.1' if kind=='revocation' else 'sci-key-claim/0.1'
     check_schema(m,schema)
     if kind=='revocation':keys(m,('schema','public_key'))
-    else:keys(m,('schema','public_key','account','expires'),('note',))
+    else:keys(m,('schema','public_key','account','expires'),('note','name'))
     signature(m['public_key'],raw,sig)
     require(m['public_key']['x']==ctx['expected_public_key_x'],'requested key')
     if kind=='claim':
@@ -318,6 +318,8 @@ def check_record(raw,sig,kind,ctx):
         elif a['type']=='github':require(a['id']==a['id'].lower(),'GitHub lowercase login')
         else:require(a['type']=='huggingface','unknown account method')
         if 'note' in m:text(m['note'],2500,controls=True)
+        if 'name' in m:
+            n=m['name'];text(n,80)
         require(isinstance(m['expires'],str) and re.fullmatch(r'[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:[Zz]|[+-][0-9]{2}:[0-9]{2})',m['expires']),'RFC 3339 expiry')
         require(datetime.fromisoformat(ctx['now'])<datetime.fromisoformat(m['expires'].replace('z','Z')),'claim expired')
         require(not ctx['known_revocation'] and ctx['retrieved_from_account_location'],'revoked/unhosted claim')

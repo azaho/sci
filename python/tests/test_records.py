@@ -146,3 +146,52 @@ def test_rfc3339_accepts_offsets_fractions_and_leap_second() -> None:
     assert parse_rfc3339("2026-11-07t12:00:00.5z").microsecond == 500000
     assert parse_rfc3339("2016-12-31T23:59:60Z") == datetime(2017, 1, 1, tzinfo=UTC)
     assert format_rfc3339(NOW) == "2026-11-07T12:00:00Z"
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "Andrii Zahorodnii",
+        " Name ",
+        "a\u202eb",
+        "Massachusetts Institute of Technology",
+        "李明",
+        "مؤسسة البحث",
+        "परीक्षण",
+        "é",
+        "a\u200cb",
+        "a\u200db",
+        "𐐀" * 80,
+    ],
+)
+def test_named_claim(private_key: Ed25519PrivateKey, name: str) -> None:
+    signed = create_claim(
+        private_key, Account("domain", "example.org"), now=NOW, name=name, note="Context"
+    )
+    assert b"sci-key-claim/0.1" in signed.record
+    assert parse_claim(signed.record).name == name
+    assert verify_claim(
+        signed.record,
+        signed.signature,
+        now=NOW,
+        expected_public_key=public_key_of(private_key),
+        requested_account=Account("domain", "example.org"),
+    ).ok
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "",
+        " ",
+        "a\nb",
+        "a\rb",
+        "a\tb",
+        "𐐀" * 81,
+    ],
+)
+def test_invalid_claim_names(private_key: Ed25519PrivateKey, name: str) -> None:
+    from pysci.errors import Invalid
+
+    with pytest.raises(Invalid):
+        create_claim(private_key, Account("domain", "example.org"), now=NOW, name=name)

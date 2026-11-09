@@ -483,7 +483,7 @@ def check_record(raw,sig,kind,ctx):
     obj=strict_json(raw)
     check_schema(obj,'sci-key-claim/0.1' if kind=='claim' else 'sci-key-revocation/0.1')
     exact_keys(obj,['schema','public_key','account','expires'] if kind=='claim' else ['schema','public_key'],
-               ['note'] if kind=='claim' else [])
+               ['note','name'] if kind=='claim' else [])
     pub=jwk_key(obj['public_key'])
     verify_sig(pub,sig,raw)
     if obj['public_key']['x']!=ctx['expected_public_key_x']:raise Invalid('key mismatch')
@@ -496,6 +496,8 @@ def check_record(raw,sig,kind,ctx):
             if account['id']!=account['id'].lower():raise Invalid('GitHub spelling')
         elif account['type']!='huggingface':raise Invalid('account type')
         if 'note' in obj:check_text(obj['note'],True,True,2500)
+        if 'name' in obj:
+            n=obj['name'];check_text(n,False,True,80)
         if rfc3339(ctx['now'])>=rfc3339(obj['expires']):raise Invalid('expired')
         if ctx['known_revocation'] or not ctx['retrieved_from_account_location']:raise Invalid('association')
     return {'outcome':'valid'}

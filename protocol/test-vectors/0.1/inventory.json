@@ -1,7 +1,7 @@
 {
   "catalog.json": {
-    "bytes": 447070,
-    "sha256": "5f8bda9cfbc68202533a3f95ef3f03b6bdb04bb6bc8e2b128f3f8f4783e21bfc"
+    "bytes": 452203,
+    "sha256": "f050ffdd0b37959848e4c629c73719a2e1a335759accea03ad198c1a30874c0b"
   },
   "claim/claim-bad-signature/record.json": {
     "bytes": 234,
@@ -74,6 +74,62 @@
   "claim/claim-missing-source/record.json.sig": {
     "bytes": 64,
     "sha256": "05e98aaef8d03307909ffdebb65a2c5ac900f9b2196771d1ac4d45bf92a0b4e3"
+  },
+  "claim/claim-name/record.json": {
+    "bytes": 261,
+    "sha256": "8fb8b33929b9ca5f197879e36420237d19b3048ea9bba2b1c4f73e716c192f2e"
+  },
+  "claim/claim-name/record.json.sig": {
+    "bytes": 64,
+    "sha256": "8d327501237b31e3d6f5bb7f88561562585346f832d482df56b87fff912457b1"
+  },
+  "claim/claim-name-bidi/record.json": {
+    "bytes": 256,
+    "sha256": "d3d3df8d5a0c45c10a7e0cbffde03907ea074dc06053bb5814c779fc1ef73474"
+  },
+  "claim/claim-name-bidi/record.json.sig": {
+    "bytes": 64,
+    "sha256": "af4bfefcd270fe67c540bbd901cecee41ff94abc3832a4be62aff4ed4f4e1997"
+  },
+  "claim/claim-name-blank/record.json": {
+    "bytes": 245,
+    "sha256": "c3d8c336666e407c3384fa150d8cec54d51106ba57b4e7150964a27909fe1f41"
+  },
+  "claim/claim-name-blank/record.json.sig": {
+    "bytes": 64,
+    "sha256": "f1b58c4ed104f8f4ac9babe55739a378d08489e86ed9e0468097af60b7723681"
+  },
+  "claim/claim-name-boundary/record.json": {
+    "bytes": 564,
+    "sha256": "8df2a04d1dee1d10006b26655d747050809c4f289f120eebcefa452673a3a368"
+  },
+  "claim/claim-name-boundary/record.json.sig": {
+    "bytes": 64,
+    "sha256": "0f09af3959e62a8160bd4f617d9bb9f960b651b1fe1d0d140a28de6476500c45"
+  },
+  "claim/claim-name-newline/record.json": {
+    "bytes": 255,
+    "sha256": "4d35a5288666e5b04febec886e120d4698e75d94cb01036de4528083a8f1e63e"
+  },
+  "claim/claim-name-newline/record.json.sig": {
+    "bytes": 64,
+    "sha256": "c01d3930b0da321858d371e41af1982b00d917edac286d098eebc867f4abe068"
+  },
+  "claim/claim-name-too-long/record.json": {
+    "bytes": 568,
+    "sha256": "608b923d8c149f8a7878b1781425cdf1887ddef6062139813a849ac2d502e454"
+  },
+  "claim/claim-name-too-long/record.json.sig": {
+    "bytes": 64,
+    "sha256": "dcc206746a11192d104e4feff358a8cc0b5c18a9f79e766b6fef1add571531b9"
+  },
+  "claim/claim-name-unicode/record.json": {
+    "bytes": 250,
+    "sha256": "5c54c3addbea132d25a7e03371a9e80e590ef22e895acfb39c7d0640ec7aa8f2"
+  },
+  "claim/claim-name-unicode/record.json.sig": {
+    "bytes": 64,
+    "sha256": "d0dea4529cfbd2dcf82251ac2cc56eb651ba253be3cbbee9a6a823df79fce8c5"
   },
   "claim/claim-revoked/record.json": {
     "bytes": 234,
@@ -188,12 +244,12 @@
     "sha256": "6630742487ae7a4649c2a5ab3f071a4c52ff94f67dd841b9220fe655907f5208"
   },
   "claim/supplemental-claim-extra-field/record.json": {
-    "bytes": 218,
-    "sha256": "fee4b028fef4d1b0b3fdcfe19bc8a764685f3db2b5c308df3eebc4b56c271fdd"
+    "bytes": 219,
+    "sha256": "a74f5eff459553a68e8dabf5871929f99b51bed377ed7ee90c88eca7a1d0c64d"
   },
   "claim/supplemental-claim-extra-field/record.json.sig": {
     "bytes": 64,
-    "sha256": "99a48ea8ea97dcf6d2ac895e455e9debb04ffd689dfc71f8b35ab6db7d29abed"
+    "sha256": "3fc5ada018d488be500a8a7dce454374da2eafe65f8678f1ed9bb56df401bbe3"
   },
   "claim/supplemental-claim-github/record.json": {
     "bytes": 200,

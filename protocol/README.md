@@ -259,6 +259,7 @@ The claim is a JSON object with only these fields:
 | `schema` | Yes | String, exactly `sci-key-claim/0.1`. |
 | `public_key` | Yes | Public JWK under section 5.1. |
 | `account` | Yes | Object with exactly two string fields: `type` and `id`. The account method defines their values. |
+| `name` | No | Publisher display name. Nonblank string, at most 80 Unicode code points. Uses the `title` character rules in section 4.2. |
 | `note` | No | Nonblank string, at most 2,500 Unicode code points. Uses the `abstract` character rules in section 4.2. |
 | `expires` | Yes | String, an expiry time in [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6) format. |
 

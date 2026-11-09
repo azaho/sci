@@ -7,6 +7,7 @@ import urllib.parse
 from datetime import UTC, datetime
 
 from pysci.accounts import AccountType, claim_urls, normalize_account
+from pysci.errors import SciError
 from pysci.keys import public_key_of
 from pysci.records import DEFAULT_CLAIM_VALIDITY, create_claim, verify_claim
 from pysci.rfc3339 import format_rfc3339, parse_rfc3339
@@ -92,8 +93,8 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
     if expires - now > DEFAULT_CLAIM_VALIDITY:
         result.warn("the protocol recommends claims expire within 90 days of signing")
     try:
-        record = create_claim(key, account, expires=expires, note=args.note)
-    except ValueError as exc:
+        record = create_claim(key, account, expires=expires, note=args.note, name=args.name)
+    except (ValueError, SciError) as exc:
         raise CliError("invalid_claim", str(exc), Exit.USAGE) from None
     public = public_key_of(key)
     check = verify_claim(
@@ -152,6 +153,11 @@ uploaded. Renewal replaces the claim files, never publication bytes.
             "--output", metavar="DIR", required=True, help="directory for <x>.json and <x>.json.sig"
         ),
         arg("--expires", metavar="RFC3339", help="claim expiry (default: 90 days from now)"),
+        arg(
+            "--name",
+            metavar="TEXT",
+            help="publisher display name, 1-80 Unicode code points",
+        ),
         arg("--note", metavar="TEXT", help="optional note stored in the signed claim"),
         arg("--key", metavar="PATH", help=KEY_ARG_HELP),
         arg(

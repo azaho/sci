@@ -335,3 +335,28 @@ def test_display_files_must_be_baseline_pngs(cli: Cli, tmp_path: Path) -> None:
     assert cli("keygen", "--json").code == 0
     run = cli("sign", str(draft), "--no-timestamp", "--json")
     assert run.code == 6 and run.json["errors"][0]["code"] == "baseline_refused"
+
+
+def test_named_claim_cli(cli: Cli) -> None:
+    assert cli("keygen", "--json").code == 0
+    run = cli(
+        "claim",
+        "domain",
+        "example.org",
+        "--name",
+        "Andrii Zahorodnii",
+        "--note",
+        "Campaign key",
+        "--output",
+        "claims",
+        "--json",
+    )
+    assert run.code == 0, run.stdout + run.stderr
+    record = json.loads(Path(run.result["files"]["claim"]).read_text())
+    assert record["schema"] == "sci-key-claim/0.1"
+    assert record["name"] == "Andrii Zahorodnii"
+    assert record["note"] == "Campaign key"
+    bad = cli(
+        "claim", "domain", "example.org", "--name", "Bad\nName", "--output", "claims", "--json"
+    )
+    assert bad.code != 0

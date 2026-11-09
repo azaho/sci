@@ -34,6 +34,7 @@ __all__ = [
 DEFAULT_CLAIM_VALIDITY = timedelta(days=90)
 REVOCATION_FILES = ("revocation.json", "revocation.json.sig", "revocation.json.sig.tsr")
 MAX_NOTE = 2500
+MAX_NAME = 80
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +53,7 @@ class Claim:
     account: Account
     expires: datetime
     note: str | None = None
+    name: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,7 +105,12 @@ def parse_claim(data: bytes, *, file: str = "claim.json") -> Claim:
     check_schema(record, CLAIM_SCHEMA, file=file)
     issues = IssueCollector()
     _fields(
-        record, ("schema", "public_key", "account", "expires"), ("note",), file, "5.2.1", issues
+        record,
+        ("schema", "public_key", "account", "expires"),
+        ("note", "name"),
+        file,
+        "5.2.1",
+        issues,
     )
     public_key = None
     if "public_key" in record:
@@ -188,11 +195,28 @@ def parse_claim(data: bytes, *, file: str = "claim.json") -> Claim:
                 collector=issues,
             )
             note = value if len(issues) == before else None
+    name = None
+    if "name" in record:
+        value = record["name"]
+        if not isinstance(value, str):
+            issues.add(
+                "claim_name", "name must be a string", section="5.2.1", file=file, field="/name"
+            )
+        else:
+            check_text(
+                value,
+                nonblank=True,
+                max_code_points=MAX_NAME,
+                file=file,
+                field="/name",
+                collector=issues,
+            )
+            name = value
     issues.raise_if_any()
     assert public_key is not None
     assert account is not None
     assert expires is not None
-    return Claim(public_key, account, expires, note)
+    return Claim(public_key, account, expires, note, name)
 
 
 def verify_claim(
@@ -276,12 +300,13 @@ def create_claim(
     *,
     expires: datetime | None = None,
     note: str | None = None,
+    name: str | None = None,
     now: datetime | None = None,
 ) -> SignedRecord:
     """Create and sign a claim (default expiry 90 days from ``now``).
 
     The record is serialized compactly with members ``schema``,
-    ``public_key``, ``account``, ``expires``, [``note``]; it is re-parsed to
+    ``public_key``, ``account``, ``expires``, [``name``], [``note``]; it is re-parsed to
     guarantee validity.
     """
     problem = account_problem(account.type, account.id)
@@ -294,6 +319,8 @@ def create_claim(
         "account": account.to_json(),
         "expires": format_rfc3339(expiry),
     }
+    if name is not None:
+        document["name"] = name
     if note is not None:
         document["note"] = note
     raw = json.dumps(document, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
