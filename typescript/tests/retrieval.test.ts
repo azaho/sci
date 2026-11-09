@@ -88,6 +88,20 @@ describe('retrieval with injected fetch', () => {
     assert.equal(full.zipSha256 !== undefined, true);
   });
 
+  test('complete ZIP verification works when the host rejects suffix ranges', async () => {
+    const fallback = mockFetch(zipRoutes);
+    const fetch: FetchLike = (url, init) => {
+      const range = new Headers(init?.headers).get('range');
+      if (range?.startsWith('bytes=-')) return Promise.resolve(new Response('Unsupported client range', { status: 501 }));
+      return fallback(url, init);
+    };
+    const remote = await openPublication(['https://zip.example/archive.json'], pub.id, { fetch });
+    assert.deepEqual(await remote.readFile('files/data.csv'), enc('a,b\n1,2\n'));
+    const full = await remote.verifyComplete();
+    assert.equal(full.baseline.baseline, true);
+    assert.equal(full.zipSha256 !== undefined, true);
+  });
+
   for (const exposeEncoding of [true, false]) {
     test(`decoded gzip responses respect file bytes (Content-Encoding exposed: ${exposeEncoding})`, async () => {
       const fetch: FetchLike = async (url) => {

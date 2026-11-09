@@ -241,7 +241,8 @@ function parseContentRange(v: string | null): { start: number; end: number; tota
  */
 export async function httpRangeSource(url: string, opts: RetrievalOptions = {}): Promise<ByteSource> {
   const b = resolveBudget(opts.budget);
-  const probe = await fetchBytes(url, opts, Math.max(22, b.maxTotalBytes), { headers: { Range: 'bytes=-22' } });
+  // GitHub release storage accepts explicit ranges but rejects suffix ranges with HTTP 501.
+  const probe = await fetchBytes(url, opts, Math.max(22, b.maxTotalBytes), { headers: { Range: 'bytes=0-0' } });
   const cr = probe.status === 206 ? parseContentRange(probe.headers.get('content-range')) : null;
   if (probe.status === 200 || (probe.status === 206 && !cr)) {
     let full = probe.body;
@@ -257,14 +258,14 @@ export async function httpRangeSource(url: string, opts: RetrievalOptions = {}):
   if (probe.status !== 206 || !cr) incomplete('transport.status', '§6', `Unexpected HTTP status ${probe.status}`, { path: url });
   const total = cr.total;
   if (total > b.maxTotalBytes) incomplete('budget.total_bytes', '§6', 'Bundle exceeds the local verification budget', { observed: total });
-  const tail = probe.body;
-  if (tail.length !== cr.end - cr.start + 1) incomplete('transport.range', '§8.2', 'Range response length mismatch', { path: url });
+  const cached = probe.body;
+  if (cached.length !== cr.end - cr.start + 1) incomplete('transport.range', '§8.2', 'Range response length mismatch', { path: url });
   return {
     size: total,
     async read(offset, length) {
       if (offset < 0 || length < 0 || offset > total - length) throw new RangeError('read out of bounds');
       if (length === 0) return new Uint8Array(0);
-      if (offset >= cr.start && offset + length - 1 <= cr.end) return tail.subarray(offset - cr.start, offset - cr.start + length);
+      if (offset >= cr.start && offset + length - 1 <= cr.end) return cached.subarray(offset - cr.start, offset - cr.start + length);
       const r = await fetchBytes(url, opts, length, { headers: { Range: `bytes=${offset}-${offset + length - 1}` } });
       const rr = parseContentRange(r.headers.get('content-range'));
       if (
