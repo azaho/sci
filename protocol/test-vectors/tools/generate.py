@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC_COMMIT = '0164db28435d7ca461c041039d2ed2fafcfa026f'
-SPEC_SHA256 = '635350d6d5e6068d36b0706c7813ffe19dbf725c72b4eec35aa848454fb3c34a'
+SPEC_SHA256 = '3b722aff01e33c3dc4bd8bba48fb074c6e4957541cd0eb70a452dfe2fe634205'
 SEED = hashlib.sha256(b'SCI conformance fixtures: PUBLIC TEST KEY, NOT FOR PRODUCTION').digest()
 KEY = Ed25519PrivateKey.from_private_bytes(SEED)
 PUBLIC = KEY.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
@@ -309,8 +309,8 @@ def generate_records():
                 ('name-boundary', '\U00010400' * 80, 'valid'),
                 ('name-too-long', '\U00010400' * 81, 'invalid'),
                 ('name-newline', 'First\nLast', 'invalid'),
-                ('name-bidi', 'First\u202eLast', 'invalid'),
-                ('name-blank', '\u00a0', 'invalid'),
+                ('name-bidi', 'First\u202eLast', 'valid'),
+                ('name-blank', ' ', 'invalid'),
             ]:
                 record('claim-' + label, {**claim, 'name': name}, 'claim', outcome=outcome,
                        context=ctx, section='5.2.1,6.6', reason='Publisher display name validation.')

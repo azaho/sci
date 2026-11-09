@@ -1,7 +1,7 @@
 {
   "catalog.json": {
-    "bytes": 452205,
-    "sha256": "ef1fae664f53bfbf4557b6f79f1fd03614aa326a3217e994eded683c39111dba"
+    "bytes": 452203,
+    "sha256": "f050ffdd0b37959848e4c629c73719a2e1a335759accea03ad198c1a30874c0b"
   },
   "claim/claim-bad-signature/record.json": {
     "bytes": 234,
@@ -92,12 +92,12 @@
     "sha256": "af4bfefcd270fe67c540bbd901cecee41ff94abc3832a4be62aff4ed4f4e1997"
   },
   "claim/claim-name-blank/record.json": {
-    "bytes": 246,
-    "sha256": "02eb3cc50246701fd178b48951a55810291c37bdb2e7557f57bef5fd22527b33"
+    "bytes": 245,
+    "sha256": "c3d8c336666e407c3384fa150d8cec54d51106ba57b4e7150964a27909fe1f41"
   },
   "claim/claim-name-blank/record.json.sig": {
     "bytes": 64,
-    "sha256": "fc81802fc310d2b850ff01d25641a8970664172805d40726adb5bcaca9773d5f"
+    "sha256": "f1b58c4ed104f8f4ac9babe55739a378d08489e86ed9e0468097af60b7723681"
   },
   "claim/claim-name-boundary/record.json": {
     "bytes": 564,

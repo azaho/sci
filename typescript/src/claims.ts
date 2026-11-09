@@ -129,15 +129,6 @@ export function parseClaim(bytes: Uint8Array, signature: Uint8Array, budget?: Pa
     const n = obj.get('name');
     if (typeof n !== 'string') fail('claim.name', '§5.2.1', 'name must be a string', { path: '/name' });
     checkText(n, { nonblank: true, maxCodePoints: 80, path: '/name', requirement: '§5.2.1' });
-    if (
-      /^[ \u00a0\u1680\u2000-\u200a\u202f\u205f\u3000]|[ \u00a0\u1680\u2000-\u200a\u202f\u205f\u3000]$/u.test(n) ||
-      /^[ \u00a0\u1680\u2000-\u200a\u202f\u205f\u3000\u200c\u200d]*$/u.test(n) ||
-      /[\u00ad\u061c\u200b\u200e\u200f\u2028-\u202e\u2060-\u2069\ufeff]/u.test(n)
-    ) {
-      fail('claim.name', '§5.2.1', 'name must be nonblank, without outer whitespace, line separators or hidden formatting controls', {
-        path: '/name',
-      });
-    }
     name = n;
   }
   const expires = obj.get('expires');

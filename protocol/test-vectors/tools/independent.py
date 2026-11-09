@@ -498,9 +498,6 @@ def check_record(raw,sig,kind,ctx):
         if 'note' in obj:check_text(obj['note'],True,True,2500)
         if 'name' in obj:
             n=obj['name'];check_text(n,False,True,80)
-            spaces=" \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
-            if n.strip(spaces)!=n or not n.strip(spaces+"\u200c\u200d"):raise Invalid('name whitespace')
-            if re.search("[\u00ad\u061c\u200b\u200e\u200f\u2028-\u202e\u2060-\u2069\ufeff]",n):raise Invalid('name controls')
         if rfc3339(ctx['now'])>=rfc3339(obj['expires']):raise Invalid('expired')
         if ctx['known_revocation'] or not ctx['retrieved_from_account_location']:raise Invalid('association')
     return {'outcome':'valid'}

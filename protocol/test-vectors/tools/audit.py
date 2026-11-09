@@ -320,9 +320,6 @@ def check_record(raw,sig,kind,ctx):
         if 'note' in m:text(m['note'],2500,controls=True)
         if 'name' in m:
             n=m['name'];text(n,80)
-            spaces=" \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
-            require(n.strip(spaces)==n and n.strip(spaces+"\u200c\u200d"),'name whitespace')
-            require(not re.search("[\u00ad\u061c\u200b\u200e\u200f\u2028-\u202e\u2060-\u2069\ufeff]",n),'name controls')
         require(isinstance(m['expires'],str) and re.fullmatch(r'[0-9]{4}-[0-9]{2}-[0-9]{2}[Tt][0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:[Zz]|[+-][0-9]{2}:[0-9]{2})',m['expires']),'RFC 3339 expiry')
         require(datetime.fromisoformat(ctx['now'])<datetime.fromisoformat(m['expires'].replace('z','Z')),'claim expired')
         require(not ctx['known_revocation'] and ctx['retrieved_from_account_location'],'revoked/unhosted claim')

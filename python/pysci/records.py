@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 
@@ -36,11 +35,6 @@ DEFAULT_CLAIM_VALIDITY = timedelta(days=90)
 REVOCATION_FILES = ("revocation.json", "revocation.json.sig", "revocation.json.sig.tsr")
 MAX_NOTE = 2500
 MAX_NAME = 80
-_NAME_SPACES = (
-    " \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005"
-    "\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000"
-)
-_NAME_HIDDEN = re.compile("[\u00ad\u061c\u200b\u200e\u200f\u2028-\u202e\u2060-\u2069\ufeff]")
 
 
 @dataclass(frozen=True, slots=True)
@@ -217,19 +211,6 @@ def parse_claim(data: bytes, *, file: str = "claim.json") -> Claim:
                 field="/name",
                 collector=issues,
             )
-            if (
-                not value.strip(_NAME_SPACES + "\u200c\u200d")
-                or value.strip(_NAME_SPACES) != value
-                or _NAME_HIDDEN.search(value)
-            ):
-                issues.add(
-                    "claim_name",
-                    "name must be nonblank, without outer whitespace, line separators "
-                    "or hidden formatting controls",
-                    section="5.2.1",
-                    file=file,
-                    field="/name",
-                )
             name = value
     issues.raise_if_any()
     assert public_key is not None
