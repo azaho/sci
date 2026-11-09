@@ -427,7 +427,7 @@ Before reporting a key's external association as verified, readers, archivers, a
 - Check that the claim's decoded public key bytes equal the expected public key bytes.
 - Check that `account.type` and `account.id` equal the requested account type and identifier.
 - Check the claim signature under section 5.1.
-- Check that the current time is before `expires`. Alternatively, to report that a publication falls within a hosted claim's validity, check that a timestamp verified under section 6.8 for that publication has a `genTime` before `expires`. This does not show that the association existed when the publication was made.
+- Check that the current time is before `expires`. Alternatively, to report that a publication falls within a hosted claim's validity, check that a timestamp verified under section 6.8 for that publication has a `genTime` before `expires`.
 - Check that the key has no known verified revocation.
 
 A successful check for the same key and account MAY be reused under section 5.2.1.
