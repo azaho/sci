@@ -1,5 +1,7 @@
 /** X.509 certificate and CRL parsing (RFC 5280) and signature verification via WebCrypto. */
 import { ed25519 } from '@noble/curves/ed25519.js';
+import { p256, p384, p521 } from '@noble/curves/nist.js';
+import { sha256, sha384, sha512 } from '@noble/hashes/sha2.js';
 import { base64DecodeStandard, equalBytes } from './bytes.ts';
 import {
   type AlgorithmId,
@@ -401,7 +403,20 @@ export async function verifySignature(
       const raw = ecdsaDerToRaw(signature, size);
       if (!raw) return false;
       const key = await subtle().importKey('spki', buf(spki), { name: 'ECDSA', namedCurve: curve }, false, ['verify']);
-      return await subtle().verify({ name: 'ECDSA', hash: ecHash }, key, buf(raw), buf(data));
+      try {
+        return await subtle().verify({ name: 'ECDSA', hash: ecHash }, key, buf(raw), buf(data));
+      } catch (error) {
+        // Older Deno/Edge runtimes cannot verify some valid curve/hash pairs
+        // (including FreeTSA's P-384/SHA-512). Only fall back for an unsupported
+        // operation, never for a rejected signature or a malformed imported key.
+        if (!(error instanceof Error) || error.name !== 'NotSupportedError') throw error;
+        const verifier = curve === 'P-256' ? p256 : curve === 'P-384' ? p384 : p521;
+        const hash = ecHash === 'SHA-256' ? sha256 : ecHash === 'SHA-384' ? sha384 : sha512;
+        const point = bitStringBytes(sequence(parseDer(spki), 'SPKI')[1]);
+        // CMS permits high-S signatures. Hash according to the signature OID,
+        // not the curve's default hash, and do not hash the digest a second time.
+        return verifier.verify(raw, hash(data), point, { prehash: false, lowS: false });
+      }
     }
     return false;
   } catch {
