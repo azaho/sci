@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC_COMMIT = '0164db28435d7ca461c041039d2ed2fafcfa026f'
-SPEC_SHA256 = '3048ed37bc77cf0a000781a6727eefe09fa383d8e7305e3277bc9e8e19fecdb1'
+SPEC_SHA256 = '311e40720392570938fee3ff67d53e6cef933916b228653d1279a9c3f52afc0d'
 SEED = hashlib.sha256(b'SCI conformance fixtures: PUBLIC TEST KEY, NOT FOR PRODUCTION').digest()
 KEY = Ed25519PrivateKey.from_private_bytes(SEED)
 PUBLIC = KEY.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)

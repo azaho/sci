@@ -2,7 +2,7 @@
   "schema": "sci-test-vectors/1",
   "protocol": "sci-publication/0.1",
   "spec_commit": "0164db28435d7ca461c041039d2ed2fafcfa026f",
-  "spec_sha256": "3048ed37bc77cf0a000781a6727eefe09fa383d8e7305e3277bc9e8e19fecdb1",
+  "spec_sha256": "311e40720392570938fee3ff67d53e6cef933916b228653d1279a9c3f52afc0d",
   "test_public_key": {
     "kty": "OKP",
     "crv": "Ed25519",
