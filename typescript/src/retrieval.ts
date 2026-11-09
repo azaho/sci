@@ -21,9 +21,9 @@ import { type CheckResult, captureAsync, fail, incomplete, SciError, type SciIss
 import { sha256Hex } from './hash.ts';
 import { parsePublicationRef } from './ids.ts';
 import { interpretRevocationLookup, interpretTimestampLookup } from './lookups.ts';
-import { type Manifest, verifyFileBytes, verifyManifest } from './manifest.ts';
+import { type Manifest, verifyFileBytes, verifyManifest, zipSizeOf } from './manifest.ts';
 import { type Metadata, parseMetadata } from './metadata.ts';
-import type { ByteSource } from './source.ts';
+import { type ByteSource, verificationSource } from './source.ts';
 import { checkTextFile } from './text.ts';
 import { readZipDirectory, readZipEntriesSpan, type ZipDirectory } from './zip.ts';
 
@@ -363,7 +363,13 @@ class Remote implements RemotePublication {
           new SciError({ code: 'retrieval.no_route', outcome: 'incomplete', requirement: '§8.2', message: 'No bundle_url route' }),
         );
       this.#zip = (async () => {
-        const source = await httpRangeSource(url, this.#opts);
+        // The signed manifest is already verified. Do not receive more ZIP bytes
+        // than its canonical size, even if the server ignores Range or lies in headers.
+        const expectedSize = zipSizeOf(this.manifest.bytes.length, this.signature.length, this.manifest.files);
+        const b = resolveBudget(this.#opts.budget);
+        if (expectedSize > b.maxTotalBytes) incomplete('budget.total_bytes', '§6', 'Bundle exceeds the local verification budget');
+        const source = await httpRangeSource(url, { ...this.#opts, budget: { ...b, maxTotalBytes: expectedSize } });
+        if (source.size !== expectedSize) fail('zip.size_formula', '§2.1', 'ZIP size differs from the signed manifest');
         const dir = await readZipDirectory(source, resolveBudget(this.#opts.budget).maxEntries);
         return { source, dir };
       })();
@@ -434,8 +440,12 @@ class Remote implements RemotePublication {
   async verifyComplete(options: { readonly retain?: (path: string) => boolean } = {}): Promise<VerifiedBundle> {
     const budget = this.#opts.budget;
     if (this.descriptor.bundle_url !== undefined) {
+      const b = resolveBudget(budget);
+      const expectedSize = zipSizeOf(this.manifest.bytes.length, this.signature.length, this.manifest.files);
+      if (expectedSize > b.maxTotalBytes) incomplete('budget.total_bytes', '§6', 'Bundle exceeds the local verification budget');
       const { source } = await this.#openZip();
-      return verifyZipBundle(source, { expectedId: this.id, budget, retain: options.retain });
+      if (source.size !== expectedSize) fail('zip.size_formula', '§2.1', 'ZIP size differs from the signed manifest');
+      return verifyZipBundle(verificationSource(source), { expectedId: this.id, budget, retain: options.retain });
     }
     const files = new Map<string, Uint8Array>([
       ['manifest.json', this.manifest.bytes],

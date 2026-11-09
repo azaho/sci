@@ -102,6 +102,63 @@ describe('retrieval with injected fetch', () => {
     assert.equal(full.zipSha256 !== undefined, true);
   });
 
+  test('full verification coalesces hundreds of file reads without skipping validation', async () => {
+    const extra = Object.fromEntries(Array.from({ length: 384 }, (_, i) => [`files/f${i}.bin`, new Uint8Array(64)]));
+    const many = makePublication({ LICENSE: license, ...extra });
+    const url = `https://zip.example/${many.digest.slice(0, 2)}/${many.digest}.zip`;
+    const fetch = mockFetch({ 'https://zip.example/archive.json': zipDesc, [url]: many.zip });
+    const remote = await openPublication(['https://zip.example/archive.json'], many.id, { fetch });
+    const before = fetch.log.length;
+    assert.equal((await remote.verifyComplete()).baseline.baseline, true);
+    assert.equal(fetch.log.length - before, 1, 'one cached block replaces hundreds of per-entry requests');
+    // The same optimization must not conceal a changed payload/CRC.
+    const broken = many.zip.slice();
+    broken[Math.floor(broken.length / 2)] = (broken[Math.floor(broken.length / 2)] ?? 0) ^ 1;
+    const badFetch = mockFetch({ 'https://zip.example/archive.json': zipDesc, [url]: broken });
+    const bad = await openPublication(['https://zip.example/archive.json'], many.id, { fetch: badFetch });
+    await assert.rejects(bad.verifyComplete());
+  });
+
+  test('signed manifest bounds the ZIP before directory or payload reads', async () => {
+    const descriptor = enc(
+      JSON.stringify({
+        schema: 'sci-archive/0.1',
+        entry_url: 'https://loose.example/{id}/{+path}',
+        bundle_url: 'https://zip.example/{id}.zip',
+      }),
+    );
+    const fallback = mockFetch({ ...looseRoutes, 'https://loose.example/archive.json': descriptor });
+    let zipRequests = 0;
+    let cancelled = false;
+    const fetch: FetchLike = async (url, init) => {
+      if (!url.endsWith('.zip')) return fallback(url, init);
+      zipRequests++;
+      // Ignore Range and lie about Content-Length: enforce actual received bytes.
+      return new Response(
+        new ReadableStream<Uint8Array>({
+          pull(controller) {
+            controller.enqueue(new Uint8Array(pub.zip.length + 1));
+          },
+          cancel() {
+            cancelled = true;
+          },
+        }),
+        { headers: { 'content-length': '1' } },
+      );
+    };
+    const remote = await openPublication(['https://loose.example/archive.json'], pub.id, { fetch });
+    assert.equal(zipRequests, 0, 'manifest and signature are checked first');
+    assert.equal((await issueOfAsync(() => remote.verifyComplete())).code, 'budget.response_bytes');
+    assert.equal(zipRequests, 1);
+    assert.ok(cancelled);
+    const limited = await openPublication(['https://loose.example/archive.json'], pub.id, {
+      fetch,
+      budget: { maxTotalBytes: pub.zip.length - 1 },
+    });
+    assert.equal((await issueOfAsync(() => limited.verifyComplete())).code, 'budget.total_bytes');
+    assert.equal(zipRequests, 1, 'over-budget manifest is rejected before any ZIP request');
+  });
+
   for (const exposeEncoding of [true, false]) {
     test(`decoded gzip responses respect file bytes (Content-Encoding exposed: ${exposeEncoding})`, async () => {
       const fetch: FetchLike = async (url) => {
