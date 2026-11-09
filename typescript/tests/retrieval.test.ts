@@ -148,7 +148,7 @@ describe('retrieval with injected fetch', () => {
     };
     const remote = await openPublication(['https://loose.example/archive.json'], pub.id, { fetch });
     assert.equal(zipRequests, 0, 'manifest and signature are checked first');
-    assert.equal((await issueOfAsync(() => remote.verifyComplete())).code, 'budget.response_bytes');
+    assert.deepEqual(await issueOfAsync(() => remote.verifyComplete()), { outcome: 'invalid', code: 'zip.size_formula' });
     assert.equal(zipRequests, 1);
     assert.ok(cancelled);
     const limited = await openPublication(['https://loose.example/archive.json'], pub.id, {
@@ -157,6 +157,32 @@ describe('retrieval with injected fetch', () => {
     });
     assert.equal((await issueOfAsync(() => limited.verifyComplete())).code, 'budget.total_bytes');
     assert.equal(zipRequests, 1, 'over-budget manifest is rejected before any ZIP request');
+  });
+
+  test('signed ZIP size mismatches are invalid for range, full, and hidden-range responses', async () => {
+    const descriptor = enc(
+      JSON.stringify({
+        schema: 'sci-archive/0.1',
+        entry_url: 'https://loose.example/{id}/{+path}',
+        bundle_url: 'https://zip.example/{id}.zip',
+      }),
+    );
+    for (const options of [{}, { ranges: false }, { exposeContentRange: false }]) {
+      for (const delta of [-1, 1]) {
+        const zip = new Uint8Array(pub.zip.length + delta);
+        zip.set(pub.zip.subarray(0, zip.length));
+        const fetch = mockFetch(
+          {
+            ...looseRoutes,
+            'https://loose.example/archive.json': descriptor,
+            [`https://zip.example/${pub.digest}.zip`]: zip,
+          },
+          options,
+        );
+        const remote = await openPublication(['https://loose.example/archive.json'], pub.id, { fetch });
+        assert.deepEqual(await issueOfAsync(() => remote.verifyComplete()), { outcome: 'invalid', code: 'zip.size_formula' });
+      }
+    }
   });
 
   for (const exposeEncoding of [true, false]) {
