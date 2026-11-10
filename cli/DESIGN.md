@@ -282,4 +282,4 @@ Valid non-baseline bundles can pass `verify` with exit 0. Local work limits retu
 
 - Additional trust authorities and proof count/byte limits.
 
-The CLI distribution is installed from Git with its `pysci` library dependency; see the [repository README](../README.md#install). Neither package is published to PyPI yet.
+The `pysci` distribution contains both the Python library and the `sci` CLI; see the [repository README](../README.md#install). It is not published to PyPI yet.

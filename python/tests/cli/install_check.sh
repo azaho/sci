@@ -2,7 +2,7 @@
 # Install the unified pysci package into clean temporary environments, then run
 # `sci --help` and the offline local workflow.
 #
-# Usage: cli/tests/install_check.sh [REPO_URL | ABSOLUTE_WHEEL_OR_SDIST] [REF]
+# Usage: python/tests/cli/install_check.sh [REPO_URL | ABSOLUTE_WHEEL_OR_SDIST] [REF]
 #   REPO_URL  default: $SCI_REPO_URL or https://github.com/azaho/sci-dev
 #             (a local clone works as file:///path/to/clone)
 #   REF       default: $SCI_REPO_REF or main
@@ -22,6 +22,12 @@ export UV_TOOL_DIR="$WORK/uv-tools"
 export UV_TOOL_BIN_DIR="$WORK/uv-bin"
 export UV_CACHE_DIR="$WORK/uv-cache"
 unset VIRTUAL_ENV
+
+check_package() {
+  local python="$1" sci="$2"
+  "$python" -c 'import importlib.metadata as m; import pysci; assert pysci.__version__ == m.version("pysci"); assert callable(pysci.verify_zip); assert "Apache License" in m.distribution("pysci").read_text("licenses/LICENSE")'
+  test "$("$python" -m pysci --version)" = "$("$sci" --version)"
+}
 
 workflow() {
   local sci="$1" dir="$2"
@@ -51,7 +57,7 @@ workflow() {
 
 echo "== uv tool install $PYSCI"
 uv tool install "$PYSCI"
-"$UV_TOOL_DIR/pysci/bin/python" -c 'import importlib.metadata as m; import pysci; assert pysci.__version__ == m.version("pysci"); assert callable(pysci.verify_zip)'
+check_package "$UV_TOOL_DIR/pysci/bin/python" "$UV_TOOL_BIN_DIR/sci"
 "$UV_TOOL_BIN_DIR/sci" --help | head -n 1
 workflow "$UV_TOOL_BIN_DIR/sci" "$WORK/uv-run"
 
@@ -60,7 +66,7 @@ if [ "${SCI_INSTALL_CHECK_PIP:-1}" != "0" ]; then
   PYTHON="${PYTHON:-python3}"
   "$PYTHON" -m venv "$WORK/venv"
   "$WORK/venv/bin/pip" install --quiet "$PYSCI"
-  "$WORK/venv/bin/python" -c 'import importlib.metadata as m; import pysci; assert pysci.__version__ == m.version("pysci"); assert callable(pysci.verify_zip)'
+  check_package "$WORK/venv/bin/python" "$WORK/venv/bin/sci"
   "$WORK/venv/bin/sci" --help | head -n 1
   workflow "$WORK/venv/bin/sci" "$WORK/pip-run"
 fi

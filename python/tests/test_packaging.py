@@ -7,11 +7,6 @@ from conftest import PYTHON_ROOT, REPO_ROOT
 import pysci
 
 
-def test_license_copy_matches_repository_license() -> None:
-    # The component documentation keeps a copy of the repository license.
-    assert (PYTHON_ROOT / "LICENSE").read_bytes() == (REPO_ROOT / "LICENSE").read_bytes()
-
-
 def test_package_data_and_typing_marker() -> None:
     package = PYTHON_ROOT / "pysci"
     assert (package / "py.typed").exists()

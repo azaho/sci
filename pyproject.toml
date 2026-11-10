@@ -56,7 +56,7 @@ ignore = ["RET505"]
 
 [tool.ruff.lint.per-file-ignores]
 "python/tests/**" = ["PT011", "PT018"]
-"cli/tests/**" = ["PT011", "PT018", "F811"]
+"python/tests/cli/**" = ["PT011", "PT018", "F811"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["pysci"]
@@ -64,14 +64,14 @@ known-first-party = ["pysci"]
 [tool.mypy]
 strict = true
 python_version = "3.11"
-files = ["python/pysci", "python/tests", "cli/tests"]
-mypy_path = ["python/tests", "cli/tests"]
+files = ["python/pysci", "python/tests"]
+mypy_path = ["python/tests", "python/tests/cli"]
 
 [[tool.mypy.overrides]]
 module = ["asn1crypto", "asn1crypto.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["python/tests", "cli/tests"]
+testpaths = ["python/tests"]
 addopts = "-ra"
 markers = ["network: requires network access (deselected unless SCI_NETWORK_TESTS=1)"]

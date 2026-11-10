@@ -29,8 +29,7 @@ TINY_PNG = bytes.fromhex(
     "0000000a4944415478da6360000000020001e527defc0000000049454e44ae426082"
 )
 
-CLI_ROOT = Path(__file__).resolve().parents[1]
-REPO_ROOT = CLI_ROOT.parent
+REPO_ROOT = Path(__file__).resolve().parents[3]
 TEST_KEYS = REPO_ROOT / "protocol" / "test-vectors" / "test-keys"
 TEST_PKI = REPO_ROOT / "protocol" / "test-vectors" / "0.1" / "pki"
 

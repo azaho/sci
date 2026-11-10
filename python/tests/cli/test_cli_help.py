@@ -4,7 +4,7 @@ import io
 from pathlib import Path
 
 import pytest
-from clitestkit import CLI_ROOT, REPO_ROOT, Cli, cli  # noqa: F401 - cli is a fixture
+from clitestkit import REPO_ROOT, Cli, cli  # noqa: F401 - cli is a fixture
 
 from pysci._cli import __version__
 from pysci._cli.commands import COMMANDS
@@ -93,10 +93,6 @@ def test_usage_errors_exit_2(cli: Cli) -> None:
     assert run.code == 2 and run.json["errors"][0]["code"] == "conflicting_options"
     run = cli("search", "--bogus", "--json")
     assert run.code == 2 and run.json["errors"][0]["code"] == "usage"
-
-
-def test_license_files_are_identical() -> None:
-    assert (CLI_ROOT / "LICENSE").read_bytes() == (REPO_ROOT / "LICENSE").read_bytes()
 
 
 def test_package_metadata() -> None:

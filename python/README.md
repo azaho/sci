@@ -4,7 +4,9 @@ Python implementation of the [SCI protocol](../protocol/README.md) (draft 0.1):
 publication verification, drafting and signing, key claims and revocations,
 RFC 3161 timestamps, and the discovery/submission interfaces. The `sci` CLI is
 included in the same `pysci` distribution. Its implementation under `pysci._cli`
-is private; library users should use the public modules below.
+is private; library users should use the public modules below. Run the command
+as `sci` or `python -m pysci`; see the [CLI guide](../cli/README.md) and
+[CLI design](../cli/DESIGN.md).
 
 ## Install
 
@@ -107,10 +109,10 @@ configuration from it; pass FreeTSA's CRL for a full revocation check.
 From the repository root:
 
 ```sh
-uv run ruff check python cli
-uv run ruff format --check python cli
+uv run ruff check python
+uv run ruff format --check python
 uv run mypy
-uv run pytest python/tests cli/tests
+uv run pytest
 ```
 
 `pytest` includes the conformance run. To run it directly from the repository root:
@@ -129,5 +131,5 @@ also run a live FreeTSA round trip.
 
 ## License
 
-Apache License 2.0; see [LICENSE](LICENSE). The root package build includes the repository license in source and wheel
+Apache License 2.0; see [repository license](../LICENSE). The root package build includes the repository license in source and wheel
 distributions.

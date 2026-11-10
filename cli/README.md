@@ -5,6 +5,10 @@ The `sci` command-line tool signs, verifies, publishes, and finds
 built on the [`pysci`](../python/README.md) library. The intended behaviour is
 specified in [DESIGN.md](DESIGN.md).
 
+This folder contains the command documentation. The implementation is in
+[`python/pysci/_cli`](../python/pysci/_cli/), and its tests are in
+[`python/tests/cli`](../python/tests/cli/).
+
 A publication is a folder or `<digest>.zip` with `README.md`, `sci.json`
 (metadata and citations), an optional `LICENSE`, and supporting `files/`. Its
 ID is the SHA-256 of its signed `manifest.json`: `sha256:<digest>`. Every
@@ -14,7 +18,8 @@ publication can be verified offline, without an index or archive.
 
 Requires Python 3.11 or later. One package, `pysci`, contains both the Python
 library and the `sci` command. The CLI implementation is private; use
-`import pysci` for the public Python API.
+`import pysci` for the public Python API. Run `python -m pysci` as an
+alternative to the `sci` executable.
 
 After the first PyPI release, install the standalone command with:
 
@@ -47,14 +52,14 @@ library users should run `pip install --upgrade pysci`; plain `pip install`
 can keep an older Git-installed copy. Package version 0.2.0 introduces this
 unified distribution; the SCI protocol remains at draft 0.1.
 
-[`tests/install_check.sh`](tests/install_check.sh) installs the unified package
+[`install_check.sh`](../python/tests/cli/install_check.sh) installs the unified package
 with uv and pip in clean temporary environments, then verifies the library and
 runs the offline CLI workflow. Pass a repository URL and ref, or a built wheel
 or source distribution:
 
 ```sh
-cli/tests/install_check.sh https://github.com/azaho/sci-dev main
-cli/tests/install_check.sh "$PWD/dist/pysci-0.2.0-py3-none-any.whl"
+python/tests/cli/install_check.sh https://github.com/azaho/sci-dev main
+python/tests/cli/install_check.sh "$PWD"/dist/pysci-*.whl
 ```
 
 ## First local workflow
@@ -220,10 +225,10 @@ From the repository root:
 
 ```sh
 uv sync
-uv run ruff check python cli
-uv run ruff format --check python cli
+uv run ruff check python
+uv run ruff format --check python
 uv run mypy
-uv run pytest python/tests cli/tests
+uv run pytest
 ```
 
 `SCI_NETWORK_TESTS=1` also runs a live FreeTSA timestamp test. Tests use a
@@ -232,4 +237,4 @@ and in-memory GitHub and Hugging Face fakes; they never upload anything.
 
 ## License
 
-Apache License 2.0; see [LICENSE](LICENSE), a copy of the repository license.
+Apache License 2.0; see [repository license](../LICENSE).

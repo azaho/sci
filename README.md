@@ -15,7 +15,7 @@ SCI is an open, decentralized publication system. A publication is a signed fold
 | Component | Contents |
 | --- | --- |
 | [`protocol/`](protocol/README.md) | Protocol specification (draft 0.1), baseline publication license, and the shared conformance corpus |
-| [`cli/`](cli/README.md) | The `sci` command: prepare, sign, verify, publish, submit, search, and retrieve publications |
+| [CLI guide](cli/README.md) | The `sci` command: prepare, sign, verify, publish, submit, search, and retrieve publications |
 | [`python/`](python/README.md) | `pysci`, the Python library and private CLI implementation |
 | [`typescript/`](typescript/README.md) | TypeScript protocol library for browsers, Deno, Workers, and Node |
 

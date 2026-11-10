@@ -27,7 +27,7 @@ jobs:
         run: |
           python=false
           typescript=false
-          if [[ -e pyproject.toml || -d python || -d cli ]]; then python=true; fi
+          if [[ -e pyproject.toml || -d python ]]; then python=true; fi
           if [[ -d typescript ]]; then typescript=true; fi
           echo "python=$python" >> "$GITHUB_OUTPUT"
           echo "typescript=$typescript" >> "$GITHUB_OUTPUT"
@@ -48,11 +48,11 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: uv sync --locked
-      - run: uv run ruff check python cli
-      - run: uv run ruff format --check python cli
+      - run: uv run ruff check python
+      - run: uv run ruff format --check python
       - run: uv run mypy
       - name: Unit tests and protocol conformance
-        run: uv run pytest python/tests cli/tests
+        run: uv run pytest
 
   typescript:
     name: typescript
@@ -97,13 +97,13 @@ jobs:
           python-version: '3.12'
           enable-cache: false
       - name: Install from this commit in clean environments
-        run: cli/tests/install_check.sh "${{ github.server_url }}/${{ github.repository }}" "${{ github.event.pull_request.head.sha || github.sha }}"
+        run: python/tests/cli/install_check.sh "${{ github.server_url }}/${{ github.repository }}" "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Build wheel and source distribution
         run: uv build
       - name: Install distributions in clean environments
         run: |
           for artifact in "$PWD"/dist/*.whl "$PWD"/dist/*.tar.gz; do
-            cli/tests/install_check.sh "$artifact"
+            python/tests/cli/install_check.sh "$artifact"
           done
 
   # Keep this name stable: main requires the python check.

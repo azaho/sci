@@ -149,7 +149,7 @@ def test_many_processes_share_one_cache_while_bundles_arrive(cli: Cli, tmp_path:
     signed(cli, campaign, 12)
     workers = 12
     env = {**os.environ, "SCI_HOME": str(cli.home)}
-    command = [sys.executable, "-m", "pysci._cli", "search", "spike", "--limit", "100"]
+    command = [sys.executable, "-m", "pysci", "search", "spike", "--limit", "100"]
     command += ["--in", str(campaign), "--json"]
     processes = [
         subprocess.Popen(command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
