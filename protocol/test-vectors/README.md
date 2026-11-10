@@ -1,7 +1,7 @@
 # SCI test vectors
 
-673 offline cases for [SCI protocol draft 0.1](../README.md), pinned to
-[commit 0164db28435d7ca461c041039d2ed2fafcfa026f](https://github.com/azaho/sci-dev/blob/0164db28435d7ca461c041039d2ed2fafcfa026f/protocol/README.md).
+680 offline cases for [SCI protocol draft 0.1](../README.md), pinned to
+[commit 0164db28435d7ca461c041039d2ed2fafcfa026f](https://github.com/azaho/sci/blob/0164db28435d7ca461c041039d2ed2fafcfa026f/protocol/README.md).
 The catalog records the exact specification SHA-256. These fixtures combine
 both original corpora, update their expectations for the current draft, and add
 regressions found during review. [REVIEW.md](REVIEW.md) explains the changes;
@@ -31,7 +31,7 @@ publication ID: that is the hash of the original manifest bytes.
 | Kind | Cases | Operation |
 | --- | ---: | --- |
 | `publication` | 540 | Verify a ZIP, loose bundle, or manifest-only input; classify baseline separately. |
-| `claim` | 33 | Verify a signed key association using the supplied account, retrieval evidence, clock, and revocation state. |
+| `claim` | 40 | Verify a signed key association using the supplied account, retrieval evidence, clock, and revocation state. |
 | `revocation` | 12 | Verify a revocation record against the expected key. |
 | `timestamp` | 29 | Frame DER values, verify each proof with the supplied clock, trust roots, and CRLs, and preserve usable earlier proofs. |
 | `discovery` | 18 | Validate an index or archive descriptor. |

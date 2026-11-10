@@ -12,10 +12,9 @@ branches/tags to tags matching `pysci-v*`. Do this before the first release:
 an environment created implicitly by a workflow has no review protection.
 The owner must review the release commit and approve the publishing job.
 
-These instructions currently target `azaho/sci-dev`. After it is renamed to
-`azaho/sci`, update the repository field below and all commands to the final
-name, and configure the PyPI publisher for `sci` before releasing. Do not use
-`azaho/sci` while that name still belongs to the legacy implementation.
+These instructions target the new SCI implementation at `azaho/sci`.
+The legacy implementation is maintained separately at `azaho/sci-legacy`.
+Configure the PyPI publisher for the final repository name, `sci`.
 
 Sign in to the PyPI account that should own `pysci`. On
 [account publishing](https://pypi.org/manage/account/publishing/), add a
@@ -25,7 +24,7 @@ pending GitHub publisher with these exact values:
 | --- | --- |
 | PyPI project name | `pysci` |
 | Owner | `azaho` |
-| Repository name | `sci-dev` |
+| Repository name | `sci` |
 | Workflow name | `publish.yml` |
 | Environment name | `pypi` |
 
@@ -44,7 +43,7 @@ After the workflow is merged, run **Publish pysci** manually from GitHub
 Actions, or:
 
 ```sh
-gh workflow run publish.yml --repo azaho/sci-dev --ref main
+gh workflow run publish.yml --repo azaho/sci --ref main
 ```
 
 A manual run builds, tests, and uploads the wheel and source archive as
@@ -60,7 +59,7 @@ workflow receive the same rehearsal on pull requests.
    first release:
 
    ```sh
-   gh release create pysci-v0.2.0 --repo azaho/sci-dev --target main \
+   gh release create pysci-v0.2.0 --repo azaho/sci --target main \
      --title "pysci 0.2.0" --generate-notes
    ```
 

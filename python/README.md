@@ -124,7 +124,7 @@ python3 protocol/test-vectors/tools/run_adapter.py \
   uv run python python/tests/adapter.py
 ```
 
-This is a subset pass of 663 of the 673 cases: the 10 `scenario` cases describe
+This is a subset pass of 670 of the 680 cases: the 10 `scenario` cases describe
 stateful indexer behavior (admission, registration, retention), which belongs
 to a service rather than this protocol library. Set `SCI_NETWORK_TESTS=1` to
 also run a live FreeTSA round trip.
