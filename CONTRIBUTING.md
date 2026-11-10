@@ -60,6 +60,11 @@ Both libraries must pass the same corpus cases. Report a subset pass as a subset
 - Do not edit signed JSON or binary fixtures by hand. Regenerate them with `protocol/test-vectors/tools/generate.py` after reviewing a protocol change.
 - After protocol `0.1` is released, changes to accepted bytes or their meaning require a new schema version.
 
+## Releasing
+
+For package publishing and the one-time PyPI setup, see
+[Releasing pysci](python/RELEASING.md).
+
 ## License
 
 Contributions are licensed under the [Apache License, Version 2.0](LICENSE). Publication bundles, including test fixtures, keep their own licenses.
