@@ -5,8 +5,8 @@
 | Path | Contents |
 | --- | --- |
 | `protocol/` | Authoritative protocol specification, baseline publication license, and shared conformance corpus |
-| `python/` | `pysci`, the Python protocol library |
-| `cli/` | The `sci` command-line tool, built on `pysci` |
+| `python/` | `pysci`, the Python protocol library and private `_cli` implementation |
+| `cli/` | CLI documentation and tests |
 | `typescript/` | TypeScript protocol library used by Sciscape's backend and browser reader |
 
 Keep protocol rules in the libraries. Keep command arguments, output, and local settings in the CLI.
@@ -17,7 +17,7 @@ Keep implementation decisions out of `protocol/README.md`. Use README files for 
 Requirements: Python 3.11+, [uv](https://docs.astral.sh/uv/), Node.js 22, Deno 2, and OpenSSL 3 or later for the corpus audit.
 
 ```sh
-uv sync --all-packages          # Python workspace: pysci and the CLI
+uv sync                         # One pysci package, including the sci command
 (cd typescript && npm ci)       # TypeScript library
 ```
 
@@ -29,7 +29,7 @@ Run the same checks as CI before opening a pull request:
 # Python library and CLI
 uv run ruff check python cli
 uv run ruff format --check python cli
-uv run mypy --strict python/pysci cli/sci
+uv run mypy
 uv run pytest python/tests cli/tests
 
 # TypeScript library: type checks, lint, Node and Deno tests, conformance

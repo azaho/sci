@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from importlib.metadata import version
+
 from conftest import PYTHON_ROOT, REPO_ROOT
 
 import pysci
 
 
 def test_license_copy_matches_repository_license() -> None:
-    # python/LICENSE is a copy so that sdists and wheels carry the license text.
+    # The component documentation keeps a copy of the repository license.
     assert (PYTHON_ROOT / "LICENSE").read_bytes() == (REPO_ROOT / "LICENSE").read_bytes()
 
 
@@ -16,7 +18,7 @@ def test_package_data_and_typing_marker() -> None:
     assert (package / "data" / "sci-baseline-LICENSE.txt").read_bytes() == (
         REPO_ROOT / "protocol" / "sci-baseline-LICENSE.txt"
     ).read_bytes()
-    assert pysci.__version__ == "0.1.0"
+    assert pysci.__version__ == version("pysci")
 
 
 def test_bundled_specification_matches_protocol_readme_and_corpus_pin() -> None:

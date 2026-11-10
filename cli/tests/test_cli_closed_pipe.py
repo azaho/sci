@@ -15,7 +15,7 @@ def run_with_closed_stdout(home: Path, *args: str) -> tuple[int, str]:
     os.close(reader)  # every write to stdout now fails with EPIPE
     try:
         done = subprocess.run(
-            [sys.executable, "-m", "sci.main", *args],
+            [sys.executable, "-m", "pysci._cli", *args],
             env={**os.environ, "SCI_HOME": str(home)},
             stdout=writer,
             stderr=subprocess.PIPE,

@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://github.com/azaho/sci-dev/actions/workflows/checks.yml"><img src="https://github.com/azaho/sci-dev/actions/workflows/checks.yml/badge.svg?branch=main" alt="Checks"></a>
   <a href="https://github.com/azaho/sci-dev/actions/workflows/test-vectors.yml"><img src="https://github.com/azaho/sci-dev/actions/workflows/test-vectors.yml/badge.svg?branch=main" alt="Test vectors"></a>
-  <a href="cli/pyproject.toml"><img src="https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white" alt="Python 3.11+"></a>
+  <a href="pyproject.toml"><img src="https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white" alt="Python 3.11+"></a>
   <a href="protocol/README.md"><img src="https://img.shields.io/badge/Protocol-0.1_draft-orange" alt="Protocol 0.1 draft"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue" alt="Software license: Apache 2.0"></a>
 </p>
@@ -16,29 +16,47 @@ SCI is an open, decentralized publication system. A publication is a signed fold
 | --- | --- |
 | [`protocol/`](protocol/README.md) | Protocol specification (draft 0.1), baseline publication license, and the shared conformance corpus |
 | [`cli/`](cli/README.md) | The `sci` command: prepare, sign, verify, publish, submit, search, and retrieve publications |
-| [`python/`](python/README.md) | `pysci`, the Python protocol library used by the CLI |
+| [`python/`](python/README.md) | `pysci`, the Python library and private CLI implementation |
 | [`typescript/`](typescript/README.md) | TypeScript protocol library for browsers, Deno, Workers, and Node |
 
 Both libraries pass the same 673-case [conformance corpus](protocol/test-vectors/README.md).
 
 ## Install
 
-Requires Python 3.11 or later. Install the CLI and its `pysci` dependency from Git:
+Requires Python 3.11 or later. One package, `pysci`, contains both the Python
+library and the `sci` command. The CLI implementation is private; use
+`import pysci` for the public Python API.
+
+After the first PyPI release, install the standalone command with:
 
 ```sh
-uv tool install --with "pysci @ git+https://github.com/azaho/sci-dev#subdirectory=python" \
-  "sci-cli @ git+https://github.com/azaho/sci-dev#subdirectory=cli"
-sci --help
+uv tool install pysci
 ```
 
-Or with pip, inside a virtual environment:
+Or install both the library and command in a project virtual environment:
 
 ```sh
-pip install "pysci @ git+https://github.com/azaho/sci-dev#subdirectory=python" \
-  "sci-cli @ git+https://github.com/azaho/sci-dev#subdirectory=cli"
+pip install pysci
 ```
 
-CI runs both commands in clean environments on every change.
+`uv tool install` isolates the command; it does not add `pysci` to your
+project or notebook environment.
+
+Until the PyPI release, install from this checkout at the repository root:
+
+```sh
+uv tool install .
+# Or, inside a project virtual environment:
+pip install .
+```
+
+For development, use `uv sync` and `uv run sci --help`. To replace an older
+Git-installed `sci-cli` tool, run `uv tool uninstall sci-cli` first; for an
+older pip installation, run `pip uninstall sci-cli` in that environment
+before installing the unified package. After the PyPI release, existing
+library users should run `pip install --upgrade pysci`; plain `pip install`
+can keep an older Git-installed copy. Package version 0.2.0 introduces this
+unified distribution; the SCI protocol remains at draft 0.1.
 
 ## First workflow
 
@@ -67,7 +85,7 @@ Host the bundles in a public archive and register them with an index:
 ```sh
 sci publish ./campaign --to https://github.com/lab/research --create
 sci submit ./campaign --to https://sciscape.io \
-  --archive https://raw.githubusercontent.com/lab/research/main/sci/archive.json
+  --archive https://github.com/lab/research
 sci pull sha256:<digest> --in https://sciscape.io   # retrieve and verify from any registered host
 ```
 

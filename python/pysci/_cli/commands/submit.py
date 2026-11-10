@@ -21,7 +21,8 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
     if not archives:
         raise CliError(
             "missing_archive",
-            "submit requires at least one --archive descriptor URL; files must already be hosted",
+            "submit requires at least one --archive descriptor URL or repository address; "
+            "files must already be hosted",
         )
     account = None
     if args.account:
@@ -110,7 +111,7 @@ def _describe(result: Result, entry: dict[str, Any]) -> None:
 COMMAND = Command(
     name="submit",
     usage_hint=(
-        "submit ID_OR_PATH ... --archive URL [--archive URL ...] [--to INDEX] "
+        "submit ID_OR_PATH ... --archive ARCHIVE [--archive ARCHIVE ...] [--to INDEX] "
         "[--account TYPE ID] [--json]"
     ),
     summary="Register hosted publications with an indexer.",
@@ -120,6 +121,10 @@ submit_url, naming the archive descriptors that host it. Accepts full IDs
 or local signed inputs (a ZIP, a signed directory, or a folder of *.zip
 bundles; each is verified first and invalid candidates are not sent). Files
 must already be hosted (see `sci publish`); submission uploads nothing.
+
+--archive accepts a descriptor URL or the same GitHub/Hugging Face repository
+address used by publish --to. Repository addresses expand to the descriptor
+created by sci publish; no upload history or provider credentials are needed.
 
 Protocol success confirms location registration only; service fields such as
 Sciscape's status, publication_url, accepted_at, reason, and message are
@@ -136,7 +141,10 @@ unchanged bundle for catalog admission.
             help="publication IDs or local signed inputs",
         ),
         arg(
-            "--archive", metavar="URL", action="append", help="archive descriptor URL (repeatable)"
+            "--archive",
+            metavar="ARCHIVE",
+            action="append",
+            help="descriptor URL or GitHub/Hugging Face repository address (repeatable)",
         ),
         arg("--to", metavar="INDEX", help="index origin (default: configured index)"),
         arg(
@@ -157,8 +165,7 @@ unchanged bundle for catalog admission.
         6: "the index refused a submission by policy (e.g. not_baseline)",
     },
     examples=(
-        "sci submit ./campaign --to https://sciscape.io --archive "
-        "https://raw.githubusercontent.com/lab/research/main/sci/archive.json",
+        "sci submit ./campaign --to https://sciscape.io --archive https://github.com/lab/research",
     ),
     run=run,
     timeout=True,

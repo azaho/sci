@@ -308,13 +308,14 @@ COMMAND = Command(
     name="read",
     usage_hint=(
         "read ID_OR_PATH [--list | --file PATH [--output FILE]] [--start-line N] [--lines N] "
-        "[--archive URL ... | --in URL] [--json]"
+        "[--archive ARCHIVE ... | --in URL] [--json]"
     ),
     summary="Read verified text or retrieve one file.",
     description="""
 Accepts a signed directory, a ZIP, or a full publication ID (sha256:<digest>
 or sci:sha256:<digest>). Local input is read offline. IDs are resolved like
-`pull`: the configured index or --in URL, or explicit --archive descriptors.
+`pull`: the configured index or --in URL, or explicit --archive descriptor
+URLs or GitHub/Hugging Face repository addresses.
 
 By default prints metadata, citations, and README text after the metadata
 checks of SCI protocol §6.3. --list prints paths, sizes, and hashes after the
@@ -337,9 +338,9 @@ are verified; this is not a complete bundle check.
         arg("--lines", type=int, default=DEFAULT_LINES, metavar="N", help="number of text lines"),
         arg(
             "--archive",
-            metavar="URL",
+            metavar="ARCHIVE",
             action="append",
-            help="archive descriptor URL to use instead of an index (repeatable)",
+            help="descriptor URL or GitHub/Hugging Face repository address (repeatable)",
         ),
         arg("--in", dest="in_", metavar="URL", help="index origin (default: configured index)"),
     ),

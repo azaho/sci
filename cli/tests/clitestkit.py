@@ -20,9 +20,9 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
+from pysci._cli.clients import http
+from pysci._cli.main import main
 from pysci.baseline import baseline_license_bytes
-from sci.clients import http
-from sci.main import main
 
 TINY_PNG = bytes.fromhex(
     "89504e470d0a1a0a0000000d49484452000000010000000108000000003a7e9b55"

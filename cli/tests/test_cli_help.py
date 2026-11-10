@@ -6,9 +6,9 @@ from pathlib import Path
 import pytest
 from clitestkit import CLI_ROOT, REPO_ROOT, Cli, cli  # noqa: F401 - cli is a fixture
 
-from sci import __version__
-from sci.commands import COMMANDS
-from sci.main import main
+from pysci._cli import __version__
+from pysci._cli.commands import COMMANDS
+from pysci._cli.main import main
 
 DESIGN_COMMANDS = {
     "search",
@@ -43,7 +43,7 @@ def test_every_design_command_is_registered() -> None:
 
 @pytest.mark.parametrize("command", COMMANDS, ids=lambda c: c.name)
 def test_command_help_is_complete(command: object) -> None:
-    from sci.spec import Command
+    from pysci._cli.spec import Command
 
     assert isinstance(command, Command)
     text = _help(command.name)
@@ -102,12 +102,12 @@ def test_license_files_are_identical() -> None:
 def test_package_metadata() -> None:
     import tomllib
 
-    project = tomllib.loads((CLI_ROOT / "pyproject.toml").read_text())["project"]
-    assert project["name"] == "sci-cli"
-    assert project["scripts"]["sci"] == "sci.main:main"
+    project = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text())["project"]
+    assert project["name"] == "pysci"
+    assert project["scripts"]["sci"] == "pysci._cli.main:main"
     assert project["license"] == "Apache-2.0"
     assert project["requires-python"] == ">=3.11"
-    assert any(dep.startswith("pysci") for dep in project["dependencies"])
+    assert not any(dep.startswith("pysci") for dep in project["dependencies"])
 
 
 def test_top_level_help_documents_the_draft_format() -> None:

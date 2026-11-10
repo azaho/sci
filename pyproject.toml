@@ -1,17 +1,77 @@
-[tool.uv.workspace]
-members = ["python", "cli"]
+[project]
+name = "pysci"
+dynamic = ["version"]
+description = "Python library and sci CLI for SCI research publications."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "SCI contributors" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Programming Language :: Python :: 3",
+    "Typing :: Typed",
+]
+dependencies = [
+    "asn1crypto>=1.5.1",
+    "cryptography>=46.0.3",
+    "idna>=3.11",
+]
 
-[tool.uv.sources]
-pysci = { workspace = true }
+[project.scripts]
+sci = "pysci._cli.main:main"
+
+[project.urls]
+Repository = "https://github.com/azaho/sci-dev"
+Documentation = "https://github.com/azaho/sci-dev/blob/main/README.md"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18",
+    "pytest>=8.4",
+    "ruff>=0.14",
+]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "python/pysci/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["python/pysci"]
+
+[tool.hatch.build.targets.sdist]
+include = ["python", "cli", "protocol", "README.md", "CONTRIBUTING.md", "LICENSE", "pyproject.toml", "uv.lock"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "C4", "PIE", "PT", "RET"]
+ignore = ["RET505"]
+
+[tool.ruff.lint.per-file-ignores]
+"python/tests/**" = ["PT011", "PT018"]
+"cli/tests/**" = ["PT011", "PT018", "F811"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pysci"]
 
 [tool.mypy]
 strict = true
 python_version = "3.11"
+files = ["python/pysci", "python/tests", "cli/tests"]
+mypy_path = ["python/tests", "cli/tests"]
 
 [[tool.mypy.overrides]]
-module = ["asn1crypto.*"]
+module = ["asn1crypto", "asn1crypto.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
+testpaths = ["python/tests", "cli/tests"]
 addopts = "-ra"
 markers = ["network: requires network access (deselected unless SCI_NETWORK_TESTS=1)"]

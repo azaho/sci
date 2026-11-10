@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from sci.clients.http import (
+from pysci._cli.clients.http import (
     Deadline,
     HttpClient,
     HttpRequest,
@@ -20,7 +20,7 @@ from sci.clients.http import (
     TransportError,
     retry_after_seconds,
 )
-from sci.errors import CliError, Exit, combine_exits
+from pysci._cli.errors import CliError, Exit, combine_exits
 
 
 class Scripted:

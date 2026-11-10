@@ -12,33 +12,50 @@ publication can be verified offline, without an index or archive.
 
 ## Install
 
-Requires Python 3.11 or later. Neither package is on PyPI yet; install the CLI
-and its `pysci` dependency from Git:
+Requires Python 3.11 or later. One package, `pysci`, contains both the Python
+library and the `sci` command. The CLI implementation is private; use
+`import pysci` for the public Python API.
+
+After the first PyPI release, install the standalone command with:
 
 ```sh
-uv tool install --with "pysci @ git+https://github.com/azaho/sci-dev#subdirectory=python" \
-  "sci-cli @ git+https://github.com/azaho/sci-dev#subdirectory=cli"
-sci --help
+uv tool install pysci
 ```
 
-With pip (inside a virtual environment):
+Or install both the library and command in a project virtual environment:
 
 ```sh
-pip install "pysci @ git+https://github.com/azaho/sci-dev#subdirectory=python" \
-  "sci-cli @ git+https://github.com/azaho/sci-dev#subdirectory=cli"
-sci --help
+pip install pysci
 ```
 
-[`tests/install_check.sh`](tests/install_check.sh) runs both commands in a clean
-temporary environment, followed by the local workflow below. It accepts a
-repository URL and ref, so it also works with a local `git+file://` clone:
+`uv tool install` isolates the command; it does not add `pysci` to your
+project or notebook environment.
+
+Until the PyPI release, install from this checkout at the repository root:
+
+```sh
+uv tool install .
+# Or, inside a project virtual environment:
+pip install .
+```
+
+For development, use `uv sync` and `uv run sci --help`. To replace an older
+Git-installed `sci-cli` tool, run `uv tool uninstall sci-cli` first; for an
+older pip installation, run `pip uninstall sci-cli` in that environment
+before installing the unified package. After the PyPI release, existing
+library users should run `pip install --upgrade pysci`; plain `pip install`
+can keep an older Git-installed copy. Package version 0.2.0 introduces this
+unified distribution; the SCI protocol remains at draft 0.1.
+
+[`tests/install_check.sh`](tests/install_check.sh) installs the unified package
+with uv and pip in clean temporary environments, then verifies the library and
+runs the offline CLI workflow. Pass a repository URL and ref, or a built wheel
+or source distribution:
 
 ```sh
 cli/tests/install_check.sh https://github.com/azaho/sci-dev main
+cli/tests/install_check.sh "$PWD/dist/pysci-0.2.0-py3-none-any.whl"
 ```
-
-From a checkout, `uv sync --all-packages` at the repository root installs both
-packages for development (`uv run sci --help`).
 
 ## First local workflow
 
@@ -87,18 +104,23 @@ key keeps its manifest and ID; changed drafts need `--replace`.
    `sci/publications.txt`. Re-running compares remote digests and reuses
    matching content. `--dry-run` lists the plan without uploading.
 
+   The same repository address works with `--archive` on `submit`, `read`,
+   and `pull`. Explicit descriptor URLs remain supported for custom hosting.
+
 2. Register the hosted copies with an index (no index is configured by default):
 
    ```sh
    sci index https://sciscape.io
    sci submit ./campaign \
-     --archive https://raw.githubusercontent.com/lab/research/main/sci/archive.json
+     --archive https://github.com/lab/research
    ```
 
    Registration makes the publication retrievable by ID. Sciscape adds it to
    its searchable catalog only with a qualifying account association; create
    one with `sci claim domain lab.example --output ./claims`, host the two
-   files where the command says, and submit again.
+   files where the command says, and submit again with
+   `--account domain lab.example`. Registration alone does not guarantee
+   admission to the searchable catalog.
 
 3. Find and retrieve publications:
 
@@ -106,7 +128,7 @@ key keeps its manifest and ID; changed drafts need `--replace`.
    sci search "neural decoding" --in @index --in @local
    sci read sha256:<digest>                    # verified README by ID
    sci pull sha256:<digest>                    # complete verified copy in ./<digest>/
-   sci pull sha256:<digest> --archive https://raw.githubusercontent.com/lab/research/main/sci/archive.json
+   sci pull sha256:<digest> --archive https://github.com/lab/research
    ```
 
 Timestamp proofs can be submitted to an index with
@@ -197,10 +219,10 @@ valid draft outside the baseline unless `--allow-nonbaseline` is given.
 From the repository root:
 
 ```sh
-uv sync --all-packages
+uv sync
 uv run ruff check python cli
 uv run ruff format --check python cli
-uv run mypy --config-file cli/pyproject.toml python/pysci cli/sci
+uv run mypy
 uv run pytest python/tests cli/tests
 ```
 

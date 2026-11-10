@@ -47,10 +47,10 @@ jobs:
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
         with:
           python-version: ${{ matrix.python }}
-      - run: uv sync --all-packages --locked
+      - run: uv sync --locked
       - run: uv run ruff check python cli
       - run: uv run ruff format --check python cli
-      - run: uv run mypy --strict python/pysci cli/sci
+      - run: uv run mypy
       - name: Unit tests and protocol conformance
         run: uv run pytest python/tests cli/tests
 
@@ -87,7 +87,7 @@ jobs:
   install:
     needs: components
     if: needs.components.outputs.python == 'true'
-    name: Documented Git installation
+    name: Git and distribution installation
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -98,6 +98,13 @@ jobs:
           enable-cache: false
       - name: Install from this commit in clean environments
         run: cli/tests/install_check.sh "${{ github.server_url }}/${{ github.repository }}" "${{ github.event.pull_request.head.sha || github.sha }}"
+      - name: Build wheel and source distribution
+        run: uv build
+      - name: Install distributions in clean environments
+        run: |
+          for artifact in "$PWD"/dist/*.whl "$PWD"/dist/*.tar.gz; do
+            cli/tests/install_check.sh "$artifact"
+          done
 
   # Keep this name stable: main requires the python check.
   python:

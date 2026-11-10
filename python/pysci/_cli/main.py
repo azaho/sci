@@ -86,7 +86,7 @@ remote publishing:
   sci publish ./campaign --to https://github.com/lab/research --create
   sci index https://sciscape.io                choose an index (no default)
   sci submit ./campaign --archive \\
-      https://raw.githubusercontent.com/lab/research/main/sci/archive.json
+      https://github.com/lab/research
   sci search "neural decoding" --in @index     catalog metadata, newest first
   sci pull sha256:<digest>                     download and verify completely
 """

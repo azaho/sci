@@ -286,12 +286,14 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
 COMMAND = Command(
     name="pull",
     usage_hint=(
-        "pull ID [--output DIR] [--zip] [--in URL | --archive URL ...] [--public-key PATH] [--json]"
+        "pull ID [--output DIR] [--zip] [--in URL | --archive ARCHIVE ...] "
+        "[--public-key PATH] [--json]"
     ),
     summary="Save a complete verified publication.",
     description="""
 Finds sources through the configured index or --in URL (SCI protocol
-§8.1.1), or uses repeated --archive descriptor URLs without an index. Each
+§8.1.1), or uses repeated --archive descriptor URLs or GitHub/Hugging Face
+repository addresses without an index. Each
 source is tried in turn against the same expected ID. The complete ZIP
 (bundle_url) is preferred; otherwise files are fetched individually
 (entry_url, blob_url). Downloads are verified completely (§6.4) in a
@@ -312,7 +314,10 @@ fail the download.
         ),
         arg("--in", dest="in_", metavar="URL", help="index origin (default: configured index)"),
         arg(
-            "--archive", metavar="URL", action="append", help="archive descriptor URL (repeatable)"
+            "--archive",
+            metavar="ARCHIVE",
+            action="append",
+            help="descriptor URL or GitHub/Hugging Face repository address (repeatable)",
         ),
         arg("--public-key", metavar="PATH", help="require the signer to match this public PEM key"),
     ),

@@ -9,8 +9,9 @@ import pytest
 from clitestkit import Cli, cli, write_draft  # noqa: F401 - cli is a fixture
 from fakehosts import FakeGitHub, FakeHub
 
-from sci.destinations import parse_remote, resolve_destinations
-from sci.errors import CliError
+from pysci._cli.commands.common import archive_urls
+from pysci._cli.destinations import parse_remote, resolve_archive, resolve_destinations
+from pysci._cli.errors import CliError
 
 
 def _campaign(cli: Cli, count: int = 2) -> tuple[Path, list[str]]:
@@ -173,7 +174,7 @@ def test_huggingface_publish_and_reuse(cli: Cli) -> None:
 
 
 def test_huggingface_token_file(cli: Cli, tmp_path: Path) -> None:
-    from sci.clients.credentials import huggingface_token
+    from pysci._cli.clients.credentials import huggingface_token
 
     token = tmp_path / "hf" / "token"
     token.parent.mkdir()
@@ -181,3 +182,84 @@ def test_huggingface_token_file(cli: Cli, tmp_path: Path) -> None:
     assert huggingface_token({"HF_HOME": str(token.parent)}) == "from-file"
     with pytest.raises(CliError):
         huggingface_token({"HOME": str(tmp_path / "none")})
+
+
+@pytest.mark.parametrize(
+    ("address", "descriptor"),
+    [
+        (address, "https://raw.githubusercontent.com/lab/research/main/sci/archive.json")
+        for address in (
+            "https://github.com/lab/research",
+            "https://github.com/lab/research.git/",
+            "git@github.com:lab/research.git",
+            "ssh://git@github.com/lab/research",
+        )
+    ]
+    + [
+        (address, "https://huggingface.co/datasets/lab/data/resolve/main/sci/archive.json")
+        for address in (
+            "https://huggingface.co/datasets/lab/data",
+            "https://huggingface.co/datasets/lab/data.git/",
+            "git@hf.co:datasets/lab/data",
+            "git@huggingface.co:datasets/lab/data.git",
+            "ssh://git@hf.co/datasets/lab/data",
+        )
+    ],
+)
+def test_archive_repository_addresses(address: str, descriptor: str) -> None:
+    assert resolve_archive(address) == descriptor
+    assert archive_urls([address, descriptor, address]) == [descriptor]
+
+
+@pytest.mark.parametrize(
+    "descriptor",
+    [
+        "https://example.org/custom/archive.json?version=2",
+        "https://raw.githubusercontent.com/lab/research/other/archive.json",
+        "https://huggingface.co/datasets/lab/data/resolve/other/custom.json",
+        "http://127.0.0.1:8080/archive.json",
+    ],
+)
+def test_explicit_archive_descriptors_are_preserved(descriptor: str) -> None:
+    assert resolve_archive(descriptor) == descriptor
+
+
+@pytest.mark.parametrize(
+    "address",
+    [
+        "./folder",
+        "/tmp/archive.json",
+        "@local",
+        "file:///tmp/archive.json",
+        "git@github.com:lab",
+        "ssh://git@example.org/lab/data",
+        "http://github.com/lab/research",
+        "https://user:secret@example.org/archive.json",
+        "https://example.org/archive.json#fragment",
+    ],
+)
+def test_invalid_archive_addresses(address: str) -> None:
+    with pytest.raises(CliError):
+        resolve_archive(address)
+
+
+def test_read_and_pull_from_published_repository(cli: Cli) -> None:
+    campaign, digests = _campaign(cli, count=1)
+    cli.transport = FakeGitHub()
+    cli.env["GH_TOKEN"] = "test-token"
+    repo = "https://github.com/lab/research"
+    published = cli("publish", str(campaign), "--to", repo, "--create", "--json")
+    assert published.code == 0, published.stdout
+    cli.env.clear()  # Public retrieval needs no publishing credentials or upload history.
+    read = cli("read", "sha256:" + digests[0], "--archive", repo, "--json")
+    assert read.code == 0, read.stdout
+    pulled = cli(
+        "pull",
+        "sha256:" + digests[0],
+        "--archive",
+        repo,
+        "--output",
+        str(cli.cwd / "retrieved"),
+        "--json",
+    )
+    assert pulled.code == 0, pulled.stdout

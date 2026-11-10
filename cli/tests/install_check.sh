@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Install the CLI and pysci from Git into clean temporary environments, then run
+# Install the unified pysci package into clean temporary environments, then run
 # `sci --help` and the offline local workflow.
 #
-# Usage: cli/tests/install_check.sh [REPO_URL] [REF]
+# Usage: cli/tests/install_check.sh [REPO_URL | ABSOLUTE_WHEEL_OR_SDIST] [REF]
 #   REPO_URL  default: $SCI_REPO_URL or https://github.com/azaho/sci-dev
 #             (a local clone works as file:///path/to/clone)
 #   REF       default: $SCI_REPO_REF or main
@@ -11,8 +11,10 @@ set -euo pipefail
 
 REPO_URL="${1:-${SCI_REPO_URL:-https://github.com/azaho/sci-dev}}"
 REF="${2:-${SCI_REPO_REF:-main}}"
-PYSCI="pysci @ git+${REPO_URL}@${REF}#subdirectory=python"
-CLI="sci-cli @ git+${REPO_URL}@${REF}#subdirectory=cli"
+case "$REPO_URL" in
+  /*.whl|/*.tar.gz) PYSCI="$REPO_URL" ;;
+  *) PYSCI="pysci @ git+${REPO_URL}@${REF}" ;;
+esac
 
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/sci-install-check.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
@@ -32,6 +34,7 @@ workflow() {
   printf 'a,b\n1,2\n' > draft/files/data.csv
   "$sci" --version
   "$sci" --help > /dev/null
+  "$sci" spec --list > /dev/null
   "$sci" keygen > /dev/null
   "$sci" license draft > /dev/null
   "$sci" check draft > /dev/null
@@ -46,16 +49,18 @@ workflow() {
   cd - > /dev/null
 }
 
-echo "== uv tool install from ${REPO_URL}@${REF}"
-uv tool install --with "$PYSCI" "$CLI"
+echo "== uv tool install $PYSCI"
+uv tool install "$PYSCI"
+"$UV_TOOL_DIR/pysci/bin/python" -c 'import importlib.metadata as m; import pysci; assert pysci.__version__ == m.version("pysci"); assert callable(pysci.verify_zip)'
 "$UV_TOOL_BIN_DIR/sci" --help | head -n 1
 workflow "$UV_TOOL_BIN_DIR/sci" "$WORK/uv-run"
 
 if [ "${SCI_INSTALL_CHECK_PIP:-1}" != "0" ]; then
-  echo "== pip install from ${REPO_URL}@${REF}"
+  echo "== pip install $PYSCI"
   PYTHON="${PYTHON:-python3}"
   "$PYTHON" -m venv "$WORK/venv"
-  "$WORK/venv/bin/pip" install --quiet "$PYSCI" "$CLI"
+  "$WORK/venv/bin/pip" install --quiet "$PYSCI"
+  "$WORK/venv/bin/python" -c 'import importlib.metadata as m; import pysci; assert pysci.__version__ == m.version("pysci"); assert callable(pysci.verify_zip)'
   "$WORK/venv/bin/sci" --help | head -n 1
   workflow "$WORK/venv/bin/sci" "$WORK/pip-run"
 fi

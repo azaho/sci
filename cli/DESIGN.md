@@ -14,7 +14,7 @@ Draft, 2026-11-07. Commands implement the [SCI protocol](../protocol/README.md) 
 | `sci sign DIR [--output DIR]` | Sign a draft and optionally save its ZIP in a campaign folder. |
 | `sci verify PATH` | Verify a signed directory or ZIP. |
 | `sci publish PATH --to DESTINATION` | Store signed bundles in local folders or external archives. |
-| `sci submit ID_OR_PATH --archive URL [--to INDEX]` | Register hosted publications with an indexer. |
+| `sci submit ID_OR_PATH --archive ARCHIVE [--to INDEX]` | Register hosted publications with an indexer. |
 | `sci keygen [--key PATH]` | Create a signing key pair. |
 | `sci claim TYPE ACCOUNT --output DIR` | Create a signed account claim. |
 | `sci timestamp PATH [--tsa URL \| --submit]` | Obtain or submit timestamp proofs. |
@@ -173,9 +173,15 @@ For Hugging Face, use the Hub upload API and its large-file storage. Descriptor:
 
 Confirm public availability and browser access to reader files, including CORS. Report successful hosting, IDs, and the descriptor URL. On retry, compare remote content digests, or download and verify files when suitable digests are unavailable. Reuse matching content; reject conflicts. Recovery must work without local upload history.
 
-### `sci submit ID_OR_PATH --archive URL [--to INDEX]`
+### `sci submit ID_OR_PATH --archive ARCHIVE [--to INDEX]`
 
-Accept full IDs or local signed inputs under the shared rules below. Repeat `--archive` for external descriptors. Use the configured index or one HTTPS origin supplied with `--to`. Files must already be hosted; submission neither uploads them nor changes local folder membership.
+Accept full IDs or local signed inputs under the shared rules below. Repeat `--archive` for external descriptors or supported GitHub/Hugging Face
+repository addresses (the same addresses accepted by `publish --to`). Resolve
+a repository to the `sci/archive.json` descriptor written by `publish`; preserve
+explicit descriptor URLs for custom layouts. Deduplicate identical resolved URLs. This
+resolution uses no credentials, network, or local upload history and does not
+establish that the files are hosted. Reject local folders and `@local`.
+The same archive argument forms apply to `read` and `pull`. Use the configured index or one HTTPS origin supplied with `--to`. Files must already be hosted; submission neither uploads them nor changes local folder membership.
 
 Call `submit_url` under [SCI protocol §8.1.4](../protocol/README.md#814-publication-submission), once per ID. Report success and include the service's response. Treat additional fields as service-specific results; protocol success alone does not establish catalog admission.
 
@@ -186,7 +192,7 @@ Publish a campaign, then register it:
 ```sh
 sci publish ./campaign --to https://github.com/lab/research --create
 sci submit ./campaign --to https://sciscape.io \
-  --archive https://raw.githubusercontent.com/lab/research/main/sci/archive.json
+  --archive https://github.com/lab/research
 ```
 
 ## Identity and timestamp proofs
