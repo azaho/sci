@@ -99,7 +99,7 @@ def test_package_metadata() -> None:
     import tomllib
 
     project = tomllib.loads((REPO_ROOT / "pyproject.toml").read_text())["project"]
-    assert project["name"] == "pysci"
+    assert project["name"] == "sci-protocol"
     assert project["scripts"]["sci"] == "pysci._cli.main:main"
     assert project["license"] == "Apache-2.0"
     assert project["requires-python"] == ">=3.11"

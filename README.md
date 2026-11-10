@@ -25,20 +25,20 @@ excluding 10 stateful indexer scenarios.
 
 ## Install
 
-Requires Python 3.11 or later. One package, `pysci`, contains both the Python
+Requires Python 3.11 or later. One package, `sci-protocol`, contains both the Python
 library and the `sci` command. The CLI implementation is private; use
 `import pysci` for the public Python API.
 
 After the first PyPI release, install the standalone command with:
 
 ```sh
-uv tool install pysci
+uv tool install sci-protocol
 ```
 
 Or install both the library and command in a project virtual environment:
 
 ```sh
-pip install pysci
+pip install sci-protocol
 ```
 
 `uv tool install` isolates the command; it does not add `pysci` to your
@@ -52,15 +52,8 @@ uv tool install .
 pip install .
 ```
 
-For development, use `uv sync` and `uv run sci --help`. To replace an older
-Git-installed `sci-cli` tool, run `uv tool uninstall sci-cli` first; for an
-older pip installation, run `pip uninstall sci-cli` in that environment
-before installing the unified package.
-
-After the PyPI release, existing library users should run
-`pip install --upgrade pysci`; plain `pip install`
-can keep an older Git-installed copy. Package version 0.2.0 introduces this
-unified distribution; the SCI protocol remains at draft 0.1.
+For development, use `uv sync` and `uv run sci --help`. Package version 0.2.0
+introduces this unified distribution; the SCI protocol remains at draft 0.1.
 
 ## First workflow
 

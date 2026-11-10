@@ -1,8 +1,10 @@
-# Releasing pysci
+# Releasing sci-protocol
 
-The repository builds one `pysci` distribution containing the Python library
+The repository builds one `sci-protocol` distribution containing the Python library
 and the `sci` command. Package releases are independent of the SCI protocol
 version. The first unified package release is `0.2.0` (protocol draft `0.1`).
+The Python import remains `pysci`; release tags retain the `pysci-v` prefix,
+which matches the protected GitHub environment's tag policy.
 
 ## One-time PyPI setup
 
@@ -16,13 +18,13 @@ These instructions target the new SCI implementation at `azaho/sci`.
 The legacy implementation is maintained separately at `azaho/sci-legacy`.
 Configure the PyPI publisher for the final repository name, `sci`.
 
-Sign in to the PyPI account that should own `pysci`. On
+Sign in to the PyPI account that should own `sci-protocol`. On
 [account publishing](https://pypi.org/manage/account/publishing/), add a
 pending GitHub publisher with these exact values:
 
 | Field | Value |
 | --- | --- |
-| PyPI project name | `pysci` |
+| PyPI project name | `sci-protocol` |
 | Owner | `azaho` |
 | Repository name | `sci` |
 | Workflow name | `publish.yml` |
@@ -33,13 +35,13 @@ The workflow declares the GitHub environment `pypi`; it must match the
 publisher's environment name. No PyPI API token or GitHub secret is needed.
 
 A pending publisher creates the project on its first successful upload;
-it does not reserve the name in advance. If `pysci` already exists under
+it does not reserve the name in advance. If `sci-protocol` already exists under
 your account, add the same publisher in that project's publishing settings
 instead. See [PyPI's setup instructions](https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/).
 
 ## Rehearse
 
-After the workflow is merged, run **Publish pysci** manually from GitHub
+After the workflow is merged, run **Publish sci-protocol** manually from GitHub
 Actions, or:
 
 ```sh
@@ -60,10 +62,10 @@ workflow receive the same rehearsal on pull requests.
 
    ```sh
    gh release create pysci-v0.2.0 --repo azaho/sci --target main \
-     --title "pysci 0.2.0" --generate-notes
+     --title "sci-protocol 0.2.0" --generate-notes
    ```
 
-3. Watch the **Publish pysci** workflow. It checks that the tag matches the
+3. Watch the **Publish sci-protocol** workflow. It checks that the tag matches the
    package version and that its commit belongs to `main`, runs Python checks,
    builds the distributions, and tests clean uv and pip installations.
    Only the separate publishing job requests the OIDC credential and uploads
@@ -71,7 +73,7 @@ workflow receive the same rehearsal on pull requests.
 4. Verify the registry installation from a clean environment:
 
    ```sh
-   uvx --from pysci==0.2.0 sci --version
+   uvx --from sci-protocol==0.2.0 sci --version
    ```
 
 Publishing a GitHub release triggers the upload; creating a draft release
@@ -82,7 +84,7 @@ need a new package version.
 ## Update Sciscape
 
 After the registry installation succeeds, update the Sciscape homepage to
-show `uv tool install pysci` (and `pip install pysci` for project environments),
+show `uv tool install sci-protocol` (and `pip install sci-protocol` for project environments),
 use repository addresses in the `--archive` examples, and deploy the
 Sciscape web Worker through that repository's deployment process.
 

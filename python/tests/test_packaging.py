@@ -13,7 +13,7 @@ def test_package_data_and_typing_marker() -> None:
     assert (package / "data" / "sci-baseline-LICENSE.txt").read_bytes() == (
         REPO_ROOT / "protocol" / "sci-baseline-LICENSE.txt"
     ).read_bytes()
-    assert pysci.__version__ == version("pysci")
+    assert pysci.__version__ == version("sci-protocol")
 
 
 def test_bundled_specification_matches_protocol_readme_and_corpus_pin() -> None:

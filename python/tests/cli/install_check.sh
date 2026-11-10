@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install the unified pysci package into clean temporary environments, then run
+# Install the unified sci-protocol package into clean temporary environments, then run
 # `sci --help` and the offline local workflow.
 #
 # Usage: python/tests/cli/install_check.sh [REPO_URL | ABSOLUTE_WHEEL_OR_SDIST] [REF]
@@ -12,8 +12,8 @@ set -euo pipefail
 REPO_URL="${1:-${SCI_REPO_URL:-https://github.com/azaho/sci}}"
 REF="${2:-${SCI_REPO_REF:-main}}"
 case "$REPO_URL" in
-  /*.whl|/*.tar.gz) PYSCI="$REPO_URL" ;;
-  *) PYSCI="pysci @ git+${REPO_URL}@${REF}" ;;
+  /*.whl|/*.tar.gz) SCI_PACKAGE="$REPO_URL" ;;
+  *) SCI_PACKAGE="sci-protocol @ git+${REPO_URL}@${REF}" ;;
 esac
 
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/sci-install-check.XXXXXX")"
@@ -25,7 +25,7 @@ unset VIRTUAL_ENV
 
 check_package() {
   local python="$1" sci="$2"
-  "$python" -c 'import importlib.metadata as m; import pysci; assert pysci.__version__ == m.version("pysci"); assert callable(pysci.verify_zip); assert "Apache License" in m.distribution("pysci").read_text("licenses/LICENSE")'
+  "$python" -c 'import importlib.metadata as m; import pysci; assert pysci.__version__ == m.version("sci-protocol"); assert callable(pysci.verify_zip); assert "Apache License" in m.distribution("sci-protocol").read_text("licenses/LICENSE")'
   test "$("$python" -m pysci --version)" = "$("$sci" --version)"
 }
 
@@ -55,17 +55,17 @@ workflow() {
   cd - > /dev/null
 }
 
-echo "== uv tool install $PYSCI"
-uv tool install "$PYSCI"
-check_package "$UV_TOOL_DIR/pysci/bin/python" "$UV_TOOL_BIN_DIR/sci"
+echo "== uv tool install $SCI_PACKAGE"
+uv tool install "$SCI_PACKAGE"
+check_package "$UV_TOOL_DIR/sci-protocol/bin/python" "$UV_TOOL_BIN_DIR/sci"
 "$UV_TOOL_BIN_DIR/sci" --help | head -n 1
 workflow "$UV_TOOL_BIN_DIR/sci" "$WORK/uv-run"
 
 if [ "${SCI_INSTALL_CHECK_PIP:-1}" != "0" ]; then
-  echo "== pip install $PYSCI"
+  echo "== pip install $SCI_PACKAGE"
   PYTHON="${PYTHON:-python3}"
   "$PYTHON" -m venv "$WORK/venv"
-  "$WORK/venv/bin/pip" install --quiet "$PYSCI"
+  "$WORK/venv/bin/pip" install --quiet "$SCI_PACKAGE"
   check_package "$WORK/venv/bin/python" "$WORK/venv/bin/sci"
   "$WORK/venv/bin/sci" --help | head -n 1
   workflow "$WORK/venv/bin/sci" "$WORK/pip-run"
