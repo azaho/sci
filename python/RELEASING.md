@@ -89,3 +89,12 @@ Sciscape web Worker through that repository's deployment process.
 The Python package does not require a Sciscape database migration or API change.
 Update this repository's installation docs to remove their pending-release
 wording once the first PyPI release is available.
+
+## Switching a legacy installation
+
+The [legacy `scipub` package](https://github.com/azaho/sci-legacy) also installs
+a command named `sci` and uses `~/.sci/` by default. Before switching, securely
+back up that directory and check which environment supplies the current command.
+Keep legacy and new SCI in separate environments with separate `SCI_HOME`
+directories if using both; do not assume their configuration or key formats
+are interchangeable.
