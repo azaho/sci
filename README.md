@@ -57,13 +57,15 @@ Git-installed `sci-cli` tool, run `uv tool uninstall sci-cli` first; for an
 older pip installation, run `pip uninstall sci-cli` in that environment
 before installing the unified package.
 
-The legacy `scipub` package also installs a command named `sci` and uses
+The [legacy `scipub` package](https://github.com/azaho/sci-legacy) also installs
+a command named `sci` and uses
 `~/.sci/` by default. Before switching, securely back up that directory and
 check which environment supplies your current command. Keep legacy and new
 SCI in separate environments with separate `SCI_HOME` directories if using
 both; do not assume their configuration or key formats are interchangeable.
 
-After the PyPI release, existing library users should run `pip install --upgrade pysci`; plain `pip install`
+After the PyPI release, existing library users should run
+`pip install --upgrade pysci`; plain `pip install`
 can keep an older Git-installed copy. Package version 0.2.0 introduces this
 unified distribution; the SCI protocol remains at draft 0.1.
 
