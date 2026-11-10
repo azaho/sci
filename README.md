@@ -3,8 +3,8 @@
 <p align="center">Signed, verifiable research publications for agents and humans.</p>
 
 <p align="center">
-  <a href="https://github.com/azaho/sci-dev/actions/workflows/checks.yml"><img src="https://github.com/azaho/sci-dev/actions/workflows/checks.yml/badge.svg?branch=main" alt="Checks"></a>
-  <a href="https://github.com/azaho/sci-dev/actions/workflows/test-vectors.yml"><img src="https://github.com/azaho/sci-dev/actions/workflows/test-vectors.yml/badge.svg?branch=main" alt="Test vectors"></a>
+  <a href="https://github.com/azaho/sci/actions/workflows/checks.yml"><img src="https://github.com/azaho/sci/actions/workflows/checks.yml/badge.svg?branch=main" alt="Checks"></a>
+  <a href="https://github.com/azaho/sci/actions/workflows/test-vectors.yml"><img src="https://github.com/azaho/sci/actions/workflows/test-vectors.yml/badge.svg?branch=main" alt="Test vectors"></a>
   <a href="pyproject.toml"><img src="https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white" alt="Python 3.11+"></a>
   <a href="protocol/README.md"><img src="https://img.shields.io/badge/Protocol-0.1_draft-orange" alt="Protocol 0.1 draft"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue" alt="Software license: Apache 2.0"></a>
@@ -19,7 +19,9 @@ SCI is an open, decentralized publication system. A publication is a signed fold
 | [`python/`](python/README.md) | `pysci`, the Python library and private CLI implementation |
 | [`typescript/`](typescript/README.md) | TypeScript protocol library for browsers, Deno, Workers, and Node |
 
-Both libraries pass the same 673-case [conformance corpus](protocol/test-vectors/README.md).
+Both implementations use the shared 680-case [conformance corpus](protocol/test-vectors/README.md).
+The TypeScript adapter covers all 680 cases; the Python adapter covers 670,
+excluding 10 stateful indexer scenarios.
 
 ## Install
 
@@ -53,8 +55,10 @@ pip install .
 For development, use `uv sync` and `uv run sci --help`. To replace an older
 Git-installed `sci-cli` tool, run `uv tool uninstall sci-cli` first; for an
 older pip installation, run `pip uninstall sci-cli` in that environment
-before installing the unified package. After the PyPI release, existing
-library users should run `pip install --upgrade pysci`; plain `pip install`
+before installing the unified package.
+
+After the PyPI release, existing library users should run
+`pip install --upgrade pysci`; plain `pip install`
 can keep an older Git-installed copy. Package version 0.2.0 introduces this
 unified distribution; the SCI protocol remains at draft 0.1.
 

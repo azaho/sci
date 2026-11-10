@@ -23,8 +23,8 @@ dependencies = [
 sci = "pysci._cli.main:main"
 
 [project.urls]
-Repository = "https://github.com/azaho/sci-dev"
-Documentation = "https://github.com/azaho/sci-dev/blob/main/README.md"
+Repository = "https://github.com/azaho/sci"
+Documentation = "https://github.com/azaho/sci/blob/main/README.md"
 
 [dependency-groups]
 dev = [

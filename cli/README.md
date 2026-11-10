@@ -58,7 +58,7 @@ runs the offline CLI workflow. Pass a repository URL and ref, or a built wheel
 or source distribution:
 
 ```sh
-python/tests/cli/install_check.sh https://github.com/azaho/sci-dev main
+python/tests/cli/install_check.sh https://github.com/azaho/sci main
 python/tests/cli/install_check.sh "$PWD"/dist/pysci-*.whl
 ```
 

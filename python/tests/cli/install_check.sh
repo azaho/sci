@@ -3,13 +3,13 @@
 # `sci --help` and the offline local workflow.
 #
 # Usage: python/tests/cli/install_check.sh [REPO_URL | ABSOLUTE_WHEEL_OR_SDIST] [REF]
-#   REPO_URL  default: $SCI_REPO_URL or https://github.com/azaho/sci-dev
+#   REPO_URL  default: $SCI_REPO_URL or https://github.com/azaho/sci
 #             (a local clone works as file:///path/to/clone)
 #   REF       default: $SCI_REPO_REF or main
 # Set SCI_INSTALL_CHECK_PIP=0 to skip the pip variant.
 set -euo pipefail
 
-REPO_URL="${1:-${SCI_REPO_URL:-https://github.com/azaho/sci-dev}}"
+REPO_URL="${1:-${SCI_REPO_URL:-https://github.com/azaho/sci}}"
 REF="${2:-${SCI_REPO_REF:-main}}"
 case "$REPO_URL" in
   /*.whl|/*.tar.gz) PYSCI="$REPO_URL" ;;
