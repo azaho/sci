@@ -471,3 +471,44 @@ def test_descriptor_unsupported_schema(world: World, tmp_path: Path) -> None:
             "--json",
         )
     assert run.code == 4
+
+
+@pytest.mark.parametrize(
+    ("repo", "descriptor"),
+    [
+        (
+            "git@github.com:lab/research.git",
+            "https://raw.githubusercontent.com/lab/research/main/sci/archive.json",
+        ),
+        (
+            "https://huggingface.co/datasets/lab/data",
+            "https://huggingface.co/datasets/lab/data/resolve/main/sci/archive.json",
+        ),
+    ],
+)
+def test_submit_repository_address_sends_descriptor(
+    world: World, repo: str, descriptor: str
+) -> None:
+    run = world.cli(
+        "submit",
+        "sha256:" + world.digest,
+        "--to",
+        world.origin,
+        "--archive",
+        repo,
+        "--archive",
+        descriptor,
+        "--account",
+        "domain",
+        "Lab.Example",
+        "--json",
+    )
+    assert run.code == 0, run.stdout
+    assert run.result["descriptors"] == [descriptor]
+    posts = [r for r in world.server.requests if r.path == "/api/submit/publication"]
+    assert len(posts) == 1
+    assert json.loads(posts[0].body) == {
+        "id": world.digest,
+        "descriptors": [descriptor],
+        "account": {"type": "domain", "id": "lab.example"},
+    }

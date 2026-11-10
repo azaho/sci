@@ -9,8 +9,8 @@ import pytest
 from clitestkit import Cli, cli, write_draft  # noqa: F401 - cli is a fixture
 from fakehosts import FakeGitHub
 
-from sci.clients import github
-from sci.clients.http import HttpRequest
+from pysci._cli.clients import github
+from pysci._cli.clients.http import HttpRequest
 
 REMOTE = "https://github.com/lab/research"
 

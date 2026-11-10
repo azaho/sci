@@ -10,7 +10,7 @@ import urllib.parse
 from dataclasses import dataclass, field
 from typing import Any
 
-from sci.clients.http import HttpRequest, RawResponse
+from pysci._cli.clients.http import HttpRequest, RawResponse
 
 
 def _reply(
@@ -122,7 +122,10 @@ class FakeGitHub:
                 if release["tag_name"] == tag and not release["draft"]:
                     for asset in release["assets"]:
                         if asset["name"] == name:
-                            return _reply(206, raw=self.assets[asset["id"]][:1])
+                            data = self.assets[asset["id"]]
+                            if "range" in {k.lower() for k in request.headers}:
+                                return _reply(206, raw=data[:1])
+                            return _reply(200, raw=data)
             return _reply(404, raw=b"")
         self.tokens.append(request.unredirected.get("Authorization"))
         if self.hook is not None:

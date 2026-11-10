@@ -5,9 +5,14 @@
 | Path | Contents |
 | --- | --- |
 | `protocol/` | Authoritative protocol specification, baseline publication license, and shared conformance corpus |
-| `python/` | `pysci`, the Python protocol library |
-| `cli/` | The `sci` command-line tool, built on `pysci` |
+| `python/` | `pysci`, the Python protocol library and private `_cli` implementation |
+| `python/tests/` | Library tests and CLI tests in `cli/` |
+| `cli/` | Command guide and design; implementation in `python/pysci/_cli/`, tests in `python/tests/cli/` |
 | `typescript/` | TypeScript protocol library used by Sciscape's backend and browser reader |
+
+The supported Python API lives in `pysci`; `_cli` contains private command
+implementation details. Run the command as `sci` or `python -m pysci`. Tests
+stay outside the installed package, so wheels contain only runtime code and data.
 
 Keep protocol rules in the libraries. Keep command arguments, output, and local settings in the CLI.
 Keep implementation decisions out of `protocol/README.md`. Use README files for operating instructions and DESIGN files for intended behavior.
@@ -17,7 +22,7 @@ Keep implementation decisions out of `protocol/README.md`. Use README files for 
 Requirements: Python 3.11+, [uv](https://docs.astral.sh/uv/), Node.js 22, Deno 2, and OpenSSL 3 or later for the corpus audit.
 
 ```sh
-uv sync --all-packages          # Python workspace: pysci and the CLI
+uv sync                         # One pysci package, including the sci command
 (cd typescript && npm ci)       # TypeScript library
 ```
 
@@ -27,10 +32,10 @@ Run the same checks as CI before opening a pull request:
 
 ```sh
 # Python library and CLI
-uv run ruff check python cli
-uv run ruff format --check python cli
-uv run mypy --strict python/pysci cli/sci
-uv run pytest python/tests cli/tests
+uv run ruff check python
+uv run ruff format --check python
+uv run mypy
+uv run pytest
 
 # TypeScript library: type checks, lint, Node and Deno tests, conformance
 (cd typescript && npm run check)
@@ -49,7 +54,7 @@ Both libraries must pass the same corpus cases. Report a subset pass as a subset
 - Typed Python with strict mypy, Ruff, and pytest. Strict TypeScript with tests in Node and Deno.
 - Validate external files, JSON, and network responses at runtime.
 - Keep command and HTTP entry points small; put shared operations in separate modules.
-- Put tests beside their component.
+- Keep Python tests in `python/tests/` (CLI tests in `python/tests/cli/`) and TypeScript tests in `typescript/tests/`.
 - Pin dependencies through `uv.lock` and `typescript/package-lock.json`.
 - `python/pysci/data/sci-protocol.md` is the copy of `protocol/README.md` that `sci spec` prints. Update both together; a test checks that they match and that the hash equals the corpus pin.
 - Do not edit signed JSON or binary fixtures by hand. Regenerate them with `protocol/test-vectors/tools/generate.py` after reviewing a protocol change.

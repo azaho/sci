@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from .config import normalize_url
 from .errors import CliError, Exit
 
 _NAME = r"[A-Za-z0-9][A-Za-z0-9._-]*"
@@ -141,3 +142,22 @@ def resolve_destinations(
             "no_destinations", "no destinations selected (no known folders?)", Exit.USAGE
         )
     return destinations
+
+
+def resolve_archive(value: str) -> str:
+    """Expand supported repository addresses; preserve explicit descriptor URLs.
+
+    Publishing layouts are deterministic, so this needs neither credentials nor
+    local upload history. A repository address does not prove files are hosted.
+    """
+    try:
+        remote = parse_remote(value)
+    except CliError:
+        # Other HTTPS paths may be explicit descriptors (including custom layouts
+        # on a supported host); validate them as URLs without rewriting them.
+        remote = None
+    if remote is not None:
+        if remote.kind == "github":
+            return f"https://raw.githubusercontent.com/{remote.repository}/main/sci/archive.json"
+        return f"https://huggingface.co/datasets/{remote.repository}/resolve/main/sci/archive.json"
+    return normalize_url(value, what="archive descriptor URL or supported repository address")

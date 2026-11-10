@@ -13,8 +13,9 @@ from pysci.timestamps import TrustConfig
 from ..clients.http import Deadline
 from ..clients.index import IndexClient
 from ..clients.tsa import build_trust
-from ..config import normalize_origin, normalize_url
+from ..config import normalize_origin
 from ..context import Context
+from ..destinations import resolve_archive
 from ..errors import CliError, Exit
 from ..storage.keys import key_permission_warning, load_signing_key, resolve_key_path
 
@@ -56,7 +57,7 @@ def index_client(ctx: Context, explicit: str | None, *, option: str = "--to") ->
 def archive_urls(values: list[str] | None) -> list[str]:
     urls: list[str] = []
     for value in values or []:
-        url = normalize_url(value, what="archive descriptor URL")
+        url = resolve_archive(value)
         if url not in urls:
             urls.append(url)
     return urls

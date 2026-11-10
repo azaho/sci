@@ -13,8 +13,9 @@ from typing import Any
 import pytest
 from clitestkit import Cli, cli, write_draft  # noqa: F401 - cli is a fixture
 
-from sci.storage import catalog as catalog_module
-from sci.storage.catalog import Catalog
+from pysci._cli.storage import catalog as catalog_module
+from pysci._cli.storage.catalog import Catalog
+from pysci.bundle import verify_zip
 
 
 def signed(cli: Cli, campaign: Path, count: int, start: int = 0) -> None:
@@ -85,7 +86,7 @@ def test_corruption_found_after_opening_rebuilds_once(
         calls["count"] += 1
         if calls["count"] == 1:
             error = sqlite3.DatabaseError("malformed")
-            error.sqlite_errorcode = sqlite3.SQLITE_CORRUPT  # type: ignore[misc]
+            error.sqlite_errorcode = sqlite3.SQLITE_CORRUPT
             raise error
         return original(self, *args, **kwargs)
 
@@ -102,7 +103,7 @@ def test_scan_reuses_a_file_another_process_indexed_after_it_started(
     campaign = tmp_path / "campaign"
     signed(cli, campaign, 3)
     path = tmp_path / "shared.sqlite"
-    original = catalog_module.verify_zip
+    original = verify_zip
     first = {"pending": True}
 
     def verify(zip_path: Path) -> Any:
@@ -135,7 +136,7 @@ def test_scan_keeps_a_file_added_after_its_listing(
     def listing_without_late(folder: Any) -> Any:
         return [entry for entry in real_scandir(folder) if entry.path != str(late)]
 
-    monkeypatch.setattr(catalog_module.os, "scandir", listing_without_late)
+    monkeypatch.setattr(os, "scandir", listing_without_late)
     catalog = Catalog(path)
     catalog.scan([campaign])
     rows = catalog.db.execute("SELECT count(*) FROM files WHERE path=?", (str(late),)).fetchone()
@@ -148,7 +149,7 @@ def test_many_processes_share_one_cache_while_bundles_arrive(cli: Cli, tmp_path:
     signed(cli, campaign, 12)
     workers = 12
     env = {**os.environ, "SCI_HOME": str(cli.home)}
-    command = [sys.executable, "-m", "sci.main", "search", "spike", "--limit", "100"]
+    command = [sys.executable, "-m", "pysci", "search", "spike", "--limit", "100"]
     command += ["--in", str(campaign), "--json"]
     processes = [
         subprocess.Popen(command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

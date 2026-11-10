@@ -32,7 +32,7 @@ from .manifest import Manifest, build_manifest, parse_manifest, verify_manifest
 from .records import create_claim, create_revocation, verify_claim, verify_revocation
 from .schemas import PROTOCOL_VERSION
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "BASELINE_LICENSE_SHA256",

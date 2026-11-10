@@ -59,7 +59,7 @@ class Context:
         if self._http is None:
             self._http = HttpClient(
                 self.transport or UrllibTransport(),
-                user_agent=f"sci-cli/{__version__}",
+                user_agent=f"pysci/{__version__}",
                 pacer=Pacer(self.home / "pace", sleep=self.sleep),
                 sleep=self.sleep,
             )

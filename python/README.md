@@ -3,24 +3,47 @@
 Python implementation of the [SCI protocol](../protocol/README.md) (draft 0.1):
 publication verification, drafting and signing, key claims and revocations,
 RFC 3161 timestamps, and the discovery/submission interfaces. The `sci` CLI is
-built on this library.
-
-The package is local for now (future PyPI name: `pysci`). It requires
-Python 3.11+ and depends only on `cryptography`, `asn1crypto`, and `idna`.
+included in the same `pysci` distribution. Its implementation under `pysci._cli`
+is private; library users should use the public modules below. Run the command
+as `sci` or `python -m pysci`; see the [CLI guide](../cli/README.md) and
+[CLI design](../cli/DESIGN.md).
 
 ## Install
 
-From the repository root (uv workspace):
+Requires Python 3.11 or later. One package, `pysci`, contains both the Python
+library and the `sci` command. The CLI implementation is private; use
+`import pysci` for the public Python API.
+
+After the first PyPI release, install the standalone command with:
 
 ```sh
-uv sync --package pysci
+uv tool install pysci
 ```
 
-Or directly from Git (substitute the final repository URL):
+Or install both the library and command in a project virtual environment:
 
 ```sh
-pip install "git+https://github.com/azaho/sci.git#subdirectory=python"
+pip install pysci
 ```
+
+`uv tool install` isolates the command; it does not add `pysci` to your
+project or notebook environment.
+
+Until the PyPI release, install from this checkout at the repository root:
+
+```sh
+uv tool install .
+# Or, inside a project virtual environment:
+pip install .
+```
+
+For development, use `uv sync` and `uv run sci --help`. To replace an older
+Git-installed `sci-cli` tool, run `uv tool uninstall sci-cli` first; for an
+older pip installation, run `pip uninstall sci-cli` in that environment
+before installing the unified package. After the PyPI release, existing
+library users should run `pip install --upgrade pysci`; plain `pip install`
+can keep an older Git-installed copy. Package version 0.2.0 introduces this
+unified distribution; the SCI protocol remains at draft 0.1.
 
 ## First workflow
 
@@ -83,13 +106,13 @@ configuration from it; pass FreeTSA's CRL for a full revocation check.
 
 ## Checks
 
-From `python/`:
+From the repository root:
 
 ```sh
-uv run --package pysci ruff check .
-uv run --package pysci ruff format --check .
-uv run --package pysci mypy
-uv run --package pysci pytest
+uv run ruff check python
+uv run ruff format --check python
+uv run mypy
+uv run pytest
 ```
 
 `pytest` includes the conformance run. To run it directly from the repository root:
@@ -98,7 +121,7 @@ uv run --package pysci pytest
 python3 protocol/test-vectors/tools/run_adapter.py \
   --kind publication --kind claim --kind revocation --kind timestamp \
   --kind discovery --kind submission --kind template --kind http -- \
-  uv run --package pysci python python/tests/adapter.py
+  uv run python python/tests/adapter.py
 ```
 
 This is a subset pass of 663 of the 673 cases: the 10 `scenario` cases describe
@@ -108,5 +131,5 @@ also run a live FreeTSA round trip.
 
 ## License
 
-Apache License 2.0; see [LICENSE](LICENSE). `python/LICENSE` is a copy of the
-repository license so that source and wheel distributions include it.
+Apache License 2.0; see [repository license](../LICENSE). The root package build includes the repository license in source and wheel
+distributions.

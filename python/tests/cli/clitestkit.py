@@ -20,17 +20,16 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
+from pysci._cli.clients import http
+from pysci._cli.main import main
 from pysci.baseline import baseline_license_bytes
-from sci.clients import http
-from sci.main import main
 
 TINY_PNG = bytes.fromhex(
     "89504e470d0a1a0a0000000d49484452000000010000000108000000003a7e9b55"
     "0000000a4944415478da6360000000020001e527defc0000000049454e44ae426082"
 )
 
-CLI_ROOT = Path(__file__).resolve().parents[1]
-REPO_ROOT = CLI_ROOT.parent
+REPO_ROOT = Path(__file__).resolve().parents[3]
 TEST_KEYS = REPO_ROOT / "protocol" / "test-vectors" / "test-keys"
 TEST_PKI = REPO_ROOT / "protocol" / "test-vectors" / "0.1" / "pki"
 
