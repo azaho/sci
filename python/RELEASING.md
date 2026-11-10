@@ -6,6 +6,17 @@ version. The first unified package release is `0.2.0` (protocol draft `0.1`).
 
 ## One-time PyPI setup
 
+First create the GitHub environment `pypi` in this repository's **Settings →
+Environments**. Add the owner as a required reviewer and restrict deployment
+branches/tags to tags matching `pysci-v*`. Do this before the first release:
+an environment created implicitly by a workflow has no review protection.
+The owner must review the release commit and approve the publishing job.
+
+These instructions currently target `azaho/sci-dev`. After it is renamed to
+`azaho/sci`, update the repository field below and all commands to the final
+name, and configure the PyPI publisher for `sci` before releasing. Do not use
+`azaho/sci` while that name still belongs to the legacy implementation.
+
 Sign in to the PyPI account that should own `pysci`. On
 [account publishing](https://pypi.org/manage/account/publishing/), add a
 pending GitHub publisher with these exact values:
