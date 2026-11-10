@@ -22,7 +22,7 @@ Keep implementation decisions out of `protocol/README.md`. Use README files for 
 Requirements: Python 3.11+, [uv](https://docs.astral.sh/uv/), Node.js 22, Deno 2, and OpenSSL 3 or later for the corpus audit.
 
 ```sh
-uv sync                         # One pysci package, including the sci command
+uv sync                         # One sci-protocol package, including the sci command
 (cd typescript && npm ci)       # TypeScript library
 ```
 
@@ -63,7 +63,7 @@ Both libraries must pass the same corpus cases. Report a subset pass as a subset
 ## Releasing
 
 For package publishing and the one-time PyPI setup, see
-[Releasing pysci](python/RELEASING.md).
+[Releasing sci-protocol](python/RELEASING.md).
 
 ## License
 

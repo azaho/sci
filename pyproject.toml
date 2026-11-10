@@ -1,5 +1,5 @@
 [project]
-name = "pysci"
+name = "sci-protocol"
 dynamic = ["version"]
 description = "Python library and sci CLI for SCI research publications."
 readme = "README.md"
