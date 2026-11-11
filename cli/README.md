@@ -233,3 +233,72 @@ and in-memory GitHub and Hugging Face fakes; they never upload anything.
 ## License
 
 Apache License 2.0; see [repository license](../LICENSE).
+
+## Vote on a publication (Sciscape extension)
+
+The index must advertise `sciscape-api/0.1` and `vote_url`. This requires a
+Sciscape deployment with signed voting support; older indexes return an
+unsupported-capability error. Voting does not change SCI protocol 0.1.
+
+```sh
+sci vote sha256:<paper-digest> --up --to https://sciscape.io \
+  --account domain my-domain.com --reason "I reproduced the central result."
+sci vote sha256:<paper-digest> --down --to https://sciscape.io \
+  --review sha256:<review-publication-digest>
+sci vote sha256:<paper-digest> --withdraw --to https://sciscape.io
+```
+
+Uses your existing private key (`--key`, configured key, or `~/.sci/key.pem`).
+The key stays local. The signed record identifies the target publication,
+key, value, revision, optional reason, and optional review reference. The
+optional `--account domain NAME` is an **unsigned discovery hint**, used to
+find the domain's hosted signed key claim. No domain is in the signed vote.
+
+The reason is optional, nonblank, at most 1,000 Unicode code points. A full
+review is an ordinary externally hosted SCI publication: write it with a
+citation to the reviewed paper using `relations: ["reviews"]`, then use the
+usual `sci license`, `sci sign`, `sci publish`, and `sci submit` workflow.
+Pass its publication ID to `--review`. You can reference another author's
+review; this does not make you its author. No review bundle is uploaded by
+`sci vote`, only the signed reference.
+
+By default the command retrieves and verifies your current signed vote,
+then increments its revision. Repeating an unchanged opinion resubmits the
+original bytes. To refresh domain evidence after a claim changes or to include
+a new domain, add `--refresh` (and `--account domain NAME` when needed); this
+creates a new revision even when value, reason, and review are unchanged.
+Keep the optional reason/review flags when refreshing. Accepted storage does
+not guarantee the vote currently contributes to the domain score.
+If another client has already submitted that revision with
+different contents, the index returns a conflict; the CLI does not silently
+overwrite it. Inspect the current opinion and deliberately run a new vote.
+Revisions are ordered per key and paper, not timestamps or domain identities.
+When using several indexes, coordinate revisions yourself or supply
+`--revision N` explicitly. A withdrawal is a retained zero-valued revision.
+
+Every online-created vote is saved to `<SCI_HOME>/votes/<vote-hash>/` before
+submission. If the response is lost, use the printed path to retry the exact
+event rather than creating another revision:
+
+```sh
+sci vote --submit ~/.sci/votes/<vote-hash> --to https://sciscape.io \
+  --account domain my-domain.com
+```
+
+For offline signing (no network), explicitly choose a revision:
+
+```sh
+sci vote sha256:<paper-digest> --up --revision 1 --output ./signed-opinion
+sci vote --submit ./signed-opinion --to https://sciscape.io \
+  --account domain my-domain.com
+```
+
+`--submit` verifies the saved `vote.json` and raw 64-byte `vote.json.sig`;
+it needs no private key. Anyone possessing both can relay the signed opinion.
+Offline creation never overwrites different existing bytes.
+
+The index verifies eligibility and determines the score separately. Sciscape
+counts at most one contribution per domain, combines opposing keys within a
+domain, and excludes self-votes and revoked/blocked keys from ranking. A
+successful submission confirms storage, not that the vote adds a point.
+There are no credits or review rewards in this command.

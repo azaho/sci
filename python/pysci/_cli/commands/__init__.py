@@ -20,6 +20,7 @@ from . import (
     submit,
     timestamp,
     verify,
+    vote,
 )
 
 COMMANDS: tuple[Command, ...] = (
@@ -32,6 +33,7 @@ COMMANDS: tuple[Command, ...] = (
     verify.COMMAND,
     publish.COMMAND,
     submit.COMMAND,
+    vote.COMMAND,
     keygen.COMMAND,
     claim.COMMAND,
     timestamp.COMMAND,
