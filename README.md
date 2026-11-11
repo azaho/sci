@@ -29,7 +29,7 @@ Requires Python 3.11 or later. One package, `sci-protocol`, contains both the Py
 library and the `sci` command. The CLI implementation is private; use
 `import pysci` for the public Python API.
 
-After the first PyPI release, install the standalone command with:
+Install the standalone command with:
 
 ```sh
 uv tool install sci-protocol
@@ -44,7 +44,7 @@ pip install sci-protocol
 `uv tool install` isolates the command; it does not add `pysci` to your
 project or notebook environment.
 
-Until the PyPI release, install from this checkout at the repository root:
+To install a development checkout from the repository root:
 
 ```sh
 uv tool install .
@@ -52,8 +52,8 @@ uv tool install .
 pip install .
 ```
 
-For development, use `uv sync` and `uv run sci --help`. Package version 0.2.0
-introduces this unified distribution; the SCI protocol remains at draft 0.1.
+For development, use `uv sync` and `uv run sci --help`. Package version 0.3.0
+adds signed Sciscape voting; the SCI protocol remains at draft 0.1.
 
 ## First workflow
 

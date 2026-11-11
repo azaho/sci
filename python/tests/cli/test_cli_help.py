@@ -20,6 +20,7 @@ DESIGN_COMMANDS = {
     "verify",
     "publish",
     "submit",
+    "vote",
     "keygen",
     "claim",
     "timestamp",

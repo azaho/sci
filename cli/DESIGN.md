@@ -283,3 +283,39 @@ Valid non-baseline bundles can pass `verify` with exit 0. Local work limits retu
 - Additional trust authorities and proof count/byte limits.
 
 The `sci-protocol` distribution contains both the Python library and the `sci` CLI; see the [repository README](../README.md#install). It is not published to PyPI yet.
+
+## Signed voting extension: `sci vote`
+
+`vote ID (--up | --down | --withdraw)` signs and submits a `sciscape-vote/0.1`
+record. Options: `--reason TEXT`, `--review ID`, `--revision N`, `--key PATH`,
+`--to INDEX`, `--account domain NAME`, `--timeout`, and `--json`.
+`--output DIR --revision N` creates files offline; `--submit DIR` verifies
+and submits existing files without loading a signing key. These modes are
+mutually exclusive with incompatible creation options.
+
+The service extension codec lives in `_cli/clients/votes.py` and reuses SCI's
+strict JSON, Unicode character, Ed25519 public-key, and signature checks.
+It does not add a record type to the SCI 0.1 protocol. The record requires
+schema, public_key, target (SCI URI), value (-1/0/1), and revision (digits-only
+integer 1..2147483647), and allows only optional reason and review. The JSON
+is limited to 16 KiB, reason to 1,000 nonblank Unicode code points; the signature
+is the raw 64 bytes over the exact original JSON.
+
+Automatic revision selection discovers `vote_url` and the catalog, fetches
+zero or one current record for the selected key and paper, and verifies its
+signature, hash, target, and key before using it. The CLI retries the exact
+current record for an unchanged opinion. The API can recheck and append domain
+evidence on an identical resubmission without a new event or revision. Otherwise
+the command uses the next revision. Omitted reason/review flags are absent from
+a new opinion; `--submit DIR` preserves the exact saved record and optional fields.
+Explicit revisions bypass lookup. Cross-client conflicts remain errors;
+network retries reuse the same multipart bytes and never advance revisions.
+
+Created records are saved before POST to `SCI_HOME/votes/<hash>/` (or the
+explicit offline directory), using no-clobber storage and keeping private keys
+outside output directories. Submission responses must confirm the exact hash,
+revision, and Boolean created flag. Lost responses and conflicts retain the
+path for exact `--submit` retries. Domain hints are unsigned multipart metadata;
+Sciscape decides eligibility and counting. Full review publications use the
+existing publication pipeline and are referenced, not embedded. No credit
+accounting is included.
