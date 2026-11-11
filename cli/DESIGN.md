@@ -305,7 +305,9 @@ Automatic revision selection discovers `vote_url` and the catalog, fetches
 zero or one current record for the selected key and paper, and verifies its
 signature, hash, target, and key before using it. The CLI retries the exact
 current record for an unchanged opinion. `--refresh` forces a new revision
-to attach current domain evidence, without altering prior signed events. It
+to attach current domain evidence, without altering prior signed events.
+Omitted reason/review flags preserve the prior fields when refreshing; an
+ordinary vote without those flags clears them. It
 cannot combine with `--revision`, `--output`, or `--submit`. Otherwise the
 command uses the next revision.
 Explicit revisions bypass lookup. Cross-client conflicts remain errors;

@@ -267,7 +267,8 @@ then increments its revision. Repeating an unchanged opinion resubmits the
 original bytes. To refresh domain evidence after a claim changes or to include
 a new domain, add `--refresh` (and `--account domain NAME` when needed); this
 creates a new revision even when value, reason, and review are unchanged.
-Keep the optional reason/review flags when refreshing. Accepted storage does
+Omitted reason/review flags retain their current values with `--refresh`;
+use an ordinary vote without those flags to remove them. Accepted storage does
 not guarantee the vote currently contributes to the domain score.
 If another client has already submitted that revision with
 different contents, the index returns a conflict; the CLI does not silently

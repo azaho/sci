@@ -97,11 +97,12 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
     else:
         target = "sci:sha256:" + parse_id(args.target)
         review = "sci:sha256:" + parse_id(args.review) if args.review else None
+        reason = args.reason
         value = 1 if args.up else -1 if args.down else 0
         key_path, key, warnings = signing_key(ctx, args)
         result.warnings.extend(warnings)
         # Validate local inputs before any network requests.
-        candidate = create_vote(key, target, value, args.revision or 1, args.reason, review)
+        candidate = create_vote(key, target, value, args.revision or 1, reason, review)
         previous = None
         if args.revision is None:
             previous = current_vote(
@@ -110,13 +111,18 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
                 public_key_of(key).x,
                 ctx.deadline(args.timeout),
             )
+        if args.refresh and previous is not None:
+            if reason is None:
+                reason = previous.reason
+            if review is None:
+                review = previous.review
         if (
             not args.refresh
             and previous is not None
             and (previous.value, previous.reason, previous.review)
             == (
                 value,
-                args.reason,
+                reason,
                 review,
             )
         ):
@@ -134,7 +140,7 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
             vote = (
                 candidate
                 if revision == candidate.revision
-                else create_vote(key, target, value, revision, args.reason, review)
+                else create_vote(key, target, value, revision, reason, review)
             )
         directory = ctx.resolve(args.output) if args.output else ctx.home / "votes" / vote.id
         require_outside(key_path, directory)
@@ -220,7 +226,9 @@ With no --revision, fetch and verify the current signed opinion, then use
 the next revision (or retry the identical opinion unchanged). Concurrent
 conflicts are reported without automatically overwriting another opinion.
 --refresh creates a new revision even for an unchanged opinion, so the index
-can attach renewed or newly discovered domain evidence.
+can attach renewed or newly discovered domain evidence. With --refresh, omitted
+--reason and --review retain their current values. To remove them, issue an
+ordinary vote without those flags.
 --reason is optional nonblank text, at most 1,000 Unicode code points.
 --review is an optional reference to a separately published SCI review;
 publish full reviews through the usual sign/publish/submit workflow.

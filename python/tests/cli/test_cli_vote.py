@@ -262,12 +262,14 @@ def test_vote_refresh_issues_new_revision_for_unchanged_opinion(cli: Cli) -> Non
     cli("keygen")
     index = VoteIndex()
     cli.transport = index
-    common = ("vote", TARGET, "--up", "--reason", "Reproduced", "--to", ORIGIN, "--json")
-    original = cli(*common)
+    common = ("vote", TARGET, "--up", "--to", ORIGIN, "--json")
+    original = cli(*common, "--reason", "Reproduced", "--review", REVIEW)
     assert original.code == 0 and original.result["revision"] == 1
     refreshed = cli(*common, "--refresh", "--account", "domain", "new.example")
     assert refreshed.code == 0 and refreshed.result["revision"] == 2
     assert refreshed.result["id"] != original.result["id"]
     assert index.hints == [{"type": "domain", "id": "new.example"}]
+    assert index.current is not None
+    assert index.current.reason == "Reproduced" and index.current.review == "sci:" + REVIEW
     retry = cli("vote", "--submit", refreshed.result["path"], "--to", ORIGIN, "--json")
     assert retry.code == 0 and retry.result["id"] == refreshed.result["id"]
