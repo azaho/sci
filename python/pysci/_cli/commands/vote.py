@@ -61,7 +61,6 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
             or args.reason is not None
             or args.review
             or args.key
-            or args.refresh
         ):
             raise CliError(
                 "conflicting_options", "--submit accepts only --to, --account, --timeout and --json"
@@ -70,10 +69,6 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
         raise CliError(
             "invalid_arguments",
             "supply a publication ID and exactly one of --up, --down, --withdraw",
-        )
-    if args.refresh and (args.revision is not None or args.output):
-        raise CliError(
-            "conflicting_options", "--refresh cannot be combined with --revision or --output"
         )
     if args.output and (args.revision is None or args.to):
         raise CliError(
@@ -111,20 +106,10 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
                 public_key_of(key).x,
                 ctx.deadline(args.timeout),
             )
-        if args.refresh and previous is not None:
-            if reason is None:
-                reason = previous.reason
-            if review is None:
-                review = previous.review
-        if (
-            not args.refresh
-            and previous is not None
-            and (previous.value, previous.reason, previous.review)
-            == (
-                value,
-                reason,
-                review,
-            )
+        if previous is not None and (previous.value, previous.reason, previous.review) == (
+            value,
+            reason,
+            review,
         ):
             vote = previous  # Repeat the exact signed opinion without manufacturing another event.
         else:
@@ -225,10 +210,9 @@ SCI 0.1. The private key stays local. Domain eligibility is index policy;
 With no --revision, fetch and verify the current signed opinion, then use
 the next revision (or retry the identical opinion unchanged). Concurrent
 conflicts are reported without automatically overwriting another opinion.
---refresh creates a new revision even for an unchanged opinion, so the index
-can attach renewed or newly discovered domain evidence. With --refresh, omitted
---reason and --review retain their current values. To remove them, issue an
-ordinary vote without those flags.
+Identical submissions recheck the index's domain evidence without a new vote
+or revision. Use --account domain NAME to discover a new association; use
+--submit DIR to resend an existing opinion without changing optional fields.
 --reason is optional nonblank text, at most 1,000 Unicode code points.
 --review is an optional reference to a separately published SCI review;
 publish full reviews through the usual sign/publish/submit workflow.
@@ -243,9 +227,6 @@ Zero (--withdraw) remains a signed revision, preventing replay of older votes.
         arg("target", nargs="?", metavar="ID", help="target SCI publication identifier"),
         arg("--up", action="store_true", help="recommend the publication"),
         arg("--down", action="store_true", help="recommend against the publication"),
-        arg(
-            "--refresh", action="store_true", help="issue a new revision to refresh domain evidence"
-        ),
         arg("--withdraw", action="store_true", help="withdraw your existing vote"),
         arg("--reason", metavar="TEXT", help="optional signed explanation"),
         arg("--review", metavar="ID", help="optional signed reference to a review publication"),

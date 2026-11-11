@@ -287,7 +287,7 @@ The `sci-protocol` distribution contains both the Python library and the `sci` C
 ## Signed voting extension: `sci vote`
 
 `vote ID (--up | --down | --withdraw)` signs and submits a `sciscape-vote/0.1`
-record. Options: `--reason TEXT`, `--review ID`, `--revision N`, `--refresh`, `--key PATH`,
+record. Options: `--reason TEXT`, `--review ID`, `--revision N`, `--key PATH`,
 `--to INDEX`, `--account domain NAME`, `--timeout`, and `--json`.
 `--output DIR --revision N` creates files offline; `--submit DIR` verifies
 and submits existing files without loading a signing key. These modes are
@@ -304,12 +304,10 @@ is the raw 64 bytes over the exact original JSON.
 Automatic revision selection discovers `vote_url` and the catalog, fetches
 zero or one current record for the selected key and paper, and verifies its
 signature, hash, target, and key before using it. The CLI retries the exact
-current record for an unchanged opinion. `--refresh` forces a new revision
-to attach current domain evidence, without altering prior signed events.
-Omitted reason/review flags preserve the prior fields when refreshing; an
-ordinary vote without those flags clears them. It
-cannot combine with `--revision`, `--output`, or `--submit`. Otherwise the
-command uses the next revision.
+current record for an unchanged opinion. The API can recheck and append domain
+evidence on an identical resubmission without a new event or revision. Otherwise
+the command uses the next revision. Omitted reason/review flags are absent from
+a new opinion; `--submit DIR` preserves the exact saved record and optional fields.
 Explicit revisions bypass lookup. Cross-client conflicts remain errors;
 network retries reuse the same multipart bytes and never advance revisions.
 

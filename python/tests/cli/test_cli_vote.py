@@ -258,18 +258,40 @@ def test_vote_signed_field_validation_and_no_clobber(cli: Cli) -> None:
     assert not index.requests
 
 
-def test_vote_refresh_issues_new_revision_for_unchanged_opinion(cli: Cli) -> None:
+def test_vote_resubmission_with_new_domain_reuses_signed_opinion(cli: Cli) -> None:
     cli("keygen")
     index = VoteIndex()
     cli.transport = index
-    common = ("vote", TARGET, "--up", "--to", ORIGIN, "--json")
-    original = cli(*common, "--reason", "Reproduced", "--review", REVIEW)
+    common = (
+        "vote",
+        TARGET,
+        "--up",
+        "--reason",
+        "Reproduced",
+        "--review",
+        REVIEW,
+        "--to",
+        ORIGIN,
+        "--json",
+    )
+    original = cli(*common)
     assert original.code == 0 and original.result["revision"] == 1
-    refreshed = cli(*common, "--refresh", "--account", "domain", "new.example")
-    assert refreshed.code == 0 and refreshed.result["revision"] == 2
-    assert refreshed.result["id"] != original.result["id"]
+    repeated = cli(*common, "--account", "domain", "new.example")
+    assert repeated.code == 0 and repeated.result["revision"] == 1
+    assert repeated.result["id"] == original.result["id"]
     assert index.hints == [{"type": "domain", "id": "new.example"}]
     assert index.current is not None
     assert index.current.reason == "Reproduced" and index.current.review == "sci:" + REVIEW
-    retry = cli("vote", "--submit", refreshed.result["path"], "--to", ORIGIN, "--json")
-    assert retry.code == 0 and retry.result["id"] == refreshed.result["id"]
+    retry = cli(
+        "vote",
+        "--submit",
+        original.result["path"],
+        "--to",
+        ORIGIN,
+        "--account",
+        "domain",
+        "other.example",
+        "--json",
+    )
+    assert retry.code == 0 and retry.result["id"] == original.result["id"]
+    assert index.hints[-1] == {"type": "domain", "id": "other.example"}

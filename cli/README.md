@@ -264,12 +264,12 @@ review; this does not make you its author. No review bundle is uploaded by
 
 By default the command retrieves and verifies your current signed vote,
 then increments its revision. Repeating an unchanged opinion resubmits the
-original bytes. To refresh domain evidence after a claim changes or to include
-a new domain, add `--refresh` (and `--account domain NAME` when needed); this
-creates a new revision even when value, reason, and review are unchanged.
-Omitted reason/review flags retain their current values with `--refresh`;
-use an ordinary vote without those flags to remove them. Accepted storage does
-not guarantee the vote currently contributes to the domain score.
+original bytes. The API rechecks domain evidence on resubmission and attaches
+newly verified claims without a new vote ID or revision. Supply `--account
+domain NAME` to discover a new domain. Keep the same reason/review flags when
+repeating the command, or use `--submit DIR` to preserve every signed field.
+Omitting reason/review from a newly issued vote removes them and is an opinion
+change. Accepted storage does not guarantee current scoring eligibility.
 If another client has already submitted that revision with
 different contents, the index returns a conflict; the CLI does not silently
 overwrite it. Inspect the current opinion and deliberately run a new vote.
