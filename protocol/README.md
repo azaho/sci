@@ -182,7 +182,7 @@ Implementations MUST reject text that violates these restrictions.
 
 A nonblank string MUST contain at least one permitted character other than SPACE, TAB, LF, or CR.
 
-As an optional presentation convention, readers can typeset inline TeX between single dollar signs in `title`, `abstract`, and `README.md`, and display TeX between lines containing only `$$` in `README.md`.
+Readers MAY typeset inline TeX between single dollar signs in `title`, `abstract`, and `README.md`, and display TeX between lines containing only `$$` in `README.md`.
 
 ### 4.3 Display items
 

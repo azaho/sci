@@ -1,7 +1,7 @@
 {
   "catalog.json": {
     "bytes": 452203,
-    "sha256": "4380e97f0df91c0c06d9634aaed587aabbaecdd9338424a216bcdf83341ad450"
+    "sha256": "a855ded88d893abacf0c59d08737adeeddded8e7ce5c25895be64075a365c5fa"
   },
   "claim/claim-bad-signature/record.json": {
     "bytes": 234,
