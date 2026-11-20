@@ -68,6 +68,10 @@ draft/
 └── files/        optional code, data, and figures
 ```
 
+For inline math, write `$x_i^2$` in the title, abstract, or `README.md`. In
+`README.md`, put display equations between lines containing only `$$`. Double
+TeX backslashes in JSON strings, e.g. `"abstract": "The rate is $\\lambda_1$."`.
+
 ```sh
 sci keygen                                   # ~/.sci/key.pem (mode 0600) and key.pub.pem
 sci license ./draft                          # select the SCI baseline license (CC BY 4.0 / MIT)
