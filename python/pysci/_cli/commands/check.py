@@ -10,6 +10,7 @@ from pysci.draft import DraftReport, check_draft
 from ..checks import issue_lines
 from ..context import Context
 from ..errors import CliError, Exit, exit_for_outcome, issue_json, issue_record
+from ..math_warnings import math_warnings
 from ..output import Result
 from ..spec import Command, arg
 from ..storage.files import temp_names
@@ -71,6 +72,11 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
     result.data = {"path": str(draft), **draft_report_json(report)}
     describe(result, report)
     warn_display(result, report)
+    for i, warning in enumerate(math_warnings(draft, report)):
+        if i == 20:
+            result.warn("More math warnings remain. Fix these and rerun sci check.")
+            break
+        result.warn(warning)
     if report.issues:
         result.exit_code = exit_for_outcome(report.outcome)
         result.errors.extend(issue_record(i) for i in report.issues)
@@ -92,7 +98,8 @@ required files, sci.json fields, README/LICENSE text rules, and absence of
 private-key material. Calculates the planned manifest and ZIP sizes with the
 signing serializer and evaluates baseline eligibility (§2.1). All
 independent problems are reported together, each with its file or JSON
-field, requirement, and observed value.
+field, requirement, and observed value. Also warns about common math formatting
+mistakes in the title, abstract, and README.md.
 """,
     args=(
         arg("dir", metavar="DIR", help="draft directory (sci.json, README.md, LICENSE, files/)"),

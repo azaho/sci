@@ -17,6 +17,7 @@ dependencies = [
     "asn1crypto>=1.5.1",
     "cryptography>=46.0.3",
     "idna>=3.11",
+    "markdown-it-py>=3,<5",
 ]
 
 [project.scripts]

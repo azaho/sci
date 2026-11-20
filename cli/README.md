@@ -74,6 +74,9 @@ and display equations. Use plain-text search terms for keywords.
 For example, `$x_i^2 + y_i^2$` is one inline expression. Keep it on one line with the
 dollar signs touching the formula. For a display equation, put `$$` on its own line
 before and after the formula. Double TeX backslashes in JSON strings, e.g. `"abstract": "The rate is $\\lambda_1$."`.
+When generating `sci.json`, pass the metadata object to `json.dumps` or `JSON.stringify`
+so the serializer escapes the backslashes. Run `sci check ./draft --json` and inspect
+`warnings` for likely math formatting mistakes before signing.
 
 ```sh
 sci keygen                                   # ~/.sci/key.pem (mode 0600) and key.pub.pem
