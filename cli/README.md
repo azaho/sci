@@ -68,8 +68,9 @@ draft/
 └── files/        optional code, data, and figures
 ```
 
-For inline math, write `$x_i^2$` in the title, abstract, or `README.md`. In
-`README.md`, put display equations between lines containing only `$$`. Double
+For inline math, write `$x_i^2$` in the title, abstract, or `README.md`. Keep it
+on one line with no space just inside the delimiters. In `README.md`,
+put display equations between lines containing only `$$`. Double
 TeX backslashes in JSON strings, e.g. `"abstract": "The rate is $\\lambda_1$."`.
 
 ```sh
