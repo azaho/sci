@@ -5,9 +5,7 @@ from __future__ import annotations
 import re
 from collections.abc import Iterator
 from pathlib import Path
-
-from markdown_it import MarkdownIt
-from markdown_it.rules_inline import StateInline, backtick
+from typing import TYPE_CHECKING
 
 from pysci.baseline import BASELINE_LIMITS
 from pysci.draft import DraftReport
@@ -15,12 +13,13 @@ from pysci.errors import SciError
 from pysci.jsonstrict import parse_json_object
 from pysci.source import PathSource
 
+if TYPE_CHECKING:
+    from markdown_it import MarkdownIt
+
 # A JSON escape can silently turn the first two characters of a TeX command into
-# one control character. Only suggest repairs for recognizable command names.
+# one control character. Limit the hint to a plausible control word inside math.
 _CONTROL = {"\t": "t", "\n": "n", "\r": "r", "\b": "b", "\f": "f"}
-_DAMAGED = re.compile(
-    r"(?:\t(?:heta|imes|ext|au|o)|\n(?:u|eq|abla)|\r(?:ho|ight)|\x08(?:eta|egin)|\frac)(?![A-Za-z])"
-)
+_DAMAGED = re.compile(r"([\t\n\r\x08\x0c])([A-Za-z]{1,48})(?![A-Za-z])")
 
 
 def _brace_warning(formula: str) -> str | None:
@@ -49,10 +48,10 @@ def _inline(text: str, *, metadata: bool = False) -> Iterator[str]:
             opening = None
             continue
         pos = match.start()
-        if opening is not None:
+        if opening is not None and not text[pos + 1 : pos + 2].isdigit():
             formula = text[opening + 1 : pos]
-            if metadata and (broken := _DAMAGED.search(formula)):
-                command = _CONTROL[broken[0][0]] + broken[0][1:]
+            if metadata and formula == formula.strip(" ") and (broken := _DAMAGED.search(formula)):
+                command = _CONTROL[broken[1]] + broken[2]
                 yield rf"possible JSON escape in math; write \\{command} in the JSON source."
                 opening = None
                 continue
@@ -62,7 +61,6 @@ def _inline(text: str, *, metadata: bool = False) -> Iterator[str]:
                 and not formula[-1].isspace()
                 and "\n" not in formula
                 and "\r" not in formula
-                and not text[pos + 1 : pos + 2].isdigit()
             ):
                 if message := _brace_warning(formula):
                     yield message
@@ -75,6 +73,8 @@ def _prose(md: MarkdownIt, text: str) -> str:
     """Mask inline code, retaining newlines for diagnostics and a boundary for math."""
     if "`" not in text:
         return text
+    from markdown_it.rules_inline import StateInline, backtick
+
     state = StateInline(text, md, {}, [])
     parts: list[str] = []
     last = 0
@@ -97,6 +97,8 @@ def _prose(md: MarkdownIt, text: str) -> str:
 def _manuscript(text: str) -> Iterator[str]:
     if "$" not in text and r"\[" not in text:
         return
+    from markdown_it import MarkdownIt
+
     md = MarkdownIt("commonmark", {"html": False}).disable("inline")
     for token in md.parse(text):
         if token.type != "inline" or not token.map:

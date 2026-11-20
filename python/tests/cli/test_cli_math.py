@@ -26,7 +26,7 @@ def test_math_warnings_before_signing(cli: Cli) -> None:
     assert cli("sign", str(draft), "--no-timestamp").code == 0
 
 
-@pytest.mark.parametrize("command", ["nu", "rho", "beta", "frac"])
+@pytest.mark.parametrize("command", ["nu", "rho", "beta", "frac", "textbf", "binom", "forall"])
 def test_json_escape_hint_even_if_the_title_fails_protocol(cli: Cli, command: str) -> None:
     draft = write_draft(cli.cwd / "paper")
     (draft / "sci.json").write_text(
@@ -39,7 +39,9 @@ def test_json_escape_hint_even_if_the_title_fails_protocol(cli: Cli, command: st
 
 def test_math_literals_and_correctly_serialized_tex_are_quiet(cli: Cli) -> None:
     draft = write_draft(cli.cwd / "paper")
-    (draft / "sci.json").write_text(json.dumps({"title": r"$\theta$", "abstract": "$eta$"}))
+    (draft / "sci.json").write_text(
+        json.dumps({"title": r"$\theta$", "abstract": "$eta$. Pay $5.\nNext week pay $10."})
+    )
     (draft / "README.md").write_text(
         r"""Pay $5 or $10. The set is $\{x\}$ and a dollar is \$.
 
