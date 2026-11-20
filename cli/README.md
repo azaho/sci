@@ -68,10 +68,12 @@ draft/
 └── files/        optional code, data, and figures
 ```
 
-For inline math, write `$x_i^2$` in the title, abstract, or `README.md`. Keep it
-on one line with no space just inside the delimiters. In `README.md`,
-put display equations between lines containing only `$$`. Double
-TeX backslashes in JSON strings, e.g. `"abstract": "The rate is $\\lambda_1$."`.
+The title and abstract can contain inline math. `README.md` can contain both inline math
+and display equations. Use plain-text search terms for keywords.
+
+For example, `$x_i^2 + y_i^2$` is one inline expression. Keep it on one line with the
+dollar signs touching the formula. For a display equation, put `$$` on its own line
+before and after the formula. Double TeX backslashes in JSON strings, e.g. `"abstract": "The rate is $\\lambda_1$."`.
 
 ```sh
 sci keygen                                   # ~/.sci/key.pem (mode 0600) and key.pub.pem

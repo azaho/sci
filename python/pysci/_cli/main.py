@@ -41,9 +41,11 @@ write a publication (complete rules: `sci spec --section 2` and `--section 4`):
         {"target": "https://example.org/data/release-3"}
       ]
     }
-  Math: use $x_i^2$ inline in title, abstract and README.md, on one line with
-  no space just inside the delimiters. In README.md, put display equations
-  between $$ lines. Double TeX backslashes in JSON source.
+  The title and abstract can contain inline math. README.md supports both inline
+  math and display equations. Use plain-text search terms for keywords.
+  For example, $x_i^2 + y_i^2$ is one inline expression. Keep it on one line with
+  the dollar signs touching the formula. For display equations, put $$ on its own
+  line before and after the formula. Double TeX backslashes in JSON strings.
   Required: title (max 200 characters) and abstract (max 2,500). Optional:
   categories (max 3 {scheme, code}; arxiv codes such as cs.LG, q-bio.NC),
   keywords (max 20, each max 64 characters), display (max 3 paths under
