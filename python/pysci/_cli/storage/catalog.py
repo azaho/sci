@@ -26,6 +26,7 @@ from pysci.manifest import README_PATH
 from pysci.source import FileSource
 
 from ..errors import issue_json
+from .files import TEMP_MARK
 
 SCHEMA_VERSION = "1"
 BUSY_TIMEOUT_SECONDS = 30.0
@@ -196,7 +197,7 @@ class Catalog:
                 continue
             current: dict[str, os.stat_result] = {}
             for entry in entries:
-                if not entry.name.endswith(".zip"):
+                if not entry.name.endswith(".zip") or entry.name.startswith(TEMP_MARK):
                     continue
                 try:
                     info = os.stat(entry.path)
