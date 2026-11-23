@@ -18,6 +18,7 @@ from .hosting import (
     ItemReport,
     Prepared,
     RemoteFile,
+    availability_checks,
     check_descriptor,
     confirm_public,
     descriptor_bytes,
@@ -452,29 +453,8 @@ class HuggingFaceArchive:
         for report in reports:
             if report.status == "pending_commit":
                 report.status = "hosted"
-        checks: list[tuple[str, str, bytes | None]] = [
-            ("descriptor", self.descriptor_url, descriptor_bytes(self.descriptor))
-        ]
-        for pub, report in zip(pubs, reports, strict=True):
-            if report.status != "hosted":
-                continue
-            entry = (
-                self.descriptor["entry_url"]
-                .replace("{id2}", pub.digest[:2])
-                .replace("{id}", pub.digest)
-            )
-            checks.append(
-                ("manifest", entry.replace("{+path}", "manifest.json"), pub.reader["manifest.json"])
-            )
-            checks.append(
-                (
-                    "bundle",
-                    self.descriptor["bundle_url"]
-                    .replace("{id2}", pub.digest[:2])
-                    .replace("{id}", pub.digest),
-                    None,
-                )
-            )
+        hosted = [p for p, r in zip(pubs, reports, strict=True) if r.status == "hosted"]
+        checks = availability_checks(self.descriptor, self.descriptor_url, hosted)
         availability = confirm_public(self.http, checks, Deadline(timeout))
         return (
             {

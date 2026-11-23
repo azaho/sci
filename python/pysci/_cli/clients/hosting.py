@@ -7,9 +7,9 @@ import json
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
-from pysci.discovery import parse_publication_list
+from pysci.discovery import parse_archive_descriptor, parse_publication_list
 from pysci.errors import SciError
 from pysci.manifest import TIMESTAMP_SIDECAR_PATH
 
@@ -196,33 +196,59 @@ def merged_list(existing: bytes | None, completed: list[str]) -> bytes:
     return "".join(f"{digest}\n" for digest in sorted(ids)).encode("ascii")
 
 
+@dataclass(frozen=True, slots=True)
+class AvailabilityCheck:
+    """A public URL to GET after publishing."""
+
+    label: Literal["descriptor", "manifest", "bundle"]
+    url: str
+    expected: bytes | None = None
+    """Exact body to compare; None checks reachability only."""
+    required: bool = True
+    """Whether a failure fails confirmation and whether the check counts toward reader CORS."""
+
+
+def availability_checks(
+    descriptor: dict[str, str], descriptor_url: str, hosted: list[Prepared]
+) -> list[AvailabilityCheck]:
+    """The public URLs to confirm after publishing, expanded from the descriptor's templates."""
+    raw = descriptor_bytes(descriptor)
+    routes = parse_archive_descriptor(raw, file=ARCHIVE_PATH)
+    checks = [AvailabilityCheck("descriptor", descriptor_url, raw)]
+    for pub in hosted:
+        entry = routes.entry(pub.digest, "manifest.json")
+        bundle = routes.bundle(pub.digest)
+        assert entry is not None, f"missing manifest route for {pub.digest}"
+        assert bundle is not None, f"missing bundle route for {pub.digest}"
+        checks.append(AvailabilityCheck("manifest", entry, pub.reader["manifest.json"]))
+        checks.append(AvailabilityCheck("bundle", bundle, required=False))
+    return checks
+
+
 def confirm_public(
     http: HttpClient,
-    checks: list[tuple[str, str, bytes | None]],
+    checks: list[AvailabilityCheck],
     deadline: Deadline,
 ) -> dict[str, Any]:
-    """Unauthenticated GETs of public URLs: availability, exact bytes, and CORS.
-
-    ``checks`` holds ``(label, url, expected bytes or None)``; None checks
-    reachability only (a one-byte range request).
-    """
+    """Unauthenticated GETs of public URLs: availability, exact bytes, and CORS."""
     results: list[dict[str, Any]] = []
     ok = True
-    for label, url, expected in checks:
-        entry: dict[str, Any] = {"label": label, "url": url}
+    reader_cors = True
+    for check in checks:
+        entry: dict[str, Any] = {"label": check.label, "url": check.url}
         try:
             headers = {"Origin": "https://example.org"}
-            if expected is None:
+            if check.expected is None:
                 headers["Range"] = "bytes=0-0"
             response = http.get(
-                url,
+                check.url,
                 deadline=deadline,
                 headers=headers,
-                max_bytes=max(len(expected or b""), 1) + 1024,
+                max_bytes=max(len(check.expected or b""), 1) + 1024,
             )
             entry["status"] = response.status
             entry["available"] = response.status in (200, 206) and (
-                expected is None or response.body == expected
+                check.expected is None or response.body == check.expected
             )
             entry["cors"] = (response.header("access-control-allow-origin") or "") in (
                 "*",
@@ -231,8 +257,8 @@ def confirm_public(
         except CliError as exc:
             entry["available"] = False
             entry["error"] = exc.records[0].to_json()
-        if label != "bundle" and not entry.get("available"):
-            ok = False
+        if check.required:
+            ok = ok and entry["available"]
+            reader_cors = reader_cors and bool(entry.get("cors"))
         results.append(entry)
-    reader_cors = all(e.get("cors") for e in results if e["label"] != "bundle")
     return {"confirmed": ok, "reader_cors": reader_cors, "checks": results}

@@ -219,3 +219,16 @@ def test_another_publisher_creating_the_release_or_asset_first(cli: Cli) -> None
     run = publish(cli, folder)
     assert run.code == 0, run.stdout
     assert run.result["results"][0]["bundle"] == "reused" and len(fake.releases) == 1
+
+
+def test_availability_checks_the_expanded_bundle_url(cli: Cli) -> None:
+    folder, digests = campaign(cli, 1)
+    fake = FakeGitHub()
+    prepared(cli, fake)
+    run = publish(cli, folder)
+    assert run.code == 0
+    checks = run.result["archives"][0]["availability"]["checks"]
+    bundle = next(check for check in checks if check["label"] == "bundle")
+    digest = digests[0]
+    assert bundle["url"] == f"{REMOTE}/releases/download/sci-{digest[:2]}/{digest}.zip"
+    assert bundle["available"] is True
