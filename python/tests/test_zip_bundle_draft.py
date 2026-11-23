@@ -161,7 +161,10 @@ def test_directory_roundtrip_and_extraction(
     assert (out / "files/data/table.csv").read_bytes() == draft["files/data/table.csv"]
     (source_dir / "files" / "extra.txt").write_bytes(b"x")
     assert verify_directory(source_dir).issues[0].code == "bundle_extra_file"
-    (source_dir / "files" / "link").symlink_to(source_dir / "README.md")
+    try:
+        (source_dir / "files" / "link").symlink_to(source_dir / "README.md")
+    except OSError:
+        pytest.skip("cannot create symlinks (Windows needs Developer Mode or admin)")
     assert verify_directory(source_dir).issues[0].code == "not_regular_file"
 
 
