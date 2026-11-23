@@ -15,7 +15,7 @@ import json
 import os
 import random
 import sqlite3
-from collections.abc import Iterator, Sequence
+from collections.abc import Generator, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -110,7 +110,17 @@ def is_corrupt(exc: sqlite3.Error) -> bool:
 
 
 def _stat_key(info: os.stat_result) -> tuple[int, int, int, int, int]:
-    return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+    def _int64(value: int) -> int:
+        """Normalize an integer to signed 64-bit range for SQLite."""
+        return (value + 2**63) % 2**64 - 2**63
+
+    return (
+        _int64(info.st_dev),
+        _int64(info.st_ino),
+        info.st_size,
+        info.st_mtime_ns,
+        info.st_ctime_ns,
+    )
 
 
 class Catalog:
@@ -174,7 +184,7 @@ class Catalog:
         self.db.close()
 
     @contextlib.contextmanager
-    def _write(self) -> Iterator[sqlite3.Connection]:
+    def _write(self) -> Generator[sqlite3.Connection]:
         self.db.execute("BEGIN IMMEDIATE")
         try:
             yield self.db
