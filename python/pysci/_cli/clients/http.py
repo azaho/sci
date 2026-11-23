@@ -14,6 +14,7 @@ import os
 import random
 import secrets
 import socket
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -222,9 +223,11 @@ class Pacer:
 
 
 def _lock(fd: int) -> None:
+    if sys.platform == "win32":  # pragma: no cover - in-process pacing only
+        return
     try:
         import fcntl
-    except ImportError:  # pragma: no cover - Windows: in-process pacing only
+    except ImportError:  # pragma: no cover - POSIX without fcntl (e.g. WASI)
         return
     fcntl.flock(fd, fcntl.LOCK_EX)
 

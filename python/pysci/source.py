@@ -7,6 +7,7 @@ Verification reads bounded ranges and streams large regions in chunks, so a
 from __future__ import annotations
 
 import os
+import sys
 import threading
 from collections.abc import Iterator
 from pathlib import Path
@@ -74,7 +75,7 @@ class FileSource:
 
     def read_at(self, offset: int, length: int) -> bytes:
         _check_range(offset, length, self._size)
-        if hasattr(os, "pread"):
+        if sys.platform != "win32":
             data = os.pread(self._file.fileno(), length, offset)
         else:  # pragma: no cover - Windows
             with self._lock:
