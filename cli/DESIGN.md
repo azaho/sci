@@ -288,7 +288,7 @@ The `sci-protocol` distribution contains both the Python library and the `sci` C
 
 `vote ID (--up | --down | --withdraw)` signs and submits a `sciscape-vote/0.1`
 record. Options: `--reason TEXT`, `--review ID`, `--revision N`, `--key PATH`,
-`--to INDEX`, `--account domain NAME`, `--timeout`, and `--json`.
+`--to INDEX`, `--account TYPE ID`, `--timeout`, and `--json`.
 `--output DIR --revision N` creates files offline; `--submit DIR` verifies
 and submits existing files without loading a signing key. These modes are
 mutually exclusive with incompatible creation options.
@@ -315,7 +315,7 @@ Created records are saved before POST to `SCI_HOME/votes/<hash>/` (or the
 explicit offline directory), using no-clobber storage and keeping private keys
 outside output directories. Submission responses must confirm the exact hash,
 revision, and Boolean created flag. Lost responses and conflicts retain the
-path for exact `--submit` retries. Domain hints are unsigned multipart metadata;
+path for exact `--submit` retries. Account hints are unsigned multipart metadata;
 Sciscape decides eligibility and counting. Full review publications use the
 existing publication pipeline and are referenced, not embedded. No credit
 accounting is included.
