@@ -284,7 +284,7 @@ change. Accepted storage does not guarantee current scoring eligibility.
 If another client has already submitted that revision with
 different contents, the index returns a conflict; the CLI does not silently
 overwrite it. Inspect the current opinion and deliberately run a new vote.
-Revisions are ordered per key and paper, not timestamps or domain identities.
+Revisions are ordered per key and paper, not timestamps or account identities.
 When using several indexes, coordinate revisions yourself or supply
 `--revision N` explicitly. A withdrawal is a retained zero-valued revision.
 
