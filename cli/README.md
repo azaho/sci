@@ -261,8 +261,9 @@ sci vote sha256:<paper-digest> --withdraw --to https://sciscape.io
 Uses your existing private key (`--key`, configured key, or `~/.sci/key.pem`).
 The key stays local. The signed record identifies the target publication,
 key, value, revision, optional reason, and optional review reference. The
-optional `--account domain NAME` is an **unsigned discovery hint**, used to
-find the domain's hosted signed key claim. No domain is in the signed vote.
+optional `--account TYPE ID` is an unsigned discovery hint for the hosted
+signed key claim. For example, use `--account github octolab` or
+`--account huggingface OctoLab`. The index decides which accounts qualify.
 
 The reason is optional, nonblank, at most 1,000 Unicode code points. A full
 review is an ordinary externally hosted SCI publication: write it with a
@@ -274,9 +275,9 @@ review; this does not make you its author. No review bundle is uploaded by
 
 By default the command retrieves and verifies your current signed vote,
 then increments its revision. Repeating an unchanged opinion resubmits the
-original bytes. The API rechecks domain evidence on resubmission and attaches
+original bytes. The API rechecks account evidence on resubmission and attaches
 newly verified claims without a new vote ID or revision. Supply `--account
-domain NAME` to discover a new domain. Keep the same reason/review flags when
+TYPE ID` to discover a new account. Keep the same reason/review flags when
 repeating the command, or use `--submit DIR` to preserve every signed field.
 Omitting reason/review from a newly issued vote removes them and is an opinion
 change. Accepted storage does not guarantee current scoring eligibility.
@@ -309,7 +310,7 @@ it needs no private key. Anyone possessing both can relay the signed opinion.
 Offline creation never overwrites different existing bytes.
 
 The index verifies eligibility and determines the score separately. Sciscape
-counts at most one contribution per domain, combines opposing keys within a
-domain, and excludes self-votes and revoked/blocked keys from ranking. A
+counts at most one contribution per eligible account, combines opposing keys within an
+account, and excludes self-votes and revoked/blocked keys from ranking. A
 successful submission confirms storage, not that the vote adds a point.
 There are no credits or review rewards in this command.

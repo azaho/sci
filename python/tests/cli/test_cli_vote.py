@@ -150,6 +150,20 @@ def test_vote_online_changes_withdrawal_and_retries(cli: Cli) -> None:
     assert all(private not in r.body_bytes() for r in index.requests)
 
 
+@pytest.mark.parametrize(
+    ("provider", "name", "canonical"),
+    [("github", "ReviewLab", "reviewlab"), ("huggingface", "ReviewLab", "ReviewLab")],
+)
+def test_vote_provider_hint(cli: Cli, provider: str, name: str, canonical: str) -> None:
+    assert cli("keygen").code == 0
+    index = VoteIndex()
+    cli.transport = index
+    vote = cli("vote", TARGET, "--up", "--to", ORIGIN, "--account", provider, name, "--json")
+    assert vote.code == 0, vote.stdout
+    assert index.hints == [{"type": provider, "id": canonical}]
+    assert index.current is not None and "account" not in json.loads(index.current.record)
+
+
 def test_vote_offline_and_submit_without_private_key(cli: Cli) -> None:
     assert cli("keygen").code == 0
     index = VoteIndex()
@@ -224,7 +238,7 @@ def test_vote_capability_and_untrusted_responses(cli: Cli) -> None:
         (TARGET, "--up", "--output", "out"),
         (TARGET, "--up", "--revision", "0"),
         (TARGET, "--up", "--revision", "2147483648"),
-        (TARGET, "--up", "--revision", "1", "--account", "github", "someone"),
+        (TARGET, "--up", "--revision", "1", "--account", "unknown", "someone"),
     ],
 )
 def test_vote_usage_errors(cli: Cli, args: tuple[str, ...]) -> None:

@@ -80,8 +80,6 @@ def run(args: argparse.Namespace, ctx: Context) -> Result:
     if args.account:
         try:
             account = normalize_account(args.account[0], args.account[1])
-            if account.type != "domain":
-                raise ValueError("votes require a registrable domain account")
             hint = json.dumps(account.to_json(), separators=(",", ":")).encode()
         except ValueError as exc:
             raise CliError("invalid_account", str(exc), Exit.USAGE) from None
@@ -204,14 +202,14 @@ COMMAND = Command(
     description="""
 Uses your existing SCI key to sign sciscape-vote/0.1 JSON and its raw Ed25519
 signature. This is an optional Sciscape service extension, not a change to
-SCI 0.1. The private key stays local. Domain eligibility is index policy;
---account domain NAME is an unsigned discovery hint, not a signed vote field.
+SCI 0.1. The private key stays local. Account eligibility is index policy;
+--account TYPE ID is an unsigned discovery hint, not a signed vote field.
 
 With no --revision, fetch and verify the current signed opinion, then use
 the next revision (or retry the identical opinion unchanged). Concurrent
 conflicts are reported without automatically overwriting another opinion.
-Identical submissions recheck the index's domain evidence without a new vote
-or revision. Use --account domain NAME to discover a new association; use
+Identical submissions recheck the index's account evidence without a new vote
+or revision. Use --account TYPE ID to discover a new association; use
 --submit DIR to resend an existing opinion without changing optional fields.
 --reason is optional nonblank text, at most 1,000 Unicode code points.
 --review is an optional reference to a separately published SCI review;
@@ -239,7 +237,12 @@ Zero (--withdraw) remains a signed revision, preventing replay of older votes.
         arg("--output", metavar="DIR", help="save offline; requires --revision; does not submit"),
         arg("--submit", metavar="DIR", help="verify and submit an already signed vote"),
         arg("--to", metavar="INDEX", help="index origin (default: configured index)"),
-        arg("--account", nargs=2, metavar=("TYPE", "ID"), help="unsigned domain discovery hint"),
+        arg(
+            "--account",
+            nargs=2,
+            metavar=("TYPE", "ID"),
+            help="unsigned discovery hint (domain, github, huggingface)",
+        ),
         arg("--key", metavar="PATH", help=KEY_ARG_HELP),
     ),
     outputs="Signed vote hash, target, value, revision, local path, and submission outcome.",
