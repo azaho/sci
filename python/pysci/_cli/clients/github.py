@@ -20,6 +20,7 @@ from .hosting import (
     ItemReport,
     Prepared,
     RemoteFile,
+    availability_checks,
     check_descriptor,
     confirm_public,
     descriptor_bytes,
@@ -693,20 +694,7 @@ class GitHubArchive:
         if stopped is None:
             commit_batch()
         hosted = [p for p, r in zip(pubs, reports, strict=True) if r.status == "hosted"]
-        checks: list[tuple[str, str, bytes | None]] = [
-            ("descriptor", self.descriptor_url, descriptor_bytes(self.descriptor))
-        ]
-        for pub in hosted:
-            entry = (
-                self.descriptor["entry_url"]
-                .replace("{id2}", pub.digest[:2])
-                .replace("{id}", pub.digest)
-            )
-            checks.append(
-                ("manifest", entry.replace("{+path}", "manifest.json"), pub.reader["manifest.json"])
-            )
-            bundle = self.descriptor["bundle_url"].replace("{id}", pub.digest)
-            checks.append(("bundle", bundle, None))
+        checks = availability_checks(self.descriptor, self.descriptor_url, hosted)
         availability = confirm_public(self.http, checks, Deadline(timeout))
         return (
             {
