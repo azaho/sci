@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import errno
+import io
 import os
 import sys
 from collections.abc import Callable, Mapping, Sequence
@@ -123,7 +125,10 @@ def _deliver(write: Callable[[], object], out: TextIO, err: TextIO) -> None:
         write()
         out.flush()
         err.flush()
-    except BrokenPipeError:
+    except OSError as exc:
+        # Ignore broken-pipe errors
+        if not (sys.platform == "win32" and exc.errno == errno.EINVAL) and exc.errno != errno.EPIPE:
+            raise
         # Point the closed streams at /dev/null so interpreter shutdown cannot fail on them.
         devnull = os.open(os.devnull, os.O_WRONLY)
         for stream in (out, err):
@@ -167,8 +172,15 @@ def main(
     cwd: Path | None = None,
 ) -> int:
     """Run the CLI; return the exit code. Keyword arguments allow embedding and tests."""
-    out = stdout or sys.stdout
-    err = stderr or sys.stderr
+
+    def _utf8(stream: TextIO) -> TextIO:
+        """Ensure text streams use UTF-8 encoding."""
+        if isinstance(stream, io.TextIOWrapper):
+            stream.reconfigure(encoding="utf-8")
+        return stream
+
+    out = stdout or _utf8(sys.stdout)
+    err = stderr or _utf8(sys.stderr)
     args_list = list(sys.argv[1:] if argv is None else argv)
     parser = build_parser()
     wants_json = "--json" in args_list
@@ -201,7 +213,7 @@ def main(
         return int(Exit.USAGE)
     except SystemExit as exc:  # --help and --version
         _deliver(lambda: None, out, err)
-        return int(exc.code or 0) if isinstance(exc.code, int) else 0
+        return exc.code if isinstance(exc.code, int) else 0
     if args.command is None:
         _deliver(lambda: parser.print_help(out), out, err)
         return int(Exit.USAGE)

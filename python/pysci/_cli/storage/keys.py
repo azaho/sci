@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import os
 import stat
+import sys
 from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -59,7 +60,8 @@ def create_key_pair(private_path: Path) -> tuple[PublicKey, Path]:
     fd = os.open(private_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     try:
         with os.fdopen(fd, "wb") as handle:
-            os.fchmod(handle.fileno(), 0o600)
+            if sys.platform != "win32":  # absent on Windows before 3.13 (no-op on 3.13+)
+                os.fchmod(handle.fileno(), 0o600)
             handle.write(private_key_to_pem(key))
             handle.flush()
             os.fsync(handle.fileno())

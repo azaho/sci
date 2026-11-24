@@ -24,7 +24,8 @@ def test_end_to_end_local_workflow(cli: Cli) -> None:
     run = cli("keygen", "--json")
     assert run.code == 0
     key = cli.home / "key.pem"
-    assert stat.S_IMODE(key.stat().st_mode) == 0o600
+    if os.name == "posix":  # Windows has no POSIX mode bits
+        assert stat.S_IMODE(key.stat().st_mode) == 0o600
     assert (cli.home / "key.pub.pem").exists()
     x = run.result["x"]
     assert run.result["public_key"] == {"kty": "OKP", "crv": "Ed25519", "x": x}
